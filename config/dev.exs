@@ -2,9 +2,7 @@ import Config
 
 # Configure your database
 config :harmony, Harmony.Repo,
-  username: "postgres",
-  password: "postgres",
-  hostname: "localhost",
+  socket_dir: "/var/run/postgresql",
   database: "harmony_dev",
   stacktrace: true,
   show_sensitive_data_on_connection_error: true,
