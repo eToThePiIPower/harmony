@@ -1,17 +1,16 @@
-name: CI
+name: Elixir CI
+
 on:
   pull_request:
-    branches:
-      - main
-      - develop
+    branches: ["develop", "main"]
   push:
-    branches:
-      - main
-      - develop
-      - 'feature.**'
+    branches: ["main", "develop", "feature.**"]
+
 jobs:
   test:
+    name: Build and test
     runs-on: ubuntu-latest
+
     services:
       db:
         image: postgres:11
@@ -23,19 +22,24 @@ jobs:
           --health-interval 10s
           --health-timeout 5s
           --health-retries 5
+
     steps:
-      - uses: actions/checkout@v2
-      - uses: erlef/setup-beam@v1
+      - uses: actions/checkout@v3
+      - name: Setup Elixir & OTP
+        uses: erlef/setup-beam@v1
         with:
           otp-version: '25.0.1'
           elixir-version: '1.13.4'
-      - uses: actions/cache@v3
+      - name: Restore dependencies
+        uses: actions/cache@v3
         with:
           path: deps
           key: ${{ runner.os }}-mix-${{ hashFiles('**/mix.lock') }}
           restore-keys: ${{ runner.os }}-mix-
-      - run: mix deps.get
-      - run: mix test
+      - name: Install dependencies
+        run: mix deps.get
+      - name: Run tests
+        run: mix test
         env:
           POSTGRES_USER: postgres
           POSTGRES_PASSWORD: postgres
