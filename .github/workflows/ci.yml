@@ -30,6 +30,11 @@ jobs:
           otp-version: '25.0.1'
           elixir-version: '1.13.4'
           experimental-otp: true
+      - uses: actions/cache@v3
+        with:
+          path: deps
+          key: ${{ runner.os }}-mix-${{ hashFiles('**/mix.lock') }}
+          restore-keys: ${{ runner.os }}-mix-
       - run: mix deps.get
       - run: mix test
         env:
