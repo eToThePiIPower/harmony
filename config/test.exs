@@ -17,8 +17,11 @@ config :harmony, Harmony.Repo,
 # Configure the database for Github Actions
 if System.get_env("GITHUB_ACTIONS") do
   config :harmony, Harmony.Repo,
-    username: "postgres",
-    password: "postgres"
+    socket_dir: nil, # must explicitly unset
+    username: System.get_env("POSTGRES_USER"),
+    password: System.get_env("POSTGRES_PASSWORD"),
+    hostname: System.get_env("POSTGRES_HOSTNAME"),
+    port: System.get_env("POSTGRES_PORT")
 end
 
 # We don't run a server during test. If one is required,
