@@ -1,0 +1,13 @@
+<ul class="navbar-nav me-auto mb-2 mb-lg-0">
+  <li class="nav-item">
+    <a class="nav-link" href="https://hexdocs.pm/phoenix/overview.html">Get Started</a>
+  </li>
+
+  <%= if function_exported?(Routes, :live_dashboard_path, 2) do %>
+  <li class="nav-item">
+    <%= link "LiveDashboard", to:
+      Routes.live_dashboard_path(@conn, :home), class: "nav-link" %>
+  </li>
+  <% end %>
+
+</ul>

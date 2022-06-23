@@ -24,6 +24,11 @@ config :harmony, HarmonyWeb.Endpoint,
   secret_key_base: "EUsgJWrsAF4RMR1YMf6Y3dP86trG2sWMc6Hjffevc90dsK/0usyoh7K4Z8+DnOmk",
   watchers: [
     # Start the esbuild watcher by calling Esbuild.install_and_run(:default, args)
+    sass: {
+        DartSass,
+        :install_and_run,
+        [:default, ~w(--embed-source-map --source-map-urls=absolute --watch)]
+    },
     esbuild: {Esbuild, :install_and_run, [:default, ~w(--sourcemap=inline --watch)]}
   ]
 

@@ -17,6 +17,19 @@ defmodule HarmonyWeb.ErrorHelpers do
     end)
   end
 
+  def has_errors(form, field) do
+    Keyword.get_values(form.errors, field)
+    |> Enum.any?
+  end
+
+  def maybe_invalid(class, form, field) do
+    if has_errors(form, field) do
+      "#{class} is-invalid"
+    else
+      "#{class}"
+    end
+  end
+
   @doc """
   Translates an error message using gettext.
   """

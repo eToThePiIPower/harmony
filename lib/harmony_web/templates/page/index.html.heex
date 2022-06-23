@@ -1,41 +1,40 @@
-<section class="phx-hero">
-  <h1><%= gettext "Welcome to %{name}!", name: "Phoenix" %></h1>
-  <p>Peace of mind from prototype to production</p>
+<section class="my-4 p-5 bg-light rounded shadow text-center">
+  <h1 class="text-primary fw-regular display-2"><%= gettext "Welcome to %{name}!", name: "Harmony" %></h1>
+  <p class="lead">Open-source, community-based chat</p>
+  <div class="d-grid gap-2 d-sm-flex justify-content-sm-center">
+    <%= link "Register", role: "button",
+      class: "btn btn-primary btn-lg px-4 gap-3",
+      to: Routes.user_registration_path(@conn, :new) %>
+    <%= link "Log in", role: "button",
+      class: "btn btn-outline-primary btn-lg px-4 gap-3",
+      to: Routes.user_session_path(@conn, :new) %>
+  </div>
 </section>
 
 <section class="row">
-  <article class="column">
-    <h2>Resources</h2>
+  <article class="col-md-6">
+    <h2 class="h4 text-secondary">Resources</h2>
     <ul>
       <li>
-        <a href="https://hexdocs.pm/phoenix/overview.html">Guides &amp; Docs</a>
+        <a href="#">About</a>
       </li>
       <li>
-        <a href="https://github.com/phoenixframework/phoenix">Source</a>
+        <a href="#">Help</a>
       </li>
       <li>
-        <a href="https://github.com/phoenixframework/phoenix/blob/v1.6/CHANGELOG.md">v1.6 Changelog</a>
+        <a href="#">Contact</a>
       </li>
     </ul>
   </article>
-  <article class="column">
-    <h2>Help</h2>
-    <ul>
-      <li>
-        <a href="https://elixirforum.com/c/phoenix-forum">Forum</a>
-      </li>
-      <li>
-        <a href="https://web.libera.chat/#elixir">#elixir on Libera Chat (IRC)</a>
-      </li>
-      <li>
-        <a href="https://twitter.com/elixirphoenix">Twitter @elixirphoenix</a>
-      </li>
-      <li>
-        <a href="https://elixir-slackin.herokuapp.com/">Elixir on Slack</a>
-      </li>
-      <li>
-        <a href="https://discord.gg/elixir">Elixir on Discord</a>
-      </li>
-    </ul>
+  <article class="col-md-6">
+    <h2 class="h4 text-secondary">Features (planned)</h2>
+    <dl class="row">
+        <dt class="col-xl-3">Communities</dt>
+        <dd class="col-xl-9">Sign up for an account and start your community.</dd>
+        <dt class="col-xl-3">Open-source</dt>
+        <dd class="col-xl-9">Check out the source on GitHub and your own server</dd>
+        <dt class="col-xl-3 text-truncate">Real-time text chat</dt>
+        <dd class="col-xl-9">Harness the power of Phoenix LiveViews for real-time text chat, at scale!</dd>
+    </dl>
   </article>
 </section>
