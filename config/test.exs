@@ -29,7 +29,9 @@ end
 config :harmony, HarmonyWeb.Endpoint,
   http: [ip: {127, 0, 0, 1}, port: 4002],
   secret_key_base: "KApGo8MoBcUia8E/oQF+d47D4VsxH9wM2wlZ3l7HU7YITsOv990LDYNA7CVWsS3B",
-  server: false
+  server: true
+
+config :wallaby, driver: Wallaby.Chrome
 
 # In test we don't send emails.
 config :harmony, Harmony.Mailer, adapter: Swoosh.Adapters.Test
