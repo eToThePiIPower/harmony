@@ -1,22 +1,29 @@
+<%= if @changeset.action do %>
+  <%= render HarmonyWeb.SharedView, "_alert.html",
+    alert_type: "danger",
+    alert_content: "Oops, something went wrong! Please check the errors below." %>
+<% end %>
+
 <h1>Reset password</h1>
 
 <.form let={f} for={@changeset} action={Routes.user_reset_password_path(@conn, :update, @token)}>
-  <%= if @changeset.action do %>
-    <div class="alert alert-danger">
-      <p>Oops, something went wrong! Please check the errors below.</p>
-    </div>
-  <% end %>
 
-  <%= label f, :password, "New password" %>
-  <%= password_input f, :password, required: true %>
-  <%= error_tag f, :password %>
+  <div class="mb-3">
+    <%= label f, :password, "New password", class: "form-label" %>
+    <%= password_input f, :password, required: true,
+      class: maybe_invalid("form-control", f, :password) %>
+    <%= error_tag f, :password %>
+  </div>
 
-  <%= label f, :password_confirmation, "Confirm new password" %>
-  <%= password_input f, :password_confirmation, required: true %>
-  <%= error_tag f, :password_confirmation %>
+  <div class="mb-3">
+    <%= label f, :password_confirmation, "Confirm new password", class: "form-label" %>
+    <%= password_input f, :password_confirmation, required: true,
+      class: maybe_invalid("form-control", f, :password_confirmation) %>
+    <%= error_tag f, :password_confirmation %>
+  </div>
 
-  <div>
-    <%= submit "Reset password" %>
+  <div class="mb-3">
+    <%= submit "Reset password", class: "btn btn-primary form-control" %>
   </div>
 </.form>
 
