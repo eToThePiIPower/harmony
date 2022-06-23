@@ -1,0 +1,34 @@
+<%= if @email_changeset.action do %>
+  <%= render HarmonyWeb.SharedView, "_alert.html",
+    alert_type: "danger",
+    alert_content: "Oops, something went wrong! Please check the errors below." %>
+<% end %>
+
+<h2 class="h4">Change email</h2>
+
+<.form let={f} for={@email_changeset} action={Routes.user_settings_path(@conn, :update)} id="update_email">
+
+  <%= hidden_input f, :action, name: "action", value: "update_email" %>
+
+  <div class="mb-3">
+    <%= label f, :email, class: "form-label" %>
+    <%= email_input f, :email, required: true,
+      class: maybe_invalid("form-control", f, :email) %>
+    <%= error_tag f, :email %>
+  </div>
+
+  <div class="mb-3">
+    <%= label f, :current_password,
+      for: "current_password_for_email",
+      class: "form-label" %>
+    <%= password_input f, :current_password, required: true,
+      id: "current_password_for_email",
+      name: "current_password",
+      class: maybe_invalid("form-control", f, :current_password) %>
+    <%= error_tag f, :current_password %>
+  </div>
+
+  <div class="mb-3">
+    <%= submit "Change email", class: "btn btn-primary form-control" %>
+  </div>
+</.form>

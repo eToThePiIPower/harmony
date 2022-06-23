@@ -1,17 +1,17 @@
 <%= if Enum.any? get_flash(@conn) do %>
   <div class="mt-4">
     <%= if get_flash(@conn, :success) do %>
-      <%= render "_alert.html",
+      <%= render HarmonyWeb.SharedView, "_alert.html",
         alert_type: "success",
         alert_content: get_flash(@conn, :success) %>
     <% end %>
     <%= if get_flash(@conn, :info) do %>
-      <%= render "_alert.html",
+      <%= render HarmonyWeb.SharedView, "_alert.html",
         alert_type: "info",
         alert_content: get_flash(@conn, :info) %>
     <% end %>
     <%= if get_flash(@conn, :error) do %>
-      <%= render "_alert.html",
+      <%= render HarmonyWeb.SharedView, "_alert.html",
         alert_type: "danger",
         alert_content: get_flash(@conn, :error) %>
     <% end %>

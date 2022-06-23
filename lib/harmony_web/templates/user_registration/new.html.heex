@@ -1,22 +1,28 @@
+<%= if @changeset.action do %>
+  <%= render HarmonyWeb.SharedView, "_alert.html",
+    alert_type: "danger",
+    alert_content: "Oops, something went wrong! Please check the errors below." %>
+<% end %>
+
 <h1>Register</h1>
 
 <.form let={f} for={@changeset} action={Routes.user_registration_path(@conn, :create)}>
-  <%= if @changeset.action do %>
-    <div class="alert alert-danger">
-      <p>Oops, something went wrong! Please check the errors below.</p>
-    </div>
-  <% end %>
+  <div class="mb-3">
+    <%= label f, :email, class: "form-label" %>
+    <%= email_input f, :email, required: true,
+      class: maybe_invalid("form-control", f, :email) %>
+    <%= error_tag f, :email %>
+  </div>
 
-  <%= label f, :email %>
-  <%= email_input f, :email, required: true %>
-  <%= error_tag f, :email %>
+  <div class="mb-3">
+    <%= label f, :password, class: "form-label" %>
+    <%= password_input f, :password, required: true,
+      class: maybe_invalid("form-control", f, :password) %>
+    <%= error_tag f, :password %>
+  </div>
 
-  <%= label f, :password %>
-  <%= password_input f, :password, required: true %>
-  <%= error_tag f, :password %>
-
-  <div>
-    <%= submit "Register" %>
+  <div class="mb-3">
+    <%= submit "Register", class: "btn btn-primary form-control" %>
   </div>
 </.form>
 
