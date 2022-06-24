@@ -31,6 +31,10 @@ jobs:
           otp-version: '25.0.1'
           elixir-version: '1.13.4'
       - uses: etothepiipower/setup-chromedriver@v1
+      - name: Install asset dependencies
+        run: |
+          cd assets
+          npm install 
       - name: Restore dependencies
         uses: actions/cache@v3
         with:
