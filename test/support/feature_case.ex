@@ -7,6 +7,7 @@ defmodule HarmonyWeb.FeatureCase do
       alias HarmonyWeb.Router.Helpers, as: Routes
 
       import Harmony.Factory
+      import HarmonyWeb.FeatureHelpers
       @endpoint HarmonyWeb.Endpoint
     end
   end
