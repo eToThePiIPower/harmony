@@ -30,13 +30,7 @@ jobs:
         with:
           otp-version: '25.0.1'
           elixir-version: '1.13.4'
-      - name: Setup Chromium & Chromedriver
-        run: |
-          apt-get update
-          curl -LO http://archive.ubuntu.com/ubuntu/pool/universe/c/chromium-browser/chromium-browser_101.0.4951.64-0ubuntu0.18.04.1_amd64.deb
-          curl -LO http://archive.ubuntu.com/ubuntu/pool/universe/c/chromium-browser/chromium-chromedriver_101.0.4951.64-0ubuntu0.18.04.1_amd64.deb
-          curl -LO http://archive.ubuntu.com/ubuntu/pool/universe/c/chromium-browser/chromium-codecs-ffmpeg_101.0.4951.64-0ubuntu0.18.04.1_amd64.deb
-          apt-get install -y ./chromium-browser_101.0.4951.64-0ubuntu0.18.04.1_amd64.deb ./chromium-chromedriver_101.0.4951.64-0ubuntu0.18.04.1_amd64.deb ./chromium-codecs-ffmpeg_101.0.4951.64-0ubuntu0.18.04.1_amd64.deb
+      - uses: etothepiipower/setup-chromedriver@v1
       - name: Restore dependencies
         uses: actions/cache@v3
         with:
