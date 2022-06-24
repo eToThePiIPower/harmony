@@ -27,6 +27,10 @@ CI.
   * Push your changes to your fork
   * Once the tests pass in CI, you can submit a pull request.
 
+Because we are using [ Wallaby  ](https://hex.pm/packages/wallaby) for feature
+tests, we'll need to install `chromedriver` and a matching version of either
+`google-chrome` or `chromium-browser` via your operating system.
+
 ## Planned Features
 
 Harmony is in an early stage right now. Planned features include:

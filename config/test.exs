@@ -3,6 +3,8 @@ import Config
 # Only in tests, remove the complexity from the password hashing algorithm
 config :bcrypt_elixir, :log_rounds, 1
 
+config :harmony, :sql_sandbox, true
+
 # Configure your database
 #
 # The MIX_TEST_PARTITION environment variable can be used
@@ -29,7 +31,9 @@ end
 config :harmony, HarmonyWeb.Endpoint,
   http: [ip: {127, 0, 0, 1}, port: 4002],
   secret_key_base: "KApGo8MoBcUia8E/oQF+d47D4VsxH9wM2wlZ3l7HU7YITsOv990LDYNA7CVWsS3B",
-  server: false
+  server: true
+
+config :wallaby, driver: Wallaby.Chrome
 
 # In test we don't send emails.
 config :harmony, Harmony.Mailer, adapter: Swoosh.Adapters.Test

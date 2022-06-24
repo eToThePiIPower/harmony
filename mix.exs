@@ -50,6 +50,8 @@ defmodule Harmony.MixProject do
       {:telemetry_poller, "~> 1.0"},
       {:gettext, "~> 0.18"},
       {:jason, "~> 1.2"},
+      {:wallaby, "~> 0.29.0", [runtime: false, only: :test]},
+      {:ex_machina, "~> 2.3", only: :test},
       {:plug_cowboy, "~> 2.5"}
     ]
   end
@@ -65,7 +67,13 @@ defmodule Harmony.MixProject do
       setup: ["deps.get", "ecto.setup"],
       "ecto.setup": ["ecto.create", "ecto.migrate", "run priv/repo/seeds.exs"],
       "ecto.reset": ["ecto.drop", "ecto.setup"],
-      test: ["ecto.create --quiet", "ecto.migrate --quiet", "test"],
+      test: [
+        "esbuild default --log-level=silent",
+        "sass default",
+        "ecto.create --quiet",
+        "ecto.migrate --quiet",
+        "test"
+      ],
       "assets.deploy": [
         "esbuild default --minify",
         "sass default --no-source-map --style=compressed",
