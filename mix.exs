@@ -51,6 +51,7 @@ defmodule Harmony.MixProject do
       {:gettext, "~> 0.18"},
       {:jason, "~> 1.2"},
       {:wallaby, "~> 0.29.0", [runtime: false, only: :test]},
+      {:ex_machina, "~> 2.3", only: :test},
       {:plug_cowboy, "~> 2.5"}
     ]
   end

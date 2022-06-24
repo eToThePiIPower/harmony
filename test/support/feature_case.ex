@@ -6,6 +6,7 @@ defmodule HarmonyWeb.FeatureCase do
       use Wallaby.DSL
       alias HarmonyWeb.Router.Helpers, as: Routes
 
+      import Harmony.Factory
       @endpoint HarmonyWeb.Endpoint
     end
   end
