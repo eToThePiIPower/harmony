@@ -21,6 +21,10 @@ defmodule HarmonyWeb.Router do
     pipe_through :browser
 
     get "/", PageController, :index
+    live "/chat", ChatLive, :index
+    live "/chat/new", ChatLive, :new
+    live "/chat/:id", ChatLive, :show
+    live "/chat/:id/edit", ChatLive, :edit
   end
 
   # Other scopes may use custom stacks.

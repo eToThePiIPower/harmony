@@ -1,0 +1,28 @@
+<div>
+  <.form
+    let={f}
+    for={@changeset}
+    id="room-form"
+    phx-target={@myself}
+    phx-change="validate"
+    phx-submit="save">
+  
+    <div class="mb-3">
+      <%= label f, :title, class: "form-label" %>
+      <%= text_input f, :title, required: true,
+        class: maybe_invalid("form-control", f, :title) %>
+      <%= error_tag f, :title %>
+    </div>
+
+    <div class="mb-3">
+      <%= label f, :description, class: "form-label" %>
+      <%= text_input f, :description, required: true,
+        class: maybe_invalid("form-control", f, :description) %>
+      <%= error_tag f, :description %>
+    </div>
+
+    <div class="mb-3">
+      <%= submit "Save", class: "btn btn-primary", phx_disable_with: "Saving..." %>
+    </div>
+  </.form>
+</div>

@@ -32,7 +32,7 @@ defmodule HarmonyWeb.UserRegistrationControllerTest do
       assert redirected_to(conn) == "/"
 
       # Now do a logged in request and assert on the menu
-      conn = get(conn, "/")
+      conn = get(conn, "/chat")
       response = html_response(conn, 200)
       assert response =~ email
       assert response =~ "Settings</a>"

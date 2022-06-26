@@ -1,0 +1,25 @@
+<%= if Enum.any? @flash do %>
+  <div class="my-0">
+    <%= if live_flash(@flash, :success) do %>
+      <p class="alert alert-success m-0" role="alert"
+        phx-click="lv:clear-flash"
+        phx-value-key="success">
+        <%= live_flash(@flash, :success) %>
+      </p>
+    <% end %>
+    <%= if live_flash(@flash, :info) do %>
+      <p class="alert alert-info m-0" role="alert"
+        phx-click="lv:clear-flash"
+        phx-value-key="info">
+        <%= live_flash(@flash, :info) %>
+      </p>
+    <% end %>
+    <%= if live_flash(@flash, :error) do %>
+      <p class="alert alert-danger m-0" role="alert"
+        phx-click="lv:clear-flash"
+        phx-value-key="error">
+        <%= live_flash(@flash, :error) %>
+      </p>
+    <% end %>
+  </div>
+<% end %>

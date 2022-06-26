@@ -1,0 +1,33 @@
+<%= if @live_action in [:new, :edit] do %>
+  <.modal title={@modal_title} return_to={@return_to}>
+    <.live_component
+      module={FormComponent}
+      id={@room.id || :new}
+      action={@live_action}
+      room={@room}
+      return_to={@return_to}
+    />
+  </.modal>
+<% end %>
+
+<div class="wrapper mx-2">
+  <nav id="list-room-sidebar" class="nav-sidebar collapse collapse-horizontal">
+    <.live_component
+      module={ListComponent}
+      id={:index}
+      active_id={@room.id}
+      rooms={@rooms}
+    />
+  </nav>
+  <main class="sidebar-content">
+    <%= if @room.id && @room.id > 0 do %>
+      <.live_component
+        module={ShowComponent}
+        id={:show}
+        room={@room}
+      />
+    <% else %>
+      <p class="default-description m-4">Select a room</p>
+    <% end %>
+  </main>
+</div>
