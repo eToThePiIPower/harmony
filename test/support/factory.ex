@@ -17,4 +17,11 @@ defmodule Harmony.Factory do
     hashed_password = Bcrypt.hash_pwd_salt(password)
     %{user | hashed_password: hashed_password}
   end
+
+  def room_factory do
+    %Harmony.Rooms.Room{
+      title: sequence(:title, &"room#{&1}-name"),
+      description: "Some description here"
+    }
+  end
 end
