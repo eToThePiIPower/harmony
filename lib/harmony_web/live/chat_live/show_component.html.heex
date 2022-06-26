@@ -1,0 +1,14 @@
+<div id={"room-detail-#{@room.id}"} class="d-flex justify-content-between align-items-start">
+  <p class="description m-4"><%= @room.description %></p>
+  <div class="actions">
+    <%= live_patch "Edit Room",
+      to: Routes.chat_path(@socket, :edit, @room),
+      class: "btn btn-sm btn-outline-primary mt-2" %>
+    <span>
+      <%= link "Delete", to: "#",
+        phx_click: "delete", phx_value_id: @room.id,
+        class: "btn btn-sm btn-outline-danger mt-2",
+        data: [confirm: "Are you sure?"] %>
+    </span>
+  </div>
+</div>

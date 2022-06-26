@@ -1,0 +1,14 @@
+<div class="list-group list-group-light room-list rounded-0">
+  <%= for room <- @rooms do %>
+    <% maybe_active = if @active_id == room.id do " active" else "" end %>
+    <%= live_patch to: Routes.chat_path(@socket, :show, room.id), 
+      id: "room-#{room.id}",
+      class: "list-group-item list-group-item-action ripple#{maybe_active}" do %>
+      <div class="d-flex justify-content-between align-items-start">
+        <span class="h6">#<%= room.title %></span>
+        <span class="small">just now</span>
+       </div>
+      <div class="small">&lt;No messages&gt;</div>
+    <% end %>
+  <% end %>
+</div>

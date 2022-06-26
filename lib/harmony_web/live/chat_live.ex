@@ -1,6 +1,7 @@
 defmodule HarmonyWeb.ChatLive do
   use HarmonyWeb, :live_view
   alias Harmony.Rooms
+  alias HarmonyWeb.ChatLive.{FormComponent,ListComponent,ShowComponent}
 
   @impl true
   def mount(_params, _session, socket) do
@@ -25,12 +26,22 @@ defmodule HarmonyWeb.ChatLive do
 
   defp handle_action(socket, :new, _params) do
     room = %Rooms.Room{}
-    {:noreply, assign(socket, room: room)}
+    {:noreply,
+     socket
+     |> assign(room: room)
+     |> assign(modal_title: "Add a Room")
+     |> assign(return_to: Routes.chat_path(socket, :index))
+    }
   end
 
   defp handle_action(socket, :edit, %{"id" => id}) do
     room = Rooms.get_room!(id)
-    {:noreply, assign(socket, room: room)}
+    {:noreply,
+     socket
+     |> assign(room: room)
+     |> assign(modal_title: "Edit Room")
+     |> assign(return_to: Routes.chat_path(socket, :show, room))
+    }
   end
 
   @impl true
