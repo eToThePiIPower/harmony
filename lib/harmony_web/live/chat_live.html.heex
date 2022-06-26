@@ -10,20 +10,16 @@
   </.modal>
 <% end %>
 
-<div class="row">
-  <section class="col-sm-3">
+<div class="wrapper mx-2">
+  <nav id="list-room-sidebar" class="nav-sidebar collapse collapse-horizontal">
     <.live_component
       module={ListComponent}
       id={:index}
       active_id={@room.id}
       rooms={@rooms}
     />
-    <%= live_patch "New Room",
-      to: Routes.chat_path(@socket, :new),
-      class: "btn btn-primary form-control mt-2" %>
-  </section>
-
-  <section class="col-sm-8">
+  </nav>
+  <main class="sidebar-content">
     <%= if @room.id && @room.id > 0 do %>
       <.live_component
         module={ShowComponent}
@@ -33,5 +29,5 @@
     <% else %>
       <p class="default-description m-4">Select a room</p>
     <% end %>
-  </section>
+  </main>
 </div>
