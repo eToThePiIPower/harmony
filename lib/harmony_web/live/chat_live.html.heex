@@ -1,10 +1,28 @@
+<%= if @live_action in [:new, :edit] do %>
+  <% {title, return_to} = if @live_action == :new do
+      {"Add a Room", Routes.chat_path(@socket, :index)}
+     else
+      {"Edit Room", Routes.chat_path(@socket, :show, @room)}
+     end
+   %>
+  <.modal title={title} return_to={Routes.chat_path(@socket, :index)}>
+    <.live_component
+      module={HarmonyWeb.ChatLive.FormComponent}
+      id={@room.id || :new}
+      action={@live_action}
+      room={@room}
+      return_to={return_to}
+    />
+  </.modal>
+<% end %>
+
 <div class="row">
   <section class="col-sm-3">
-    <div class="list-group room-list rounded-0">
+    <div class="list-group list-group-light room-list rounded-0">
       <%= for room <- @rooms do %>
         <% maybe_active = if @room.id == room.id do " active" else "" end %>
-        <%= live_patch to: Routes.live_path(@socket, HarmonyWeb.ChatLive, %{id: room.id}),
-          class: "list-group-item list-group-item-action#{maybe_active}" do %>
+        <%= live_patch to: Routes.chat_path(@socket, :show, room.id), 
+          class: "list-group-item list-group-item-action ripple#{maybe_active}" do %>
           <div class="d-flex justify-content-between align-items-start">
             <span class="h6">#<%= room.title %></span>
             <span class="small">just now</span>
@@ -13,11 +31,19 @@
         <% end %>
       <% end %>
     </div>
+    <div>
+      <%= live_patch "New Room",
+        to: Routes.chat_path(@socket, :new),
+        class: "btn btn-primary form-control mt-2" %>
+    </div>
   </section>
 
   <section class="col-sm-9">
-    <%= if @room.id > 0 do %>
+    <%= if @room.id && @room.id > 0 do %>
       <p class="description m-4"><%= @room.description %></p>
+      <%= live_patch "Edit Room",
+        to: Routes.chat_path(@socket, :edit, @room),
+        class: "btn btn-primary mt-2" %>
     <% else %>
       <p class="default-description m-4">Select a room</p>
     <% end %>

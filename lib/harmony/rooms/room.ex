@@ -14,5 +14,7 @@ defmodule Harmony.Rooms.Room do
     room
     |> cast(attrs, [:title, :description])
     |> validate_required([:title, :description])
+    |> unsafe_validate_unique(:title, Harmony.Repo, message: "must be unique")
+    |> validate_length(:title, min: 4)
   end
 end
