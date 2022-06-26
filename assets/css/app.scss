@@ -5,4 +5,9 @@
     font-weight: 500 !important;
 }
 
+.container-fluid.live-container {
+    padding-right: 0;
+    padding-left: 0;
+}
+
 @import '../node_modules/bootstrap/scss/bootstrap';

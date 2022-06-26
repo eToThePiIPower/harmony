@@ -1,5 +1,5 @@
 <div class="row">
-  <aside class="col-3">
+  <section class="col-sm-3">
     <ul class="list-group room-list">
       <%= for room <- @rooms do %>
       <li class="list-group-item">
@@ -7,13 +7,13 @@
       </li>
       <% end %>
     </ul>
-  </aside>
+  </section>
 
-  <main class="col-9">
-  <%= if @room do %>
-    <p class="description"><%= @room.description %></p>
-  <% else %>
-    <p class="default-description">Select a room</p>
-  <% end %>
-  </main>
+  <section class="col-sm-9">
+    <%= if @room do %>
+      <p class="description m-4"><%= @room.description %></p>
+    <% else %>
+      <p class="default-description m-4">Select a room</p>
+    <% end %>
+  </section>
 </div>
