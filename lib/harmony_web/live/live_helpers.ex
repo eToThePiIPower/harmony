@@ -40,14 +40,14 @@ defmodule HarmonyWeb.LiveHelpers do
           <div class="modal-header">
             <h2 class="h5 modal-title"><%= @title %></h2>
             <%= if @return_to do %>
-              <%= live_patch "✖",
+              <%= live_patch "",
                 to: @return_to,
                 id: "close",
-                class: "phx-modal-close",
+                class: "btn-close",
                 phx_click: hide_modal()
               %>
             <% else %>
-              <a id="close" href="#" class="phx-modal-close" phx-click={hide_modal()}>✖</a>
+              <a id="close" href="#" class="btn-close" phx-click={hide_modal()}></a>
             <% end %>
           </div>
 

@@ -33,7 +33,6 @@ defmodule HarmonyWeb.ChatLive.FormComponent do
         {:noreply,
          socket
          |> put_flash(:info, "Room updated successfully")
-         |> put_flash(:success, "Returning to #{socket.assigns.return_to}")
          |> push_redirect(to: socket.assigns.return_to)}
 
       {:error, %Ecto.Changeset{} = changeset} ->
