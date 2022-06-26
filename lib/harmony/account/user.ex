@@ -33,6 +33,7 @@ defmodule Harmony.Account.User do
     |> cast(attrs, [:email, :password])
     |> validate_email()
     |> validate_password(opts)
+    |> validate_confirmation(:password, message: "does not match password")
   end
 
   defp validate_email(changeset) do
