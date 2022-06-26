@@ -1,16 +1,22 @@
 <div class="row">
   <section class="col-sm-3">
-    <ul class="list-group room-list">
+    <div class="list-group room-list rounded-0">
       <%= for room <- @rooms do %>
-      <li class="list-group-item">
-        <%= live_patch room.title, to: Routes.live_path(@socket, HarmonyWeb.ChatLive, %{id: room.id}) %>
-      </li>
+        <% maybe_active = if @room.id == room.id do " active" else "" end %>
+        <%= live_patch to: Routes.live_path(@socket, HarmonyWeb.ChatLive, %{id: room.id}),
+          class: "list-group-item list-group-item-action#{maybe_active}" do %>
+          <div class="d-flex justify-content-between align-items-start">
+            <span class="h6">#<%= room.title %></span>
+            <span class="small">just now</span>
+          </div>
+          <div class="small">&lt;No messages&gt;</div>
+        <% end %>
       <% end %>
-    </ul>
+    </div>
   </section>
 
   <section class="col-sm-9">
-    <%= if @room do %>
+    <%= if @room.id > 0 do %>
       <p class="description m-4"><%= @room.description %></p>
     <% else %>
       <p class="default-description m-4">Select a room</p>

@@ -10,8 +10,8 @@ defmodule HarmonyWeb.UserListsRoomsTest do
     |> sign_in(as: user)
     |> visit("/chat")
     |> refute_has(Query.text("Room 1 description"))
-    |> assert_has(Query.css(".room-list li", text: room1.title))
-    |> assert_has(Query.css(".room-list li", text: room2.title))
+    |> assert_has(Query.css(".room-list .list-group-item", text: room1.title))
+    |> assert_has(Query.css(".room-list .list-group-item", text: room2.title))
     |> click(Query.link(room1.title))
     |> assert_has(Query.css(".description", text: "Room 1 description"))
   end

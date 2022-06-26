@@ -15,7 +15,7 @@ defmodule HarmonyWeb.ChatLive do
   end
 
   def handle_params(_params, _uri, socket) do
-    room = nil
+    room = %{id: 0}
 
     {:noreply, assign(socket, room: room)}
   end
