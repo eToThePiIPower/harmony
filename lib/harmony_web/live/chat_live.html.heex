@@ -5,7 +5,7 @@
       {"Edit Room", Routes.chat_path(@socket, :show, @room)}
      end
    %>
-  <.modal title={title} return_to={Routes.chat_path(@socket, :index)}>
+  <.modal title={title} return_to={return_to}>
     <.live_component
       module={HarmonyWeb.ChatLive.FormComponent}
       id={@room.id || :new}
