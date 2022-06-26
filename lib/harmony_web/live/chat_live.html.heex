@@ -1,0 +1,19 @@
+<div class="row">
+  <aside class="col-3">
+    <ul class="list-group room-list">
+      <%= for room <- @rooms do %>
+      <li class="list-group-item">
+        <%= live_patch room.title, to: Routes.live_path(@socket, HarmonyWeb.ChatLive, %{id: room.id}) %>
+      </li>
+      <% end %>
+    </ul>
+  </aside>
+
+  <main class="col-9">
+  <%= if @room do %>
+    <p class="description"><%= @room.description %></p>
+  <% else %>
+    <p class="default-description">Select a room</p>
+  <% end %>
+  </main>
+</div>
