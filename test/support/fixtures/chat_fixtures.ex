@@ -1,7 +1,7 @@
-defmodule Harmony.RoomsFixtures do
+defmodule Harmony.ChatFixtures do
   @moduledoc """
   This module defines test helpers for creating
-  entities via the `Harmony.Rooms` context.
+  entities via the `Harmony.Chat` context.
   """
 
   @doc """
@@ -14,7 +14,7 @@ defmodule Harmony.RoomsFixtures do
         description: "some description",
         title: "some title"
       })
-      |> Harmony.Rooms.create_room()
+      |> Harmony.Chat.create_room()
 
     room
   end

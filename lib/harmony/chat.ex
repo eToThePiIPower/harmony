@@ -1,12 +1,12 @@
-defmodule Harmony.Rooms do
+defmodule Harmony.Chat do
   @moduledoc """
-  The Rooms context.
+  The Chat context.
   """
 
   import Ecto.Query, warn: false
   alias Harmony.Repo
 
-  alias Harmony.Rooms.Room
+  alias Harmony.Chat.Room
 
   @doc """
   Returns the list of rooms.

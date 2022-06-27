@@ -1,4 +1,4 @@
-defmodule Harmony.Rooms.Room do
+defmodule Harmony.Chat.Room do
   use Ecto.Schema
   import Ecto.Changeset
 

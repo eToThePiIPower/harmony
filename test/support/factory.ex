@@ -19,7 +19,7 @@ defmodule Harmony.Factory do
   end
 
   def room_factory do
-    %Harmony.Rooms.Room{
+    %Harmony.Chat.Room{
       title: sequence(:title, &"room#{&1}-name"),
       description: "Some description here"
     }
