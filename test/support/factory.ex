@@ -5,7 +5,7 @@ defmodule Harmony.Factory do
     %Harmony.Account.User{
       email: sequence(:email, &"user#{&1}@example.com"),
       password: "password"
-    }
+    } |> set_password()
   end
 
   def set_password(%{password: password} = user) do

@@ -2,7 +2,7 @@ defmodule HarmonyWeb.UserListsRoomsTest do
   use HarmonyWeb.FeatureCase, async: false
 
   test "signed in user sees a list of rooms", %{session: session} do
-    user = build(:user) |> set_password |> insert
+    user = insert(:user)
     room1 = insert(:room, description: "Room 1 description")
     room2 = insert(:room, description: "Room 2 description")
 
