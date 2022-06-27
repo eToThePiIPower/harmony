@@ -5,6 +5,7 @@ defmodule Harmony.Chat.Room do
   schema "rooms" do
     field :description, :string
     field :title, :string
+    has_many :messages, Harmony.Chat.Message
 
     timestamps()
   end

@@ -2,6 +2,7 @@ defmodule Harmony.ChatTest do
   use Harmony.DataCase
 
   alias Harmony.Chat
+  import Harmony.Factory
 
   describe "rooms" do
     alias Harmony.Chat.Room
@@ -18,6 +19,25 @@ defmodule Harmony.ChatTest do
     test "get_room!/1 returns the room with given id" do
       room = room_fixture()
       assert Chat.get_room!(room.id) == room
+    end
+
+    test "get_room_by_name!/1 returns the room with given title" do
+      room = room_fixture()
+      assert Chat.get_room_by_name!(room.title) == room
+    end
+
+    @tag :focus
+    test "preload_room_messages/1 sorts & loads the rooms messages with users" do
+      room = insert(:room)
+      user = insert(:user)
+      [m1, m2] = insert_list(2, :message, %{room: room, user: user})
+
+      returned_room =  Chat.get_room_by_name!(room.title) |> Chat.preload_room_messages
+      [returned_m1, returned_m2] = returned_room.messages
+
+      assert returned_m1.id == m1.id
+      assert returned_m2.body == m2.body
+      assert returned_m2.user.email == user.email
     end
 
     test "create_room/1 with valid data creates a room" do

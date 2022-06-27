@@ -20,7 +20,7 @@ defmodule HarmonyWeb.ChatLive do
   end
 
   defp handle_action(socket, :show, %{"id" => id}) do
-    room = Chat.get_room!(id)
+    room = Chat.get_room!(id) |> Chat.preload_room_messages
     {:noreply, assign(socket, room: room)}
   end
 
@@ -35,7 +35,7 @@ defmodule HarmonyWeb.ChatLive do
   end
 
   defp handle_action(socket, :edit, %{"id" => id}) do
-    room = Chat.get_room!(id)
+    room = Chat.get_room!(id) |> Chat.preload_room_messages
     {:noreply,
      socket
      |> assign(room: room)

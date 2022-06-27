@@ -7,6 +7,7 @@ defmodule Harmony.Chat do
   alias Harmony.Repo
 
   alias Harmony.Chat.Room
+  alias Harmony.Chat.Message
 
   @doc """
   Returns the list of rooms.
@@ -36,6 +37,17 @@ defmodule Harmony.Chat do
 
   """
   def get_room!(id), do: Repo.get!(Room, id)
+  def get_room_by_name!(name) do
+    Repo.get_by(Room, title: name)
+  end
+
+  def preload_room_messages(room) do
+    sort_query = from m in Message, order_by: m.inserted_at
+    room
+    # |> Repo.preload([messages: sort_query]) # These can be combined as below, which is more idiomatic
+    # |> Repo.preload([messages: :user]) # or clearer?
+    |> Repo.preload([messages: {sort_query, [:user]}])
+  end
 
   @doc """
   Creates a room.
