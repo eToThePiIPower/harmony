@@ -18,4 +18,18 @@ defmodule Harmony.ChatFixtures do
 
     room
   end
+
+  @doc """
+  Generate a message.
+  """
+  def message_fixture(attrs \\ %{}) do
+    {:ok, message} =
+      attrs
+      |> Enum.into(%{
+        body: "some body"
+      })
+      |> Harmony.Chat.create_message()
+
+    message
+  end
 end

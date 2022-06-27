@@ -55,4 +55,19 @@ defmodule Harmony.DataCase do
       end)
     end)
   end
+
+  def equal_records(%{__struct__: t1, id: id1}, %{__struct__: t2, id: id2}) do
+    t1 == t2 and id1 == id2
+  end
+  def equal_records(_, _), do: false
+
+  def forget(struct, field, cardinality \\ :one) do
+    %{struct |
+      field => %Ecto.Association.NotLoaded{
+        __field__: field,
+        __owner__: struct.__struct__,
+        __cardinality__: cardinality
+      }
+    }
+  end
 end

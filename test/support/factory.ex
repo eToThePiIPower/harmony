@@ -24,4 +24,12 @@ defmodule Harmony.Factory do
       description: "Some description here"
     }
   end
+
+  def message_factory do
+    %Harmony.Chat.Message{
+      body: "some factory body",
+      user: build(:user),
+      room: build(:room)
+    }
+  end
 end
