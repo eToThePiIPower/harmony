@@ -26,7 +26,6 @@ defmodule Harmony.ChatTest do
       assert Chat.get_room_by_name!(room.title) == room
     end
 
-    @tag :focus
     test "preload_room_messages/1 sorts & loads the rooms messages with users" do
       room = insert(:room)
       user = insert(:user)

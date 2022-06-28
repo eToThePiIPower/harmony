@@ -37,10 +37,37 @@ defmodule Harmony.Chat do
 
   """
   def get_room!(id), do: Repo.get!(Room, id)
+
+  @doc """
+  Gets a single room, selected by (unique) name.
+
+  Raises `Ecto.NoResultsError`
+
+  ## Examples
+      iex> get_room_by_name!('room-exists')
+      %Room{}
+
+      iex> get_room_by_name!('invalid-room')
+      ** (Ecto.NoResultsError)
+
+  """
   def get_room_by_name!(name) do
     Repo.get_by(Room, title: name)
   end
 
+  @doc """
+  Preloads the messages for a room, sorting them by insertion date. Users who
+  own the messages are also preloaded.
+
+  ## Examples
+      iex> room = get_room_by_name!('room-exists') |> preload_room_messages()
+      %Room{}
+      iex> [m1 | _] = room.messages
+      [%Message{}, %Message{}]
+      iex> m1.user.email
+      "somebody@example.com"
+
+  """
   def preload_room_messages(room) do
     sort_query = from m in Message, order_by: m.inserted_at
     room
