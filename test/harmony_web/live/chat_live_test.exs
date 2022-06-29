@@ -8,21 +8,24 @@ defmodule HarmonyWeb.ChatLiveTest do
   @update_attrs %{title: "new-room", description: "This is an updated description"}
   @invalid_attrs %{}
 
-  defp create_room(_) do
+  defp create_room_and_user(_) do
     room = insert(:room)
-    %{room: room}
+    user = insert(:user)
+    %{room: room, user: user}
   end
 
   describe "ChatLive :index" do
-    setup [:create_room]
+    setup [:create_room_and_user]
 
-    test "lists all rooms", %{conn: conn} do
+    test "lists all rooms", %{conn: conn, user: user} do
+      conn = log_in_user(conn, user)
       {:ok, _index_live, html} = live(conn, Routes.chat_path(conn, :index))
 
       assert html =~ "Select a room"
     end
 
-    test "saves new room", %{conn: conn} do
+    test "saves new room", %{conn: conn, user: user} do
+      conn = log_in_user(conn, user)
       {:ok, index_live, _html} = live(conn, Routes.chat_path(conn, :index))
 
       assert index_live |> element("a", "New Room") |> render_click() =~
@@ -45,15 +48,17 @@ defmodule HarmonyWeb.ChatLiveTest do
   end
 
   describe "ChatLive :show" do
-    setup [:create_room]
+    setup [:create_room_and_user]
 
-    test "displays room", %{conn: conn, room: room} do
+    test "displays room", %{conn: conn, room: room, user: user} do
+      conn = log_in_user(conn, user)
       {:ok, _show_live, html} = live(conn, Routes.chat_path(conn, :show, room))
 
       assert html =~ "#{room.description}"
     end
 
-    test "updates room within modal", %{conn: conn, room: room} do
+    test "updates room within modal", %{conn: conn, room: room, user: user} do
+      conn = log_in_user(conn, user)
       {:ok, show_live, _html} = live(conn, Routes.chat_path(conn, :show, room))
 
       assert show_live |> element("a", "Edit") |> render_click() =~

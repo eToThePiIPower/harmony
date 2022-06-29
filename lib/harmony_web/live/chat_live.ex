@@ -2,11 +2,13 @@ defmodule HarmonyWeb.ChatLive do
   use HarmonyWeb, :live_view
   alias Harmony.Chat
   alias HarmonyWeb.ChatLive.{FormComponent,ListComponent,ShowComponent}
+  alias Harmony.Account
 
   @impl true
-  def mount(_params, _session, socket) do
+  def mount(_params, %{"user_token" => user_token}, socket) do
     rooms = Chat.list_rooms()
-    {:ok, assign(socket, rooms: rooms)}
+    user = Account.get_user_by_session_token(user_token)
+    {:ok, assign(socket, rooms: rooms, current_user: user)}
   end
 
   @impl true
@@ -21,7 +23,7 @@ defmodule HarmonyWeb.ChatLive do
 
   defp handle_action(socket, :show, %{"id" => id}) do
     room = Chat.get_room!(id) |> Chat.preload_room_messages
-    {:noreply, assign(socket, room: room)}
+    {:noreply, assign(socket, room: room, messages: room.messages)}
   end
 
   defp handle_action(socket, :new, _params) do
@@ -39,6 +41,7 @@ defmodule HarmonyWeb.ChatLive do
     {:noreply,
      socket
      |> assign(room: room)
+     |> assign(messages: room.messages)
      |> assign(modal_title: "Edit Room")
      |> assign(return_to: Routes.chat_path(socket, :show, room))
     }
@@ -53,5 +56,17 @@ defmodule HarmonyWeb.ChatLive do
      |> push_redirect(to: Routes.chat_path(socket, :index))
      |> put_flash(:success, "Deleted room")
      |> assign(:rooms, Chat.list_rooms())}
+  end
+
+  @impl true
+  def handle_event("send-message", %{"body" => body}, socket) do
+    user = socket.assigns.current_user
+    room = socket.assigns.room
+    messages = socket.assigns.room.messages
+    message = Chat.create_message(%{body: body, room_id: room.id, user_id: user.id})
+    {:noreply,
+     socket
+     |> assign(messages: messages ++ message)
+    }
   end
 end

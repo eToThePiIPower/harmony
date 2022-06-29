@@ -16,7 +16,7 @@
   </div>
 
   <div class="card-column">
-    <%= for message <- @room.messages do %>
+    <%= for message <- @messages do %>
       <article class="card mb-3">
         <section class="card-body">
           <%= message.body %>
@@ -27,4 +27,9 @@
       </article>
     <% end %>
   </div>
+  <form phx-submit="send-message">
+    <input type="text" name="body"
+      placeholder={"Talking in ##{@room.title}"}
+      class="form-control" />
+  </form>
 </div>
