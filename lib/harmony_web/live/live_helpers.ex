@@ -69,6 +69,16 @@ defmodule HarmonyWeb.LiveHelpers do
     |> fn x -> "https://s.gravatar.com/avatar/#{x}?s=#{size}" end.()
   end
 
+  def time_in_words(%NaiveDateTime{} = datetime) do
+    {now, 1} = Date.day_of_era(DateTime.utc_now())
+    {then, 1} = Date.day_of_era(datetime)
+    case (now - then) do
+      0 -> "#{Timex.format!(datetime, "%H:%M %p", :strftime)}"
+      1 -> "Yesterday at #{Timex.format!(datetime, "%H:%M %p", :strftime)}"
+      _ -> "#{Timex.format!(datetime, "%d/%m/%Y", :strftime)}"
+    end
+  end
+
   defp hide_modal(js \\ %JS{}) do
     js
     |> JS.hide(to: "#modal", transition: "fade-out")

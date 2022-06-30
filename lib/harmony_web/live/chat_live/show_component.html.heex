@@ -27,7 +27,7 @@
           <div class="message-contents">
             <header class="message-header">
               <span class="message-user"><%= message.user.email %></span>
-              <span class="message-timestamp"><%= message.inserted_at %></span>
+              <span class="message-timestamp"><%= time_in_words(message.inserted_at) %></span>
             </header>
             <main class="message-body"><%= message.body %></main>
           </div>
