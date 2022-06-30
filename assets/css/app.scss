@@ -86,5 +86,56 @@ $navbar-dark-profile-icon: url('data:image/svg+xml,<svg xmlns="http://www.w3.org
     flex-direction: column-reverse;
     max-height: 80vh;
 }
-.card-column {
+
+.message {
+  --gravatar-size: 45px;
+
+  align-items: start;
+  display: flex;
+  flex-direction: row;
+  flex-wrap: wrap;
+  margin-bottom: 1.5rem;
+  width: 100%;
+
+  .message-avatar {
+    display: flex;
+    flex-direction: colummn;
+    height: var(--gravatar-size);
+    margin-right: .5rem;
+    width: var(--gravatar-size);
+  }
+
+  .message-body {
+    white-space: pre-wrap;
+  }
+
+  .message-contents {
+    display: flex;
+    flex-direction: column;
+    width: calc(100% - var(--gravatar-size) - 1rem);
+  }
+
+  .message-user {
+    color: $green;
+    font-weight: bold;
+  }
+
+  .message-timestamp {
+    color: $gray-500;
+  }
+}
+
+.message-form {
+  display: flex;
+  flex-direction: row;
+
+  .message-input {
+    flex-direction: column;
+  }
+
+  .message-submit {
+    flex-direction: column;
+    padding-top: .75rem;
+    padding-bottom: .75rem;
+  }
 }

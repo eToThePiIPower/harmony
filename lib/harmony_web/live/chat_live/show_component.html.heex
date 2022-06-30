@@ -18,22 +18,30 @@
   <div class="message-wrapper">
     <div class="card-column">
       <%= for message <- @messages do %>
-        <article class="card mb-3">
-          <section class="card-body">
-            <%= message.body %>
-          </section>
-          <footer class="card-footer">
-            <%= message.user.email %>
-          </footer>
+        <article class="message">
+          <img class="message-avatar" src={gravatar_for(message.user, 40) }/>
+          <div class="message-contents">
+            <header class="message-header">
+              <span class="message-user"><%= message.user.email %></span>
+              <span class="message-timestamp"><%= message.inserted_at %></span>
+            </header>
+            <main class="message-body"><%= message.body %></main>
+          </div>
         </article>
       <% end %>
     </div>
   </div>
 
-  <form phx-submit="send-message">
-    <input type="text" name="body"
-      placeholder={"Talking in ##{@room.title}"}
-      class="form-control" />
+  <form class="message-form" phx-submit="send-message">
+    <div class="input-group mx-3">
+      <textarea name="body"
+        placeholder={"Talking in ##{@room.title}"}
+        rows="1"
+        class="message-input form-control" />
+      <button type="submit" class="message-submit btn btn-primary">
+        Send
+      </button>
+    </div>
   </form>
 </div>
 

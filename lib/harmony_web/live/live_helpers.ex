@@ -60,6 +60,15 @@ defmodule HarmonyWeb.LiveHelpers do
     """
   end
 
+  def gravatar_for(%Harmony.Account.User{email: email}, size \\ 40) do
+    email
+    |> String.trim()
+    |> String.downcase()
+    |> :erlang.md5
+    |> Base.encode16(case: :lower)
+    |> fn x -> "https://s.gravatar.com/avatar/#{x}?s=#{size}" end.()
+  end
+
   defp hide_modal(js \\ %JS{}) do
     js
     |> JS.hide(to: "#modal", transition: "fade-out")
