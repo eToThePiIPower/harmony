@@ -1,6 +1,10 @@
 <div id={"room-detail-#{@room.id}"} class="room-detail m-3">
   <div class="d-flex justify-content-between align-items-center mb-3">
-    <div class="description"><%= @room.description %></div>
+    <div>
+      <span class="room-name-icon">#</span>
+      <span class="h5"><%= "#{@room.title }" %></span>
+      <span class="description"><%= @room.description %></span>
+    </div>
     <div class="actions">
       <%= live_patch "Edit Room",
         to: Routes.chat_path(@socket, :edit, @room),

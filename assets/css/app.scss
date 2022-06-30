@@ -80,11 +80,21 @@ $navbar-dark-profile-icon: url('data:image/svg+xml,<svg xmlns="http://www.w3.org
     }
 }
 
+.room-name-icon {
+  color: $gray-500;
+  font-size: $h3-font-size;
+}
+
+.description {
+  font-style: italic;
+}
+
 .message-wrapper {
     overflow-y: scroll;
     display: flex;
     flex-direction: column-reverse;
     max-height: 80vh;
+    max-height: calc(100vh - 40px - 2rem - (42px + 1rem) - (50px + 1rem))
 }
 
 .message {
@@ -99,7 +109,8 @@ $navbar-dark-profile-icon: url('data:image/svg+xml,<svg xmlns="http://www.w3.org
 
   .message-avatar {
     display: flex;
-    flex-direction: colummn;
+    border-radius: 33%;
+    flex-direction: column;
     height: var(--gravatar-size);
     margin-right: .5rem;
     width: var(--gravatar-size);
@@ -127,6 +138,7 @@ $navbar-dark-profile-icon: url('data:image/svg+xml,<svg xmlns="http://www.w3.org
 
 .message-form {
   display: flex;
+  margin-top: 1rem;
   flex-direction: row;
 
   .message-input {
