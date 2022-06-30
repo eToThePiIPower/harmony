@@ -23,6 +23,7 @@ defmodule HarmonyWeb.ChatLive do
 
   defp handle_action(socket, :show, %{"id" => id}) do
     room = Chat.get_room!(id) |> Chat.preload_room_messages
+    Phoenix.PubSub.subscribe(Harmony.PubSub, "room-channel-#{room.title}")
     {:noreply, assign(socket, room: room, messages: room.messages)}
   end
 
@@ -62,11 +63,17 @@ defmodule HarmonyWeb.ChatLive do
   def handle_event("send-message", %{"body" => body}, socket) do
     user = socket.assigns.current_user
     room = socket.assigns.room
-    messages = socket.assigns.room.messages
     message = Chat.create_message(%{body: body, room_id: room.id, user_id: user.id})
+    Phoenix.PubSub.broadcast(Harmony.PubSub, "room-channel-#{room.title}", {:new_message, %{message: message}})
+    {:noreply, socket}
+  end
+
+  @impl true
+  def handle_info({:new_message, %{message: message}}, socket) do
     {:noreply,
      socket
-     |> assign(messages: messages ++ message)
+     |> assign(:messages, [message])
     }
+    # {:noreply, socket}
   end
 end

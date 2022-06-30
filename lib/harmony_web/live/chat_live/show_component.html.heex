@@ -15,21 +15,25 @@
     </div>
   </div>
 
-  <div class="card-column">
-    <%= for message <- @messages do %>
-      <article class="card mb-3">
-        <section class="card-body">
-          <%= message.body %>
-        </section>
-        <footer class="card-footer">
-          <%= message.user.email %>
-        </footer>
-      </article>
-    <% end %>
+  <div class="message-wrapper">
+    <div class="card-column">
+      <%= for message <- @messages do %>
+        <article class="card mb-3">
+          <section class="card-body">
+            <%= message.body %>
+          </section>
+          <footer class="card-footer">
+            <%= message.user.email %>
+          </footer>
+        </article>
+      <% end %>
+    </div>
   </div>
+
   <form phx-submit="send-message">
     <input type="text" name="body"
       placeholder={"Talking in ##{@room.title}"}
       class="form-control" />
   </form>
 </div>
+

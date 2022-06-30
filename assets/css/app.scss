@@ -80,3 +80,11 @@ $navbar-dark-profile-icon: url('data:image/svg+xml,<svg xmlns="http://www.w3.org
     }
 }
 
+.message-wrapper {
+    overflow-y: scroll;
+    display: flex;
+    flex-direction: column-reverse;
+    max-height: 80vh;
+}
+.card-column {
+}
