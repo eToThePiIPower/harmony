@@ -8,7 +8,7 @@ defmodule HarmonyWeb.ChatLive do
   def mount(_params, %{"user_token" => user_token}, socket) do
     rooms = Chat.list_rooms()
     user = Account.get_user_by_session_token(user_token)
-    {:ok, assign(socket, rooms: rooms, current_user: user)}
+    {:ok, assign(socket, rooms: rooms, current_user: user, messages: []), temporary_assigns: [messages: []]}
   end
 
   @impl true
@@ -70,10 +70,12 @@ defmodule HarmonyWeb.ChatLive do
 
   @impl true
   def handle_info({:new_message, %{message: message}}, socket) do
-    {:noreply,
-     socket
-     |> assign(:messages, [message])
-    }
-    # {:noreply, socket}
+    room_title = socket.assigns.room.title
+    case message.room.title do
+      ^room_title ->
+        {:noreply, socket |> assign(:messages, [message])}
+      _ ->
+        {:noreply, socket}
+    end
   end
 end

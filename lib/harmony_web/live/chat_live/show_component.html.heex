@@ -20,9 +20,9 @@
   </div>
 
   <div class="message-wrapper">
-    <div class="card-column">
+    <div id={"room-#{@room.title}-messages"} class="card-column" phx-update="append">
       <%= for message <- @messages do %>
-        <article class="message">
+        <article id={"message-id-#{message.id}"} class="message">
           <img class="message-avatar" src={gravatar_for(message.user, 40) }/>
           <div class="message-contents">
             <header class="message-header">
