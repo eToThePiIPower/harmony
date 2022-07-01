@@ -93,8 +93,7 @@ $navbar-dark-profile-icon: url('data:image/svg+xml,<svg xmlns="http://www.w3.org
     overflow-y: scroll;
     display: flex;
     flex-direction: column-reverse;
-    max-height: 80vh;
-    max-height: calc(100vh - 40px - 2rem - (42px + 1rem) - (50px + 1rem))
+    max-height: calc(100vh - (40px + 2rem) - 2rem - (42px + 1rem) - (50px + 1rem))
 }
 
 .message {
