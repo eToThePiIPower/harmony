@@ -1,6 +1,7 @@
 defmodule HarmonyWeb.UserListsRoomsTest do
   use HarmonyWeb.FeatureCase, async: false
 
+  @tag :noci
   test "signed in user sees a list of rooms", %{session: session} do
     user = insert(:user)
     room1 = insert(:room, description: "Room 1 description")
