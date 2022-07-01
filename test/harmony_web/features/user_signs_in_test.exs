@@ -1,6 +1,7 @@
 defmodule HarmonyWeb.UserSignsInTest do
   use HarmonyWeb.FeatureCase, async: true
 
+  @tag :noci
   test "user can sign in", %{session: session} do
     user = build(:user) |> set_password |> insert
 
