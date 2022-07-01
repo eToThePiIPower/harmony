@@ -188,6 +188,11 @@ defmodule Harmony.Chat do
     %Message{}
     |> Message.changeset(attrs)
     |> Repo.insert()
+    |> case do
+      {:ok, %Message{} = message} ->
+        {:ok, message |> Repo.preload(:user)}
+      error -> error
+    end
   end
 
   @doc """

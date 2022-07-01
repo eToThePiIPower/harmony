@@ -63,7 +63,7 @@ defmodule HarmonyWeb.ChatLive do
   def handle_event("send-message", %{"body" => body}, socket) do
     user = socket.assigns.current_user
     room = socket.assigns.room
-    message = Chat.create_message(%{body: body, room_id: room.id, user_id: user.id})
+    {:ok, %Chat.Message{} = message} = Chat.create_message(%{body: body, room_id: room.id, user_id: user.id})
     Phoenix.PubSub.broadcast(Harmony.PubSub, "room-channel-#{room.title}", {:new_message, %{message: message}})
     {:noreply, socket}
   end
