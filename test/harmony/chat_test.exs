@@ -105,6 +105,7 @@ defmodule Harmony.ChatTest do
       assert {:ok, %Message{} = message} = Chat.create_message(valid_attrs)
       assert message.body == "some body"
       assert message.user.email == user.email
+      assert message.room.title == room.title
     end
 
     test "create_message/1 with invalid data returns error changeset" do

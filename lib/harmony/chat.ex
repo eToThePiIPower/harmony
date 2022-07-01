@@ -190,7 +190,7 @@ defmodule Harmony.Chat do
     |> Repo.insert()
     |> case do
       {:ok, %Message{} = message} ->
-        {:ok, message |> Repo.preload(:user)}
+        {:ok, message |> Repo.preload(:user) |> Repo.preload(:room)}
       error -> error
     end
   end
