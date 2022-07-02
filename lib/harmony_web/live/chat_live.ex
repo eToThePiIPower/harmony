@@ -1,12 +1,14 @@
 defmodule HarmonyWeb.ChatLive do
   use HarmonyWeb, :live_view
-  alias Harmony.Rooms
+  alias Harmony.Chat
   alias HarmonyWeb.ChatLive.{FormComponent,ListComponent,ShowComponent}
+  alias Harmony.Account
 
   @impl true
-  def mount(_params, _session, socket) do
-    rooms = Rooms.list_rooms()
-    {:ok, assign(socket, rooms: rooms)}
+  def mount(_params, %{"user_token" => user_token}, socket) do
+    rooms = Chat.list_rooms()
+    user = Account.get_user_by_session_token(user_token)
+    {:ok, assign(socket, rooms: rooms, current_user: user, messages: []), temporary_assigns: [messages: []]}
   end
 
   @impl true
@@ -20,12 +22,13 @@ defmodule HarmonyWeb.ChatLive do
   end
 
   defp handle_action(socket, :show, %{"id" => id}) do
-    room = Rooms.get_room!(id)
-    {:noreply, assign(socket, room: room)}
+    room = Chat.get_room!(id) |> Chat.preload_room_messages
+    Phoenix.PubSub.subscribe(Harmony.PubSub, "room-channel-#{room.title}")
+    {:noreply, assign(socket, room: room, messages: room.messages)}
   end
 
   defp handle_action(socket, :new, _params) do
-    room = %Rooms.Room{}
+    room = %Chat.Room{}
     {:noreply,
      socket
      |> assign(room: room)
@@ -35,10 +38,11 @@ defmodule HarmonyWeb.ChatLive do
   end
 
   defp handle_action(socket, :edit, %{"id" => id}) do
-    room = Rooms.get_room!(id)
+    room = Chat.get_room!(id) |> Chat.preload_room_messages
     {:noreply,
      socket
      |> assign(room: room)
+     |> assign(messages: room.messages)
      |> assign(modal_title: "Edit Room")
      |> assign(return_to: Routes.chat_path(socket, :show, room))
     }
@@ -46,12 +50,32 @@ defmodule HarmonyWeb.ChatLive do
 
   @impl true
   def handle_event("delete", %{"id" => id}, socket) do
-    item = Rooms.get_room!(id)
-    {:ok, _} = Rooms.delete_room(item)
+    room = Chat.get_room!(id)
+    {:ok, _} = Chat.delete_room(room)
     {:noreply,
      socket
      |> push_redirect(to: Routes.chat_path(socket, :index))
      |> put_flash(:success, "Deleted room")
-     |> assign(:rooms, Rooms.list_rooms())}
+     |> assign(:rooms, Chat.list_rooms())}
+  end
+
+  @impl true
+  def handle_event("send-message", %{"body" => body}, socket) do
+    user = socket.assigns.current_user
+    room = socket.assigns.room
+    {:ok, %Chat.Message{} = message} = Chat.create_message(%{body: body, room_id: room.id, user_id: user.id})
+    Phoenix.PubSub.broadcast(Harmony.PubSub, "room-channel-#{room.title}", {:new_message, %{message: message}})
+    {:noreply, socket}
+  end
+
+  @impl true
+  def handle_info({:new_message, %{message: message}}, socket) do
+    room_title = socket.assigns.room.title
+    case message.room.title do
+      ^room_title ->
+        {:noreply, socket |> assign(:messages, [message])}
+      _ ->
+        {:noreply, socket}
+    end
   end
 end

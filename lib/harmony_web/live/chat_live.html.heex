@@ -10,7 +10,7 @@
   </.modal>
 <% end %>
 
-<div class="wrapper mx-2">
+<div class="wrapper">
   <nav id="list-room-sidebar" class="nav-sidebar collapse collapse-horizontal">
     <.live_component
       module={ListComponent}
@@ -25,6 +25,7 @@
         module={ShowComponent}
         id={:show}
         room={@room}
+        messages={@messages}
       />
     <% else %>
       <p class="default-description m-4">Select a room</p>

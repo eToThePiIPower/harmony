@@ -21,6 +21,6 @@ defmodule HarmonyWeb.FeatureCase do
 
     metadata = Phoenix.Ecto.SQL.Sandbox.metadata_for(Harmony.Repo, self())
     {:ok, session} = Wallaby.start_session(metadata: metadata)
-    {:ok, session: session}
+    {:ok, session: session, metadata: metadata}
   end
 end

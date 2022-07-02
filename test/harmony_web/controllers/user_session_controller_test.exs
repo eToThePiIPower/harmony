@@ -18,7 +18,7 @@ defmodule HarmonyWeb.UserSessionControllerTest do
 
     test "redirects if already logged in", %{conn: conn, user: user} do
       conn = conn |> log_in_user(user) |> get(Routes.user_session_path(conn, :new))
-      assert redirected_to(conn) == "/"
+      assert redirected_to(conn) == "/chat"
     end
   end
 
@@ -30,7 +30,7 @@ defmodule HarmonyWeb.UserSessionControllerTest do
         })
 
       assert get_session(conn, :user_token)
-      assert redirected_to(conn) == "/"
+      assert redirected_to(conn) == "/chat"
 
       # Now do a logged in request and assert on the menu
       conn = get(conn, "/chat")
@@ -51,7 +51,7 @@ defmodule HarmonyWeb.UserSessionControllerTest do
         })
 
       assert conn.resp_cookies["_harmony_web_user_remember_me"]
-      assert redirected_to(conn) == "/"
+      assert redirected_to(conn) == "/chat"
     end
 
     test "logs the user in with return to", %{conn: conn, user: user} do

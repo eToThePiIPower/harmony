@@ -4,8 +4,8 @@ defmodule Harmony.Factory do
   def user_factory do
     %Harmony.Account.User{
       email: sequence(:email, &"user#{&1}@example.com"),
-      password: "password"
-    }
+      password: "password1234"
+    } |> set_password()
   end
 
   def set_password(%{password: password} = user) do
@@ -19,9 +19,17 @@ defmodule Harmony.Factory do
   end
 
   def room_factory do
-    %Harmony.Rooms.Room{
+    %Harmony.Chat.Room{
       title: sequence(:title, &"room#{&1}-name"),
       description: "Some description here"
+    }
+  end
+
+  def message_factory do
+    %Harmony.Chat.Message{
+      body: "some factory body",
+      user: build(:user),
+      room: build(:room)
     }
   end
 end

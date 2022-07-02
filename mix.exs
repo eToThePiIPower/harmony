@@ -52,6 +52,7 @@ defmodule Harmony.MixProject do
       {:jason, "~> 1.2"},
       {:wallaby, "~> 0.29.0", [runtime: false, only: :test]},
       {:ex_machina, "~> 2.3", only: :test},
+      {:timex, "~> 3.7.8"},
       {:plug_cowboy, "~> 2.5"}
     ]
   end

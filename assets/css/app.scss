@@ -80,3 +80,73 @@ $navbar-dark-profile-icon: url('data:image/svg+xml,<svg xmlns="http://www.w3.org
     }
 }
 
+.room-name-icon {
+  color: $gray-500;
+  font-size: $h3-font-size;
+}
+
+.description {
+  font-style: italic;
+}
+
+.message-wrapper {
+    overflow-y: scroll;
+    display: flex;
+    flex-direction: column-reverse;
+    max-height: calc(100vh - (40px + 2rem) - 2rem - (42px + 1rem) - (50px + 1rem))
+}
+
+.message {
+  --gravatar-size: 45px;
+
+  align-items: start;
+  display: flex;
+  flex-direction: row;
+  flex-wrap: wrap;
+  margin-bottom: 1.5rem;
+  width: 100%;
+
+  .message-avatar {
+    display: flex;
+    border-radius: 33%;
+    flex-direction: column;
+    height: var(--gravatar-size);
+    margin-right: .5rem;
+    width: var(--gravatar-size);
+  }
+
+  .message-body {
+    white-space: pre-wrap;
+  }
+
+  .message-contents {
+    display: flex;
+    flex-direction: column;
+    width: calc(100% - var(--gravatar-size) - 1rem);
+  }
+
+  .message-user {
+    color: $green;
+    font-weight: bold;
+  }
+
+  .message-timestamp {
+    color: $gray-500;
+  }
+}
+
+.message-form {
+  display: flex;
+  margin-top: 1rem;
+  flex-direction: row;
+
+  .message-input {
+    flex-direction: column;
+  }
+
+  .message-submit {
+    flex-direction: column;
+    padding-top: .75rem;
+    padding-bottom: .75rem;
+  }
+}

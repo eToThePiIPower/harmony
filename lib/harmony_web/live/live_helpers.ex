@@ -60,6 +60,25 @@ defmodule HarmonyWeb.LiveHelpers do
     """
   end
 
+  def gravatar_for(%Harmony.Account.User{email: email}, size \\ 40) do
+    email
+    |> String.trim()
+    |> String.downcase()
+    |> :erlang.md5
+    |> Base.encode16(case: :lower)
+    |> fn x -> "https://s.gravatar.com/avatar/#{x}?s=#{size}" end.()
+  end
+
+  def time_in_words(%NaiveDateTime{} = datetime) do
+    {now, 1} = Date.day_of_era(DateTime.utc_now())
+    {then, 1} = Date.day_of_era(datetime)
+    case (now - then) do
+      0 -> "#{Timex.format!(datetime, "%H:%M %p", :strftime)}"
+      1 -> "Yesterday at #{Timex.format!(datetime, "%H:%M %p", :strftime)}"
+      _ -> "#{Timex.format!(datetime, "%d/%m/%Y", :strftime)}"
+    end
+  end
+
   defp hide_modal(js \\ %JS{}) do
     js
     |> JS.hide(to: "#modal", transition: "fade-out")

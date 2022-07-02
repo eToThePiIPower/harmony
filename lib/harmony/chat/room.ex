@@ -1,10 +1,11 @@
-defmodule Harmony.Rooms.Room do
+defmodule Harmony.Chat.Room do
   use Ecto.Schema
   import Ecto.Changeset
 
   schema "rooms" do
     field :description, :string
     field :title, :string
+    has_many :messages, Harmony.Chat.Message
 
     timestamps()
   end

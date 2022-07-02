@@ -18,9 +18,14 @@ defmodule HarmonyWeb.Router do
   end
 
   scope "/", HarmonyWeb do
-    pipe_through :browser
+    pipe_through [:browser, :redirect_if_user_is_authenticated]
 
     get "/", PageController, :index
+  end
+
+  scope "/", HarmonyWeb do
+    pipe_through [:browser, :require_authenticated_user]
+
     live "/chat", ChatLive, :index
     live "/chat/new", ChatLive, :new
     live "/chat/:id", ChatLive, :show

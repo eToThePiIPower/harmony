@@ -1,6 +1,7 @@
 defmodule HarmonyWeb.UserVisitsRootPageTest do
-  use HarmonyWeb.FeatureCase, async: true
+  use HarmonyWeb.FeatureCase, async: false
 
+  @tag :noci
   test "user can visit root page", %{session: session} do
     session
     |> visit("/")

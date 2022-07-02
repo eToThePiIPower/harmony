@@ -1,6 +1,10 @@
 <div id={"room-detail-#{@room.id}"} class="room-detail m-3">
   <div class="d-flex justify-content-between align-items-center mb-3">
-    <div class="description"><%= @room.description %></div>
+    <div>
+      <span class="room-name-icon">#</span>
+      <span class="h5"><%= "#{@room.title }" %></span>
+      <span class="description"><%= @room.description %></span>
+    </div>
     <div class="actions">
       <%= live_patch "Edit Room",
         to: Routes.chat_path(@socket, :edit, @room),
@@ -11,6 +15,37 @@
           class: "btn btn-sm btn-outline-danger",
           data: [confirm: "Are you sure?"] %>
       </span>
+
     </div>
   </div>
+
+  <div class="message-wrapper">
+    <div id={"room-#{@room.title}-messages"} class="card-column" phx-update="append">
+      <%= for message <- @messages do %>
+        <article id={"message-id-#{message.id}"} class="message">
+          <img class="message-avatar" src={gravatar_for(message.user, 40) }/>
+          <div class="message-contents">
+            <header class="message-header">
+              <span class="message-user"><%= message.user.email %></span>
+              <span class="message-timestamp"><%= time_in_words(message.inserted_at) %></span>
+            </header>
+            <main class="message-body"><%= message.body %></main>
+          </div>
+        </article>
+      <% end %>
+    </div>
+  </div>
+
+  <form class="message-form" phx-submit="send-message">
+    <div class="input-group mx-3">
+      <textarea name="body"
+        placeholder={"Talking in ##{@room.title}"}
+        rows="1"
+        class="message-input form-control" />
+      <button type="submit" class="message-submit btn btn-primary">
+        Send
+      </button>
+    </div>
+  </form>
 </div>
+
