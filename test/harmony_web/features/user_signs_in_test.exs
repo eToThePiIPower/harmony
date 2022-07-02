@@ -1,5 +1,5 @@
 defmodule HarmonyWeb.UserSignsInTest do
-  use HarmonyWeb.FeatureCase, async: true
+  use HarmonyWeb.FeatureCase, async: false
 
   @tag :noci
   test "user can sign in", %{session: session} do
