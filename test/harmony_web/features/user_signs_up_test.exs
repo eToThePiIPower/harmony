@@ -1,6 +1,7 @@
 defmodule HarmonyWeb.UserSignsUpTest do
   use HarmonyWeb.FeatureCase, async: false
 
+  @tag :noci
   test "user can sign up", %{session: session} do
     session
     |> visit("/users/register")
@@ -11,6 +12,7 @@ defmodule HarmonyWeb.UserSignsUpTest do
     |> assert_has(Query.css(".username", text: "new_user@example.com"))
   end
 
+  @tag :noci
   test "user must confirm password when they sign up", %{session: session} do
     session
     |> visit("/users/register")
