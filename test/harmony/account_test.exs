@@ -54,6 +54,7 @@ defmodule Harmony.AccountTest do
 
       assert %{
                password: ["can't be blank"],
+               password_confirmation: ["does not match password"],
                email: ["can't be blank"]
              } = errors_on(changeset)
     end
