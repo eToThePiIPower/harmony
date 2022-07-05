@@ -17,7 +17,7 @@ defmodule HarmonyWeb.UserSignsUpTest do
     session
     |> visit("/users/register")
     |> fill_in(Query.text_field("Email"), with: "new_user@example.com")
-    |> fill_in(Query.css("#user_password"), with: "password1234")
+    |> fill_in(Query.text_field("Password", at: 0, count: 2), with: "password1234")
     |> fill_in(Query.text_field("Password confirmation"), with: "nomatch")
     |> click(Query.button("Register"))
     |> refute_has(Query.css(".username", text: "new_user@example.com"))
