@@ -54,6 +54,7 @@ defmodule Harmony.AccountTest do
 
       assert %{
                password: ["can't be blank"],
+               password_confirmation: ["does not match password"],
                email: ["can't be blank"]
              } = errors_on(changeset)
     end
@@ -258,7 +259,7 @@ defmodule Harmony.AccountTest do
     test "allows fields to be set" do
       changeset =
         Account.change_user_password(%User{}, %{
-          "password" => "new valid password"
+          "password" => "new valid password", "password_confirmation" => "new valid password"
         })
 
       assert changeset.valid?
@@ -289,14 +290,14 @@ defmodule Harmony.AccountTest do
       too_long = String.duplicate("db", 100)
 
       {:error, changeset} =
-        Account.update_user_password(user, valid_user_password(), %{password: too_long})
+        Account.update_user_password(user, valid_user_password(), %{password: too_long, password_confirmation: too_long})
 
       assert "should be at most 72 character(s)" in errors_on(changeset).password
     end
 
     test "validates current password", %{user: user} do
       {:error, changeset} =
-        Account.update_user_password(user, "invalid", %{password: valid_user_password()})
+        Account.update_user_password(user, "invalid", %{password: valid_user_password(), password_confirmation: valid_user_password()})
 
       assert %{current_password: ["is not valid"]} = errors_on(changeset)
     end
@@ -304,7 +305,7 @@ defmodule Harmony.AccountTest do
     test "updates the password", %{user: user} do
       {:ok, user} =
         Account.update_user_password(user, valid_user_password(), %{
-          password: "new valid password"
+          password: "new valid password", password_confirmation: "new valid password"
         })
 
       assert is_nil(user.password)
@@ -316,7 +317,7 @@ defmodule Harmony.AccountTest do
 
       {:ok, _} =
         Account.update_user_password(user, valid_user_password(), %{
-          password: "new valid password"
+          password: "new valid password", password_confirmation: "new valid password"
         })
 
       refute Repo.get_by(UserToken, user_id: user.id)
@@ -502,19 +503,19 @@ defmodule Harmony.AccountTest do
 
     test "validates maximum values for password for security", %{user: user} do
       too_long = String.duplicate("db", 100)
-      {:error, changeset} = Account.reset_user_password(user, %{password: too_long})
+      {:error, changeset} = Account.reset_user_password(user, %{password: too_long, password_confirmation: too_long})
       assert "should be at most 72 character(s)" in errors_on(changeset).password
     end
 
     test "updates the password", %{user: user} do
-      {:ok, updated_user} = Account.reset_user_password(user, %{password: "new valid password"})
+      {:ok, updated_user} = Account.reset_user_password(user, %{password: "new valid password", password_confirmation: "new valid password"})
       assert is_nil(updated_user.password)
       assert Account.get_user_by_email_and_password(user.email, "new valid password")
     end
 
     test "deletes all tokens for the given user", %{user: user} do
       _ = Account.generate_user_session_token(user)
-      {:ok, _} = Account.reset_user_password(user, %{password: "new valid password"})
+      {:ok, _} = Account.reset_user_password(user, %{password: "new valid password", password_confirmation: "new valid password"})
       refute Repo.get_by(UserToken, user_id: user.id)
     end
   end

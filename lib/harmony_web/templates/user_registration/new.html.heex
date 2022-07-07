@@ -22,6 +22,13 @@
   </div>
 
   <div class="mb-3">
+    <%= label f, :password_confirmation, class: "form-label" %>
+    <%= password_input f, :password_confirmation, required: true,
+      class: maybe_invalid("form-control", f, :password_confirmation) %>
+    <%= error_tag f, :password_confirmation %>
+  </div>
+
+ <div class="mb-3">
     <%= submit "Register", class: "btn btn-primary form-control" %>
   </div>
 </.form>
