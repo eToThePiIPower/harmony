@@ -5,29 +5,24 @@ defmodule HarmonyWeb.ChatRoomLive do
 
   def render(assigns) do
     ~H"""
+    <div class="flex flex-col shrink-0 w-64 bg-slate-100">
+      <.rooms_list_header />
+      <.rooms_list title="Rooms">
+        <.rooms_list_item :for={room <- @rooms} room={room} active={room.id == @room.id} />
+      </.rooms_list>
+    </div>
+
     <div class="flex flex-col grow shadow-lg">
-      <div
-        id="room-header"
-        phx-click="toggle-topic"
-        class="flex justify-between items-center shrink-0 bg-white border-b border-slate-300 px-4 py-4"
-      >
-        <div class="flex flex-col gap-1.5">
-          <h1 class="name text-sm font-bold leading-none">
-            #{@room.name}
-          </h1>
-          <div class="topic text-xs leading-none h-3.5" :if={!@hide_topic?}>
-            {@room.topic}
-          </div>
-        </div>
-      </div>
+      <.room_header room={@room} hide_topic?={@hide_topic?}/>
     </div>
     """
   end
 
   def mount(_params, _session, socket) do
-    room = Room |> Repo.all() |> List.first()
+    rooms = Room |> Repo.all()
+    room = rooms |> List.first()
 
-    {:ok, assign(socket, room: room, hide_topic?: false)}
+    {:ok, assign(socket, room: room, rooms: rooms, hide_topic?: false)}
   end
 
   def handle_event("toggle-topic", _params, socket) do

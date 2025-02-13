@@ -3,12 +3,12 @@ defmodule HarmonyWeb.UserCanSeeAListOfChatRoomsTest do
   import Harmony.Factory
 
   test "user can see a list of chat rooms", %{conn: conn} do
-    room = insert(:room)
+    [room1, room2] = insert_pair(:room)
 
     conn
     |> visit("/")
-    |> assert_has(".name", text: room.name)
-    |> assert_has(".topic", text: room.topic)
+    |> assert_has("#rooms-list .name", text: room1.name)
+    |> assert_has("#rooms-list .name", text: room2.name)
   end
 
   test "user can toggle the room topic visibility", %{conn: conn} do
@@ -16,11 +16,11 @@ defmodule HarmonyWeb.UserCanSeeAListOfChatRoomsTest do
 
     conn
     |> visit("/")
-    |> assert_has(".name", text: room.name)
-    |> assert_has(".topic", text: room.topic)
+    |> assert_has("#room-header .name", text: room.name)
+    |> assert_has("#room-header .topic", text: room.topic)
     |> click_button("#room-header", room.name)
-    |> refute_has(".topic")
+    |> refute_has("#room-header .topic")
     |> click_button("#room-header", room.name)
-    |> assert_has(".topic", text: room.topic)
+    |> assert_has("#room-header .topic", text: room.topic)
   end
 end
