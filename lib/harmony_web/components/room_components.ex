@@ -4,6 +4,7 @@ defmodule HarmonyWeb.RoomComponents do
   """
   use Phoenix.Component
   use Gettext, backend: HarmonyWeb.Gettext
+  use HarmonyWeb, :verified_routes
 
   import HarmonyWeb.CoreComponents
 
@@ -15,18 +16,18 @@ defmodule HarmonyWeb.RoomComponents do
 
   def rooms_list_item(assigns) do
     ~H"""
-    <a
+    <.link
       class={[
-        "flex items-center h-8 text-sm pl-8 pr-3",
+        "rooms-list-item flex items-center h-8 text-sm pl-8 pr-3",
         (@active && "bg-slate-300") || "hover:bg-slate-300"
       ]}
-      href="#"
+      patch={~p"/rooms/#{@room.name}"}
     >
       <.icon name="hero-hashtag" class="h-4 w-4" />
       <span class={["ml-2 leading-none name", @active && "font-bold"]}>
         {@room.name}
       </span>
-    </a>
+    </.link>
     """
   end
 

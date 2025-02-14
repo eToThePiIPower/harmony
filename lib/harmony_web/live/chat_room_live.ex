@@ -20,9 +20,20 @@ defmodule HarmonyWeb.ChatRoomLive do
 
   def mount(_params, _session, socket) do
     rooms = Room |> Repo.all()
-    room = rooms |> List.first()
 
-    {:ok, assign(socket, room: room, rooms: rooms, hide_topic?: false)}
+    {:ok, assign(socket, rooms: rooms, hide_topic?: false)}
+  end
+
+  def handle_params(%{"name" => name}, _uri, socket) do
+    room = Repo.get_by(Room, name: name)
+
+    {:noreply, assign(socket, room: room)}
+  end
+
+  def handle_params(_params, _uri, socket) do
+    room = Repo.all(Room) |> List.first()
+
+    {:noreply, assign(socket, room: room)}
   end
 
   def handle_event("toggle-topic", _params, socket) do

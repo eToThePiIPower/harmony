@@ -23,4 +23,19 @@ defmodule HarmonyWeb.UserCanSeeAListOfChatRoomsTest do
     |> click_button("#room-header", room.name)
     |> assert_has("#room-header .topic", text: room.topic)
   end
+
+  test "user can switch between rooms", %{conn: conn} do
+    [room1, room2] = insert_pair(:room)
+
+    conn
+    |> visit("/")
+    |> assert_has("#room-header .name", text: room1.name)
+    |> assert_has("#room-header .topic", text: room1.topic)
+    |> click_link("#rooms-list .rooms-list-item", room2.name)
+    |> assert_has("#room-header .name", text: room2.name)
+    |> assert_has("#room-header .topic", text: room2.topic)
+    |> click_link("#rooms-list .rooms-list-item", room1.name)
+    |> assert_has("#room-header .name", text: room1.name)
+    |> assert_has("#room-header .topic", text: room1.topic)
+  end
 end

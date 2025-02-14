@@ -18,6 +18,7 @@ defmodule HarmonyWeb.Router do
     pipe_through :browser
 
     live "/", ChatRoomLive
+    live "/rooms/:name", ChatRoomLive
   end
 
   # Other scopes may use custom stacks.
