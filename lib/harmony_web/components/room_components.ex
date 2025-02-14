@@ -10,7 +10,7 @@ defmodule HarmonyWeb.RoomComponents do
 
   alias Harmony.Chat.Room
   # alias Phoenix.LiveView.JS
- 
+
   attr :active, :boolean, required: true
   attr :room, Room, required: true
 
@@ -31,12 +31,10 @@ defmodule HarmonyWeb.RoomComponents do
     """
   end
 
-
   attr :title, :string, default: "Rooms"
   slot :inner_block, required: true
 
   def rooms_list(assigns) do
-
     ~H"""
     <div class="mt-4 overflow-auto">
       <div class="flex items-center h-8 px-3">
@@ -66,7 +64,6 @@ defmodule HarmonyWeb.RoomComponents do
     </div>
     """
   end
-
 
   attr :room, Room, required: true
   attr :hide_topic?, :boolean, default: false

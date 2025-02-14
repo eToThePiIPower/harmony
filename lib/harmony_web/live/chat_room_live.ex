@@ -1,7 +1,7 @@
 defmodule HarmonyWeb.ChatRoomLive do
   use HarmonyWeb, :live_view
 
-  alias Harmony.{Chat.Room, Repo}
+  alias Harmony.Chat
 
   def render(assigns) do
     ~H"""
@@ -13,27 +13,27 @@ defmodule HarmonyWeb.ChatRoomLive do
     </div>
 
     <div class="flex flex-col grow shadow-lg">
-      <.room_header room={@room} hide_topic?={@hide_topic?}/>
+      <.room_header room={@room} hide_topic?={@hide_topic?} />
     </div>
     """
   end
 
   def mount(_params, _session, socket) do
-    rooms = Room |> Repo.all()
+    rooms = Chat.list_rooms()
 
     {:ok, assign(socket, rooms: rooms, hide_topic?: false)}
   end
 
   def handle_params(%{"name" => name}, _uri, socket) do
-    room = Repo.get_by(Room, name: name)
+    room = Chat.get_room(name) || Chat.default_room()
 
-    {:noreply, assign(socket, room: room)}
+    {:noreply, assign(socket, room: room, page_title: "##{room.name}")}
   end
 
   def handle_params(_params, _uri, socket) do
-    room = Repo.all(Room) |> List.first()
+    room = Chat.default_room()
 
-    {:noreply, assign(socket, room: room)}
+    {:noreply, assign(socket, room: room, page_title: "##{room.name}")}
   end
 
   def handle_event("toggle-topic", _params, socket) do
