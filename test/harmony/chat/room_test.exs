@@ -44,4 +44,26 @@ defmodule Harmony.Chat.RoomTest do
       refute changeset.valid?
     end
   end
+
+  describe "Chat.Room:topic" do
+    test "validates length <= 16" do
+      room = build(:room)
+
+      changeset = Room.changeset(room, %{topic: String.duplicate("a", 80)})
+      assert changeset.valid?
+
+      changeset = Room.changeset(room, %{topic: String.duplicate("a", 81)})
+      refute changeset.valid?
+    end
+
+    test "validates existence" do
+      room = build(:room)
+
+      changeset = Room.changeset(room, %{topic: ""})
+      refute changeset.valid?
+
+      changeset = Room.changeset(room, %{topic: nil})
+      refute changeset.valid?
+    end
+  end
 end

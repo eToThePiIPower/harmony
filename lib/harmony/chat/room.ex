@@ -15,11 +15,12 @@ defmodule Harmony.Chat.Room do
   def changeset(room, attrs) do
     room
     |> cast(attrs, [:name, :topic])
+    |> validate_required([:name, :topic])
     |> unique_constraint(:name)
     |> validate_length(:name, max: 16)
     |> validate_format(:name, ~r/^[a-z0-9\-]+$/,
       message: "must contain only lowercase letters, numbers, or dashes"
     )
-    |> validate_required([:name, :topic])
+    |> validate_length(:topic, max: 80)
   end
 end
