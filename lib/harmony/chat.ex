@@ -4,8 +4,8 @@ defmodule Harmony.Chat do
 
   def list_rooms do
     from(Room)
-    |> order_by([asc: :name])
-    |> Repo.all
+    |> order_by(asc: :name)
+    |> Repo.all()
   end
 
   def get_room(name) do
@@ -15,6 +15,6 @@ defmodule Harmony.Chat do
   def default_room do
     from(Room)
     |> first(:inserted_at)
-    |> Repo.one
+    |> Repo.one()
   end
 end

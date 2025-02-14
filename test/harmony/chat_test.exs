@@ -6,10 +6,10 @@ defmodule Harmony.ChatTest do
 
   describe "rooms" do
     test "list_room/0 returns all rooms, alphabetically" do
-      room1 = insert(:room, name: "C room") 
-      room2 = insert(:room, name: "X room") 
-      room3 = insert(:room, name: "A room") 
-      room4 = insert(:room, name: "M room") 
+      room1 = insert(:room, name: "C room")
+      room2 = insert(:room, name: "X room")
+      room3 = insert(:room, name: "A room")
+      room4 = insert(:room, name: "M room")
 
       assert Chat.list_rooms() == [room3, room1, room4, room2]
     end
