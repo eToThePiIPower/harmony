@@ -12,9 +12,11 @@ defmodule HarmonyWeb.ChatRoomLive do
       </.rooms_list>
     </div>
 
-    <div class="flex flex-col grow shadow-lg">
-      <.room_header room={@room} hide_topic?={@hide_topic?} />
-    </div>
+    <%= if @room do %>
+      <div class="flex flex-col grow shadow-lg">
+        <.room_header room={@room} hide_topic?={@hide_topic?} />
+      </div>
+    <% end %>
     """
   end
 
@@ -31,9 +33,13 @@ defmodule HarmonyWeb.ChatRoomLive do
   end
 
   def handle_params(_params, _uri, socket) do
-    room = Chat.default_room()
+    case Chat.default_room() do
+      room = %Chat.Room{} ->
+        {:noreply, assign(socket, room: room, page_title: "##{room.name}")}
 
-    {:noreply, assign(socket, room: room, page_title: "##{room.name}")}
+      nil ->
+        {:noreply, assign(socket, room: nil)}
+    end
   end
 
   def handle_event("toggle-topic", _params, socket) do
