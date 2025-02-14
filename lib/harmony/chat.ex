@@ -3,7 +3,9 @@ defmodule Harmony.Chat do
   import Ecto.Query
 
   def list_rooms do
-    Repo.all(Room)
+    from(Room)
+    |> order_by([asc: :name])
+    |> Repo.all
   end
 
   def get_room(name) do
@@ -11,7 +13,7 @@ defmodule Harmony.Chat do
   end
 
   def default_room do
-    from(r in Room)
+    from(Room)
     |> first(:inserted_at)
     |> Repo.one
   end
