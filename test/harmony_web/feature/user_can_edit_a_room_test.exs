@@ -1,6 +1,13 @@
 defmodule HarmonyWeb.UserEditARoomTest do
   use HarmonyWeb.FeatureCase, async: true
   import Harmony.Factory
+  import Harmony.AccountsFixtures
+
+  setup %{conn: conn} do
+    password = valid_user_password()
+    user = user_fixture(%{password: password})
+    %{conn: log_in_user(conn, user), user: user, password: password}
+  end
 
   test "user can edit a chat room", %{conn: conn} do
     room = insert(:room)
