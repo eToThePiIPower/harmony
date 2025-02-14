@@ -19,6 +19,7 @@ defmodule HarmonyWeb.Router do
 
     live "/", ChatRoomLive
     live "/rooms/:name", ChatRoomLive
+    live "/rooms/:name/edit", ChatRoomLive.Edit
   end
 
   # Other scopes may use custom stacks.

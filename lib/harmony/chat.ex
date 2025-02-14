@@ -17,4 +17,14 @@ defmodule Harmony.Chat do
     |> first(:inserted_at)
     |> Repo.one()
   end
+
+  def change_room(room, attrs \\ %{}) do
+    Room.changeset(room, attrs)
+  end
+
+  def update_room(%Room{} = room, attrs) do
+    room
+    |> Room.changeset(attrs)
+    |> Repo.update()
+  end
 end

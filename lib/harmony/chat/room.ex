@@ -16,6 +16,7 @@ defmodule Harmony.Chat.Room do
     room
     |> cast(attrs, [:name, :topic])
     |> validate_required([:name, :topic])
+    |> unsafe_validate_unique(:name, Harmony.Repo)
     |> unique_constraint(:name)
     |> validate_length(:name, max: 16)
     |> validate_format(:name, ~r/^[a-z0-9\-]+$/,

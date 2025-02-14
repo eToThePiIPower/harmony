@@ -78,6 +78,13 @@ defmodule HarmonyWeb.RoomComponents do
       <div class="flex flex-col gap-1.5">
         <h1 class="name text-sm font-bold leading-none">
           #{@room.name}
+          <.link
+            id="room-edit-link"
+            class="font-normal text-xs text-blue-600 hover:text-blue-700"
+            navigate={~p"/rooms/#{@room.name}/edit"}
+          >
+            Edit
+          </.link>
         </h1>
         <div :if={!@hide_topic?} class="topic text-xs leading-none h-3.5">
           {@room.topic}

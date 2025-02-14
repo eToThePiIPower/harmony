@@ -1,5 +1,5 @@
 defmodule Harmony.Chat.RoomTest do
-  use ExUnit.Case, async: true
+  use Harmony.DataCase, async: true
   alias Harmony.Chat.Room
   import Harmony.Factory
 

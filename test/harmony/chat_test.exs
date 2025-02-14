@@ -30,5 +30,21 @@ defmodule Harmony.ChatTest do
 
       assert Chat.default_room() == room1
     end
+
+    test "change_room/2" do
+      room = build(:room)
+      new_attrs = %{name: "new-name"}
+
+      assert changeset = %Ecto.Changeset{} = Chat.change_room(room, new_attrs)
+      assert changeset.changes.name == "new-name"
+    end
+
+    test "update_room/2 with valid params updates a room" do
+      room = insert(:room)
+      new_attrs = %{name: "new-name"}
+
+      assert {:ok, new_room} = Chat.update_room(room, new_attrs)
+      assert new_room.name == "new-name"
+    end
   end
 end
