@@ -19,10 +19,6 @@ defmodule HarmonyWeb.Router do
 
   scope "/", HarmonyWeb do
     pipe_through :browser
-
-    live "/", ChatRoomLive
-    live "/rooms/:name", ChatRoomLive
-    live "/rooms/:name/edit", ChatRoomLive.Edit
   end
 
   # Other scopes may use custom stacks.
@@ -68,6 +64,10 @@ defmodule HarmonyWeb.Router do
 
     live_session :require_authenticated_user,
       on_mount: [{HarmonyWeb.UserAuth, :ensure_authenticated}] do
+      live "/", ChatRoomLive
+      live "/rooms/:name", ChatRoomLive
+      live "/rooms/:name/edit", ChatRoomLive.Edit
+
       live "/users/settings", UserSettingsLive, :edit
       live "/users/settings/confirm_email/:token", UserSettingsLive, :confirm_email
     end

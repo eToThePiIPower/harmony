@@ -1,6 +1,12 @@
 defmodule HarmonyWeb.UserCanSeeAListOfChatRoomsTest do
   use HarmonyWeb.FeatureCase, async: true
   import Harmony.Factory
+  import Harmony.AccountsFixtures
+
+  setup %{conn: conn} do
+    user = user_fixture()
+    %{conn: log_in_user(conn, user), user: user}
+  end
 
   test "user can see a list of chat rooms", %{conn: conn} do
     [room1, room2] = insert_pair(:room)
