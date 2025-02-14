@@ -10,6 +10,8 @@ defmodule HarmonyWeb.ChatRoomLive do
       <.rooms_list title="Rooms">
         <.rooms_list_item :for={room <- @rooms} room={room} active={room.id == @room.id} />
       </.rooms_list>
+
+      <.rooms_list_actions current_user={@current_user} />
     </div>
 
     <%= if @room do %>
