@@ -12,6 +12,9 @@ defmodule Harmony.Chat.MessageTest do
 
       changeset = Message.changeset(message, %{body: nil})
       refute changeset.valid?
+
+      changeset = Message.changeset(message, %{body: "hello"})
+      assert changeset.valid?
     end
   end
 end

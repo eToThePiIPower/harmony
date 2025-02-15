@@ -1,5 +1,6 @@
 defmodule Harmony.Chat do
   alias Harmony.{Chat.Room, Chat.Message, Repo}
+  alias Harmony.Accounts.User
   import Ecto.Query
 
   # Chat.Room
@@ -38,5 +39,15 @@ defmodule Harmony.Chat do
     |> order_by([m], asc: :inserted_at, asc: :id)
     |> preload(:user)
     |> Repo.all()
+  end
+
+  def change_message(message, attrs \\ %{}) do
+    Message.changeset(message, attrs)
+  end
+
+  def create_message(%User{} = user, %Room{} = room, attrs) do
+    %Message{user: user, room: room}
+    |> Message.changeset(attrs)
+    |> Repo.insert()
   end
 end

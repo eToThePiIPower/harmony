@@ -31,6 +31,38 @@ defmodule HarmonyWeb.RoomComponents do
     """
   end
 
+  attr :form, Ecto.Form
+  attr :room, Room
+
+  def message_send_form(assigns) do
+    ~H"""
+    <div class="h-12 bg-white px-4 pb-4">
+      <.form
+        for={@form}
+        id="message-send-form"
+        phx-submit="send-message"
+        phx-change="validate-message"
+        class="flex items-center border-2 border-slate-300 rounded-sm p-1"
+      >
+        <label for="chat-message-textarea" class="sr-only">Message Body</label>
+        <textarea
+          class="grow text-sm px-3 border-l border-slate-300 mx-1 resize-none"
+          cols=""
+          id="chat-message-textarea"
+          name={@form[:body].name}
+          placeholder={"Message ##{@room.name}"}
+          phx-hook="CtrlEnterSubmit"
+          phx-debounce
+          rows="1"
+        >{Phoenix.HTML.Form.normalize_value("textarea", @form[:body].value)}</textarea>
+        <button class="shrink flex items-center justify-center h-6 w-6 rounded hover:bg-slate-200">
+          <.icon name="hero-paper-airplane" class="h-4 w-4" />
+        </button>
+      </.form>
+    </div>
+    """
+  end
+
   attr :title, :string, default: "Rooms"
   slot :inner_block, required: true
 
