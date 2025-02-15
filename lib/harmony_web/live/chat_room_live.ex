@@ -17,6 +17,9 @@ defmodule HarmonyWeb.ChatRoomLive do
     <%= if @room do %>
       <div class="flex flex-col grow shadow-lg">
         <.room_header room={@room} hide_topic?={@hide_topic?} />
+        <div id="messages-list">
+          <.message_item :for={message <- @messages} message={message} />
+        </div>
       </div>
     <% end %>
     """
@@ -30,14 +33,16 @@ defmodule HarmonyWeb.ChatRoomLive do
 
   def handle_params(%{"name" => name}, _uri, socket) do
     room = Chat.get_room(name) || Chat.default_room()
+    messages = Chat.list_messages(room)
 
-    {:noreply, assign(socket, room: room, page_title: "##{room.name}")}
+    {:noreply, assign(socket, room: room, messages: messages, page_title: "##{room.name}")}
   end
 
   def handle_params(_params, _uri, socket) do
     case Chat.default_room() do
       room = %Chat.Room{} ->
-        {:noreply, assign(socket, room: room, page_title: "##{room.name}")}
+        messages = Chat.list_messages(room)
+        {:noreply, assign(socket, room: room, messages: messages, page_title: "##{room.name}")}
 
       nil ->
         {:noreply, assign(socket, room: nil)}

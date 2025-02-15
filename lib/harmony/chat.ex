@@ -1,6 +1,8 @@
 defmodule Harmony.Chat do
-  alias Harmony.{Chat.Room, Repo}
+  alias Harmony.{Chat.Room, Chat.Message, Repo}
   import Ecto.Query
+
+  # Chat.Room
 
   def list_rooms do
     from(Room)
@@ -26,5 +28,15 @@ defmodule Harmony.Chat do
     room
     |> Room.changeset(attrs)
     |> Repo.update()
+  end
+
+  # Chat.Message
+
+  def list_messages(%Room{id: room_id}) do
+    Message
+    |> where([m], m.room_id == ^room_id)
+    |> order_by([m], asc: :inserted_at, asc: :id)
+    |> preload(:user)
+    |> Repo.all()
   end
 end

@@ -47,4 +47,17 @@ defmodule Harmony.ChatTest do
       assert new_room.name == "new-name"
     end
   end
+
+  describe "messages" do
+    test "list_messages/1 returns all messages for a room" do
+      room = insert(:room)
+      insert_list(3, :message, room: room)
+
+      other_room = insert(:room)
+      insert_list(3, :message, room: other_room)
+
+      messages = Chat.list_messages(room)
+      assert length(messages) == 3
+    end
+  end
 end
