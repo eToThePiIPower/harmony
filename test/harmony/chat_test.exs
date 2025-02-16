@@ -1,6 +1,7 @@
 defmodule Harmony.ChatTest do
   use Harmony.DataCase
   import Harmony.Factory
+  import Harmony.AccountsFixtures
 
   alias Harmony.Chat
 
@@ -45,6 +46,39 @@ defmodule Harmony.ChatTest do
 
       assert {:ok, new_room} = Chat.update_room(room, new_attrs)
       assert new_room.name == "new-name"
+    end
+  end
+
+  describe "messages" do
+    test "list_messages/1 returns all messages for a room" do
+      room = insert(:room)
+      insert_list(3, :message, room: room)
+
+      other_room = insert(:room)
+      insert_list(3, :message, room: other_room)
+
+      messages = Chat.list_messages(room)
+      assert length(messages) == 3
+    end
+
+    test "create_message/3 create a message" do
+      user = user_fixture()
+      room = insert(:room)
+      params = params_for(:message, body: "Test message body")
+
+      {:ok, message} = Chat.create_message(user, room, params)
+      assert message.body == "Test message body"
+    end
+
+    test "change_message/2 returns a valid changeset" do
+      user = user_fixture()
+      room = insert(:room)
+      message = %Chat.Message{room: room, user: user}
+      new_attrs = %{body: "message body"}
+
+      assert changeset = %Ecto.Changeset{} = Chat.change_message(message, new_attrs)
+      assert changeset.changes.body == "message body"
+      assert changeset.valid?
     end
   end
 end
