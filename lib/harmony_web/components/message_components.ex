@@ -24,11 +24,22 @@ defmodule HarmonyWeb.MessageComponents do
           <.link class="text-sm font-semibold hover:underline">
             <span class="message-user">{@message.user.email}</span>
           </.link>
-
+          <span
+            id={@dom_id <> "timestamp"}
+            phx-hook="Timestamp"
+            data-timestamp={@message.inserted_at}
+            class="ml-1 text-xs text-gray-500"
+          >
+            {message_timestamp(@message)}
+          </span>
           <p class="text-sm message-body">{@message.body}</p>
         </div>
       </div>
     </div>
     """
+  end
+
+  defp message_timestamp(message) do
+    message.inserted_at |> Calendar.strftime("%I:%M %p on %Y/%m/%d")
   end
 end
