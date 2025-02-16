@@ -18,8 +18,17 @@ defmodule HarmonyWeb.ChatRoomLive do
     <%= if @room do %>
       <div class="flex flex-col grow shadow-lg">
         <.room_header room={@room} hide_topic?={@hide_topic?} />
-        <div id="messages-list" class="overflow-auto flex-grow" phx-hook="MessagesList">
-          <.message_item :for={message <- @messages} message={message} />
+        <div
+          id="messages-list"
+          class="overflow-auto flex-grow"
+          phx-update="stream"
+          phx-hook="MessagesList"
+        >
+          <.message_item
+            :for={{dom_id, message} <- @streams.messages}
+            dom_id={dom_id}
+            message={message}
+          />
         </div>
         <.message_send_form form={@send_message_form} room={@room} />
       </div>
@@ -41,7 +50,8 @@ defmodule HarmonyWeb.ChatRoomLive do
 
     socket =
       socket
-      |> assign(room: room, messages: messages, page_title: "##{room.name}")
+      |> assign(room: room, page_title: "##{room.name}")
+      |> stream(:messages, messages, reset: true)
       |> assign_message_form(changeset)
 
     {:noreply, socket}
@@ -68,7 +78,7 @@ defmodule HarmonyWeb.ChatRoomLive do
       case Chat.create_message(user, room, message_params) do
         {:ok, message} ->
           socket
-          |> update(:messages, &(&1 ++ [message]))
+          |> stream_insert(:messages, message)
           |> assign_message_form(Chat.change_message(%Message{}))
 
         {:error, changeset} ->

@@ -12,10 +12,11 @@ defmodule HarmonyWeb.MessageComponents do
   # alias Phoenix.LiveView.JS
 
   attr :message, Message, required: true
+  attr :dom_id, :string
 
   def message_item(assigns) do
     ~H"""
-    <div class="relative flex px-4 py-3">
+    <div id={@dom_id} class="relative flex px-4 py-3">
       <div class="h-10 w-10 rounded shrink-0 bg-slate-300"></div>
 
       <div class="ml-2">
