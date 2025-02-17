@@ -5,13 +5,13 @@ defmodule HarmonyWeb.UserSettingsLive do
 
   def render(assigns) do
     ~H"""
-    <.header class="text-center">
-      Account Settings
-      <:subtitle>Manage your account email address and password settings</:subtitle>
-    </.header>
+    <div class="mx-auto w-96 mt-16">
+      <.header class="text-center">
+        Account Settings
+        <:subtitle>Manage your account email address and password settings</:subtitle>
+      </.header>
 
-    <div class="space-y-12 divide-y">
-      <div>
+      <div class="space-y-12 divide-y">
         <.simple_form
           for={@email_form}
           id="email_form"
@@ -29,10 +29,11 @@ defmodule HarmonyWeb.UserSettingsLive do
             required
           />
           <:actions>
-            <.button phx-disable-with="Changing...">Change Email</.button>
+            <.button class="w-full" phx-disable-with="Changing...">Change Email</.button>
           </:actions>
         </.simple_form>
       </div>
+
       <div>
         <.simple_form
           for={@password_form}
@@ -65,7 +66,7 @@ defmodule HarmonyWeb.UserSettingsLive do
             required
           />
           <:actions>
-            <.button phx-disable-with="Changing...">Change Password</.button>
+            <.button class="w-full" phx-disable-with="Changing...">Change Password</.button>
           </:actions>
         </.simple_form>
       </div>
