@@ -4,7 +4,7 @@ defmodule Harmony.Chat.Message do
   alias Harmony.Chat.Room
   alias Harmony.Accounts.User
 
-  @primary_key {:id, :binary_id, autogenerate: true}
+  @primary_key {:id, UUIDv7, autogenerate: true}
   @foreign_key_type :binary_id
   schema "messages" do
     field :body, :string

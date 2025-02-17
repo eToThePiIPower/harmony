@@ -33,6 +33,7 @@ defmodule Harmony.MixProject do
   defp deps do
     [
       {:bcrypt_elixir, "~> 3.0"},
+      {:uuidv7, "~> 1.0"},
       {:phoenix, "~> 1.7.19"},
       {:phoenix_ecto, "~> 4.5"},
       {:ecto_sql, "~> 3.10"},
