@@ -19,6 +19,7 @@ defmodule HarmonyWeb.UserSettingsLive do
           phx-change="validate_email"
         >
           <.input field={@email_form[:email]} type="email" label="Email" required />
+          <.input field={@email_form[:username]} label="Username" required />
           <.input
             field={@email_form[:current_password]}
             name="current_password"
@@ -29,7 +30,7 @@ defmodule HarmonyWeb.UserSettingsLive do
             required
           />
           <:actions>
-            <.button class="w-full" phx-disable-with="Changing...">Change Email</.button>
+            <.button class="w-full" phx-disable-with="Changing...">Change Email and Username</.button>
           </:actions>
         </.simple_form>
       </div>
@@ -120,8 +121,8 @@ defmodule HarmonyWeb.UserSettingsLive do
     %{"current_password" => password, "user" => user_params} = params
     user = socket.assigns.current_user
 
-    case Accounts.apply_user_email(user, password, user_params) do
-      {:ok, applied_user} ->
+    case Accounts.apply_or_update_user_authname(user, password, user_params) do
+      {:confirm, :ok, applied_user} ->
         Accounts.deliver_user_update_email_instructions(
           applied_user,
           user.email,
@@ -131,7 +132,11 @@ defmodule HarmonyWeb.UserSettingsLive do
         info = "A link to confirm your email change has been sent to the new address."
         {:noreply, socket |> put_flash(:info, info) |> assign(email_form_current_password: nil)}
 
-      {:error, changeset} ->
+      {:noconfirm, :ok, _user} ->
+        info = "Username updated"
+        {:noreply, socket |> put_flash(:info, info) |> assign(email_form_current_password: nil)}
+
+      {_, :error, changeset} ->
         {:noreply, assign(socket, :email_form, to_form(Map.put(changeset, :action, :insert)))}
     end
   end

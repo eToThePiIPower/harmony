@@ -120,6 +120,19 @@ defmodule Harmony.Accounts do
   end
 
   @doc """
+  Returns an `%Ecto.Changeset{}` for changing the user username and/or email.
+
+  ## Examples
+
+      iex> change_user_authname(user)
+      %Ecto.Changeset{data: %User{}}
+
+  """
+  def change_user_authname(user, attrs \\ %{}) do
+    User.authname_changeset(user, attrs, validate_email: false, validate_username: false)
+  end
+
+  @doc """
   Emulates that the email will change without actually changing
   it in the database.
 
@@ -137,6 +150,33 @@ defmodule Harmony.Accounts do
     |> User.email_changeset(attrs)
     |> User.validate_current_password(password)
     |> Ecto.Changeset.apply_action(:update)
+  end
+
+  @doc """
+  If only the username has been changed, update the user. If the email has
+  been changed, emulates that the email will change without actually changing
+  it in the database.
+
+  ## Examples
+
+      iex> apply_or_update_user_authname(user, "valid password", %{email: ...})
+      {:ok, %User{}}
+
+  """
+  def apply_or_update_user_authname(user, password, attrs) do
+    case user
+         |> User.authname_changeset(attrs)
+         |> User.validate_current_password(password) do
+      %Ecto.Changeset{changes: %{email: _}} = changeset ->
+        changeset
+        |> Ecto.Changeset.apply_action(:update)
+        |> Tuple.insert_at(0, :confirm)
+
+      %Ecto.Changeset{} = changeset ->
+        changeset
+        |> Repo.update()
+        |> Tuple.insert_at(0, :noconfirm)
+    end
   end
 
   @doc """

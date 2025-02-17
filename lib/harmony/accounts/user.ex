@@ -124,6 +124,27 @@ defmodule Harmony.Accounts.User do
   end
 
   @doc """
+  A user changeset for changing the username, email, or both.
+
+  It requires the email to change otherwise an error is added.
+  """
+  def authname_changeset(user, attrs, opts \\ []) do
+    user
+    |> cast(attrs, [:email, :username])
+    |> validate_email(opts)
+    |> case do
+      %{changes: %{email: _}} = changeset ->
+        changeset
+
+      %{changes: %{username: _}} = changeset ->
+        changeset
+
+      %{} = changeset ->
+        add_error(changeset, :email, "did not change", username: "did not change")
+    end
+  end
+
+  @doc """
   A user changeset for changing the password.
 
   ## Options
