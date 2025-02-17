@@ -22,7 +22,7 @@ defmodule HarmonyWeb.MessageComponents do
       <div class="ml-2">
         <div class="-mt-1">
           <.link class="text-sm font-semibold hover:underline">
-            <span class="message-user">{@message.user.email}</span>
+            <span class="message-user">{@message.user.username}</span>
           </.link>
           <span
             id={@dom_id <> "timestamp"}

@@ -15,6 +15,6 @@ defmodule HarmonyWeb.UsersCanSendMessages do
     |> fill_in("#message-send-form textarea", "Message Body", with: "Test message body")
     |> submit()
     |> assert_has("#messages-list .message-body", text: "Test message body")
-    |> assert_has("#messages-list .message-user", text: user.email)
+    |> assert_has("#messages-list .message-user", text: user.username)
   end
 end

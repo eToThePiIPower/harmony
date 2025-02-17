@@ -16,7 +16,7 @@ defmodule HarmonyWeb.UsersCanSeeMessages do
     |> visit("/rooms/#{room.name}")
     |> assert_has("#messages-list .message-body", text: m1.body)
     |> assert_has("#messages-list .message-body", text: m2.body)
-    |> assert_has("#messages-list .message-user", text: m1.user.email)
+    |> assert_has("#messages-list .message-user", text: m1.user.username)
   end
 
   test "each room has it's own messages", %{conn: conn, room: room} do
