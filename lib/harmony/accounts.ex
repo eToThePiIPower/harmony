@@ -27,20 +27,27 @@ defmodule Harmony.Accounts do
   end
 
   @doc """
-  Gets a user by email and password.
+  Gets a user by authname (email or username), and password.
 
   ## Examples
 
-      iex> get_user_by_email_and_password("foo@example.com", "correct_password")
+      iex> get_user_by_authname_and_password("foo@example.com", "correct_password")
       %User{}
 
-      iex> get_user_by_email_and_password("foo@example.com", "invalid_password")
+      iex> get_user_by_authname_and_password("Foo", "correct_password")
+      %User{}
+
+      iex> get_user_by_authname_and_password("foo@example.com", "invalid_password")
       nil
 
   """
-  def get_user_by_email_and_password(email, password)
-      when is_binary(email) and is_binary(password) do
-    user = Repo.get_by(User, email: email)
+  def get_user_by_authname_and_password(authname, password)
+      when is_binary(authname) and is_binary(password) do
+    user =
+      User
+      |> where([u], u.email == ^authname or u.username == ^authname)
+      |> Repo.one()
+
     if User.valid_password?(user, password), do: user
   end
 
@@ -90,7 +97,11 @@ defmodule Harmony.Accounts do
 
   """
   def change_user_registration(%User{} = user, attrs \\ %{}) do
-    User.registration_changeset(user, attrs, hash_password: false, validate_email: false)
+    User.registration_changeset(user, attrs,
+      hash_password: false,
+      validate_email: false,
+      validate_username: false
+    )
   end
 
   ## Settings
@@ -105,7 +116,7 @@ defmodule Harmony.Accounts do
 
   """
   def change_user_email(user, attrs \\ %{}) do
-    User.email_changeset(user, attrs, validate_email: false)
+    User.email_changeset(user, attrs, validate_email: false, validate_username: false)
   end
 
   @doc """

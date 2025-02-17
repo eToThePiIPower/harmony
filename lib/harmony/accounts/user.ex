@@ -53,11 +53,11 @@ defmodule Harmony.Accounts.User do
     |> maybe_validate_unique_email(opts)
   end
 
-  defp validate_username(changeset, _opts) do
+  defp validate_username(changeset, opts) do
     changeset
     |> validate_required([:username])
-    |> unsafe_validate_unique(:username, Harmony.Repo)
-    |> unique_constraint(:username)
+    |> validate_length(:username, max: 24)
+    |> maybe_validate_unique_username(opts)
   end
 
   defp validate_password(changeset, opts) do
@@ -83,6 +83,16 @@ defmodule Harmony.Accounts.User do
       # would keep the database transaction open longer and hurt performance.
       |> put_change(:hashed_password, Bcrypt.hash_pwd_salt(password))
       |> delete_change(:password)
+    else
+      changeset
+    end
+  end
+
+  defp maybe_validate_unique_username(changeset, opts) do
+    if Keyword.get(opts, :validate_username, true) do
+      changeset
+      |> unsafe_validate_unique(:username, Harmony.Repo)
+      |> unique_constraint(:username)
     else
       changeset
     end
