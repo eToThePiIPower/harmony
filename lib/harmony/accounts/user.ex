@@ -5,6 +5,7 @@ defmodule Harmony.Accounts.User do
   @foreign_key_type :binary_id
   schema "users" do
     field :email, :string
+    field :username, :string
     field :password, :string, virtual: true, redact: true
     field :hashed_password, :string, redact: true
     field :current_password, :string, virtual: true, redact: true
@@ -38,8 +39,9 @@ defmodule Harmony.Accounts.User do
   """
   def registration_changeset(user, attrs, opts \\ []) do
     user
-    |> cast(attrs, [:email, :password])
+    |> cast(attrs, [:email, :username, :password])
     |> validate_email(opts)
+    |> validate_username(opts)
     |> validate_password(opts)
   end
 
@@ -49,6 +51,13 @@ defmodule Harmony.Accounts.User do
     |> validate_format(:email, ~r/^[^\s]+@[^\s]+$/, message: "must have the @ sign and no spaces")
     |> validate_length(:email, max: 160)
     |> maybe_validate_unique_email(opts)
+  end
+
+  defp validate_username(changeset, opts) do
+    changeset
+    |> validate_required([:username])
+    |> validate_length(:username, max: 24)
+    |> maybe_validate_unique_username(opts)
   end
 
   defp validate_password(changeset, opts) do
@@ -79,6 +88,16 @@ defmodule Harmony.Accounts.User do
     end
   end
 
+  defp maybe_validate_unique_username(changeset, opts) do
+    if Keyword.get(opts, :validate_username, true) do
+      changeset
+      |> unsafe_validate_unique(:username, Harmony.Repo)
+      |> unique_constraint(:username)
+    else
+      changeset
+    end
+  end
+
   defp maybe_validate_unique_email(changeset, opts) do
     if Keyword.get(opts, :validate_email, true) do
       changeset
@@ -101,6 +120,27 @@ defmodule Harmony.Accounts.User do
     |> case do
       %{changes: %{email: _}} = changeset -> changeset
       %{} = changeset -> add_error(changeset, :email, "did not change")
+    end
+  end
+
+  @doc """
+  A user changeset for changing the username, email, or both.
+
+  It requires the email to change otherwise an error is added.
+  """
+  def authname_changeset(user, attrs, opts \\ []) do
+    user
+    |> cast(attrs, [:email, :username])
+    |> validate_email(opts)
+    |> case do
+      %{changes: %{email: _}} = changeset ->
+        changeset
+
+      %{changes: %{username: _}} = changeset ->
+        changeset
+
+      %{} = changeset ->
+        add_error(changeset, :email, "did not change", username: "did not change")
     end
   end
 

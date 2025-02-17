@@ -6,7 +6,7 @@ defmodule HarmonyWeb.UserRegistrationLive do
 
   def render(assigns) do
     ~H"""
-    <div class="mx-auto max-w-sm">
+    <div class="mx-auto w-96 mt-16">
       <.header class="text-center">
         Register for an account
         <:subtitle>
@@ -32,6 +32,7 @@ defmodule HarmonyWeb.UserRegistrationLive do
         </.error>
 
         <.input field={@form[:email]} type="email" label="Email" required />
+        <.input field={@form[:username]} label="Username" required />
         <.input field={@form[:password]} type="password" label="Password" required />
 
         <:actions>

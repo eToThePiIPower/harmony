@@ -11,7 +11,7 @@ defmodule HarmonyWeb.UserSessionControllerTest do
     test "logs the user in", %{conn: conn, user: user} do
       conn =
         post(conn, ~p"/users/log_in", %{
-          "user" => %{"email" => user.email, "password" => valid_user_password()}
+          "user" => %{"authname" => user.email, "password" => valid_user_password()}
         })
 
       assert get_session(conn, :user_token)
@@ -20,7 +20,7 @@ defmodule HarmonyWeb.UserSessionControllerTest do
       # Now do a logged in request and assert on the menu
       conn = get(conn, ~p"/")
       response = html_response(conn, 200)
-      assert response =~ user.email
+      assert response =~ user.username
       assert response =~ ~p"/users/settings"
       assert response =~ ~p"/users/log_out"
     end
@@ -29,7 +29,7 @@ defmodule HarmonyWeb.UserSessionControllerTest do
       conn =
         post(conn, ~p"/users/log_in", %{
           "user" => %{
-            "email" => user.email,
+            "authname" => user.email,
             "password" => valid_user_password(),
             "remember_me" => "true"
           }
@@ -45,7 +45,7 @@ defmodule HarmonyWeb.UserSessionControllerTest do
         |> init_test_session(user_return_to: "/foo/bar")
         |> post(~p"/users/log_in", %{
           "user" => %{
-            "email" => user.email,
+            "authname" => user.email,
             "password" => valid_user_password()
           }
         })
@@ -61,6 +61,7 @@ defmodule HarmonyWeb.UserSessionControllerTest do
           "_action" => "registered",
           "user" => %{
             "email" => user.email,
+            "username" => user.username,
             "password" => valid_user_password()
           }
         })
@@ -76,6 +77,7 @@ defmodule HarmonyWeb.UserSessionControllerTest do
           "_action" => "password_updated",
           "user" => %{
             "email" => user.email,
+            "username" => user.username,
             "password" => valid_user_password()
           }
         })
@@ -87,7 +89,7 @@ defmodule HarmonyWeb.UserSessionControllerTest do
     test "redirects to login page with invalid credentials", %{conn: conn} do
       conn =
         post(conn, ~p"/users/log_in", %{
-          "user" => %{"email" => "invalid@email.com", "password" => "invalid_password"}
+          "user" => %{"authname" => "invalid@email.com", "password" => "invalid_password"}
         })
 
       assert Phoenix.Flash.get(conn.assigns.flash, :error) == "Invalid email or password"

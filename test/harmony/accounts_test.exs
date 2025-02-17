@@ -17,21 +17,25 @@ defmodule Harmony.AccountsTest do
     end
   end
 
-  describe "get_user_by_email_and_password/2" do
-    test "does not return the user if the email does not exist" do
-      refute Accounts.get_user_by_email_and_password("unknown@example.com", "hello world!")
+  describe "get_user_by_authname_and_password/2" do
+    test "does not return the user if the authname does not exist" do
+      refute Accounts.get_user_by_authname_and_password("unknown@example.com", "hello world!")
     end
 
     test "does not return the user if the password is not valid" do
       user = user_fixture()
-      refute Accounts.get_user_by_email_and_password(user.email, "invalid")
+      refute Accounts.get_user_by_authname_and_password(user.email, "invalid")
+      refute Accounts.get_user_by_authname_and_password(user.username, "invalid")
     end
 
     test "returns the user if the email and password are valid" do
       %{id: id} = user = user_fixture()
 
       assert %User{id: ^id} =
-               Accounts.get_user_by_email_and_password(user.email, valid_user_password())
+               Accounts.get_user_by_authname_and_password(user.email, valid_user_password())
+
+      assert %User{id: ^id} =
+               Accounts.get_user_by_authname_and_password(user.username, valid_user_password())
     end
   end
 
@@ -54,6 +58,7 @@ defmodule Harmony.AccountsTest do
 
       assert %{
                password: ["can't be blank"],
+               username: ["can't be blank"],
                email: ["can't be blank"]
              } = errors_on(changeset)
     end
@@ -84,6 +89,22 @@ defmodule Harmony.AccountsTest do
       assert "has already been taken" in errors_on(changeset).email
     end
 
+    test "validates maximum values for username for security" do
+      too_long = String.duplicate("db", 100)
+      {:error, changeset} = Accounts.register_user(%{username: too_long})
+      assert "should be at most 24 character(s)" in errors_on(changeset).username
+    end
+
+    test "validates username uniqueness" do
+      %{username: username} = user_fixture()
+      {:error, changeset} = Accounts.register_user(%{username: username})
+      assert "has already been taken" in errors_on(changeset).username
+
+      # Now try with the upper cased username too, to check that username case is ignored.
+      {:error, changeset} = Accounts.register_user(%{username: String.upcase(username)})
+      assert "has already been taken" in errors_on(changeset).username
+    end
+
     test "registers users with a hashed password" do
       email = unique_user_email()
       {:ok, user} = Accounts.register_user(valid_user_attributes(email: email))
@@ -97,21 +118,23 @@ defmodule Harmony.AccountsTest do
   describe "change_user_registration/2" do
     test "returns a changeset" do
       assert %Ecto.Changeset{} = changeset = Accounts.change_user_registration(%User{})
-      assert changeset.required == [:password, :email]
+      assert changeset.required == [:password, :username, :email]
     end
 
     test "allows fields to be set" do
       email = unique_user_email()
+      username = unique_user_username()
       password = valid_user_password()
 
       changeset =
         Accounts.change_user_registration(
           %User{},
-          valid_user_attributes(email: email, password: password)
+          valid_user_attributes(email: email, username: username, password: password)
         )
 
       assert changeset.valid?
       assert get_change(changeset, :email) == email
+      assert get_change(changeset, :username) == username
       assert get_change(changeset, :password) == password
       assert is_nil(get_change(changeset, :hashed_password))
     end
@@ -295,7 +318,8 @@ defmodule Harmony.AccountsTest do
         })
 
       assert is_nil(user.password)
-      assert Accounts.get_user_by_email_and_password(user.email, "new valid password")
+      assert Accounts.get_user_by_authname_and_password(user.email, "new valid password")
+      assert Accounts.get_user_by_authname_and_password(user.username, "new valid password")
     end
 
     test "deletes all tokens for the given user", %{user: user} do
@@ -490,7 +514,8 @@ defmodule Harmony.AccountsTest do
     test "updates the password", %{user: user} do
       {:ok, updated_user} = Accounts.reset_user_password(user, %{password: "new valid password"})
       assert is_nil(updated_user.password)
-      assert Accounts.get_user_by_email_and_password(user.email, "new valid password")
+      assert Accounts.get_user_by_authname_and_password(user.email, "new valid password")
+      assert Accounts.get_user_by_authname_and_password(user.username, "new valid password")
     end
 
     test "deletes all tokens for the given user", %{user: user} do

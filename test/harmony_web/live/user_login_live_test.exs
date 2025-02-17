@@ -25,14 +25,32 @@ defmodule HarmonyWeb.UserLoginLiveTest do
   end
 
   describe "user login" do
-    test "redirects if user login with valid credentials", %{conn: conn} do
+    test "redirects if user login with valid email and password", %{conn: conn} do
       password = "123456789abcd"
       user = user_fixture(%{password: password})
 
       {:ok, lv, _html} = live(conn, ~p"/users/log_in")
 
       form =
-        form(lv, "#login_form", user: %{email: user.email, password: password, remember_me: true})
+        form(lv, "#login_form",
+          user: %{authname: user.email, password: password, remember_me: true}
+        )
+
+      conn = submit_form(form, conn)
+
+      assert redirected_to(conn) == ~p"/"
+    end
+
+    test "redirects if user login with valid username and password", %{conn: conn} do
+      password = "123456789abcd"
+      user = user_fixture(%{password: password})
+
+      {:ok, lv, _html} = live(conn, ~p"/users/log_in")
+
+      form =
+        form(lv, "#login_form",
+          user: %{authname: user.username, password: password, remember_me: true}
+        )
 
       conn = submit_form(form, conn)
 
@@ -46,7 +64,7 @@ defmodule HarmonyWeb.UserLoginLiveTest do
 
       form =
         form(lv, "#login_form",
-          user: %{email: "test@email.com", password: "123456", remember_me: true}
+          user: %{authname: "test@email.com", password: "123456", remember_me: true}
         )
 
       conn = submit_form(form, conn)

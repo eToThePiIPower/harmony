@@ -11,6 +11,7 @@ To start your Phoenix server:
   * Create and migrate your database with `mix ecto.setup`
   * Download npm assets with `cd assets && npm install && cd ..`
   * Start Phoenix endpoint with `mix phx.server` or inside IEx with `iex -S mix phx.server`
+  * Optionally, run `mix run priv/repo/seeds.exs` to add some sample data
 
 Now you can visit [`localhost:4000`](http://localhost:4000) from your browser.
 
