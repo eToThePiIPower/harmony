@@ -80,5 +80,27 @@ defmodule Harmony.ChatTest do
       assert changeset.changes.body == "message body"
       assert changeset.valid?
     end
+
+    test "delete_message_by_id/2 delete a message with id && user" do
+      user = user_fixture()
+      room = insert(:room)
+      message = insert(:message, user: user, room: room)
+      id = message.id
+
+      assert [%Chat.Message{id: ^id}] = Chat.list_messages(room)
+      assert {:ok, %Chat.Message{}} = Chat.delete_message_by_id(message.id, user)
+      assert [] == Chat.list_messages(room)
+    end
+
+    test "delete_message_by_id/2 does not delete a message with wrong user" do
+      user = user_fixture()
+      room = insert(:room)
+      message = insert(:message, room: room)
+      id = message.id
+
+      assert [%Chat.Message{id: ^id}] = Chat.list_messages(room)
+      assert {:error, _} = Chat.delete_message_by_id(message.id, user)
+      assert [%Chat.Message{id: ^id}] = Chat.list_messages(room)
+    end
   end
 end

@@ -28,6 +28,7 @@ defmodule HarmonyWeb.ChatRoomLive do
             :for={{dom_id, message} <- @streams.messages}
             dom_id={dom_id}
             message={message}
+            show_delete={@current_user == message.user}
           />
         </div>
         <.message_send_form form={@send_message_form} room={@room} />
@@ -86,6 +87,11 @@ defmodule HarmonyWeb.ChatRoomLive do
       end
 
     {:noreply, socket}
+  end
+
+  def handle_event("delete-message", %{"id" => id}, socket) do
+    {:ok, message} = Chat.delete_message_by_id(id, socket.assigns.current_user)
+    {:noreply, stream_delete(socket, :messages, message)}
   end
 
   def handle_event("validate-message", %{"message" => message_params}, socket) do
