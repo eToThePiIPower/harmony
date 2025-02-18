@@ -17,7 +17,7 @@ defmodule HarmonyWeb.MessageComponents do
 
   def message_item(assigns) do
     ~H"""
-    <div id={@dom_id} class="group relative flex px-4 py-3">
+    <div id={@dom_id} class="group relative flex px-4 py-3 hover:bg-slate-100">
       <.message_delete_button :if={@show_delete} message={@message} />
       <div class="h-10 w-10 rounded shrink-0 bg-slate-300"></div>
 
