@@ -65,8 +65,10 @@ defmodule Harmony.ChatTest do
       user = user_fixture()
       room = insert(:room)
       params = params_for(:message, body: "Test message body")
+      Chat.subscribe_to_room(room)
 
       {:ok, message} = Chat.create_message(user, room, params)
+      assert_receive({:new_message, ^message})
       assert message.body == "Test message body"
     end
 
@@ -86,9 +88,11 @@ defmodule Harmony.ChatTest do
       room = insert(:room)
       message = insert(:message, user: user, room: room)
       id = message.id
+      Chat.subscribe_to_room(room)
 
       assert [%Chat.Message{id: ^id}] = Chat.list_messages(room)
       assert {:ok, %Chat.Message{}} = Chat.delete_message_by_id(message.id, user)
+      assert_receive({:delete_message, %Chat.Message{id: ^id}})
       assert [] == Chat.list_messages(room)
     end
 
@@ -97,9 +101,11 @@ defmodule Harmony.ChatTest do
       room = insert(:room)
       message = insert(:message, room: room)
       id = message.id
+      Chat.subscribe_to_room(room)
 
       assert [%Chat.Message{id: ^id}] = Chat.list_messages(room)
       assert {:error, _} = Chat.delete_message_by_id(message.id, user)
+      refute_receive({:delete_message, %Chat.Message{id: ^id}})
       assert [%Chat.Message{id: ^id}] = Chat.list_messages(room)
     end
   end

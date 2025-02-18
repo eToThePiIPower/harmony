@@ -44,6 +44,8 @@ defmodule HarmonyWeb.ChatRoomLive do
   end
 
   def handle_params(%{"name" => name}, _uri, socket) do
+    if socket.assigns[:room], do: Chat.unsubscribe_from_room(socket.assigns.room)
+
     room = Chat.get_room(name) || Chat.default_room()
     messages = Chat.list_messages(room)
 
@@ -54,6 +56,8 @@ defmodule HarmonyWeb.ChatRoomLive do
       |> assign(room: room, page_title: "##{room.name}")
       |> stream(:messages, messages, reset: true)
       |> assign_message_form(changeset)
+
+    Chat.subscribe_to_room(room)
 
     {:noreply, socket}
   end
@@ -68,6 +72,22 @@ defmodule HarmonyWeb.ChatRoomLive do
     end
   end
 
+  def handle_info({:new_message, message}, socket) do
+    socket =
+      socket
+      |> stream_insert(:messages, message)
+
+    {:noreply, socket}
+  end
+
+  def handle_info({:delete_message, message}, socket) do
+    socket =
+      socket
+      |> stream_delete(:messages, message)
+
+    {:noreply, socket}
+  end
+
   def handle_event("toggle-topic", _params, socket) do
     {:noreply, update(socket, :hide_topic?, &(!&1))}
   end
@@ -77,9 +97,8 @@ defmodule HarmonyWeb.ChatRoomLive do
 
     socket =
       case Chat.create_message(user, room, message_params) do
-        {:ok, message} ->
+        {:ok, %Chat.Message{}} ->
           socket
-          |> stream_insert(:messages, message)
           |> assign_message_form(Chat.change_message(%Message{}))
 
         {:error, changeset} ->
@@ -90,8 +109,8 @@ defmodule HarmonyWeb.ChatRoomLive do
   end
 
   def handle_event("delete-message", %{"id" => id}, socket) do
-    {:ok, message} = Chat.delete_message_by_id(id, socket.assigns.current_user)
-    {:noreply, stream_delete(socket, :messages, message)}
+    {:ok, %Chat.Message{}} = Chat.delete_message_by_id(id, socket.assigns.current_user)
+    {:noreply, socket}
   end
 
   def handle_event("validate-message", %{"message" => message_params}, socket) do
