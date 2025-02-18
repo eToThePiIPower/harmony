@@ -27,6 +27,12 @@ defmodule Harmony.Chat do
     Room.changeset(room, attrs)
   end
 
+  # def create_room(%User{admin? true}, attrs) do
+  def create_room(%User{}, attrs) do
+    Room.changeset(%Room{}, attrs)
+    |> Repo.insert()
+  end
+
   def update_room(%Room{} = room, attrs) do
     room
     |> Room.changeset(attrs)

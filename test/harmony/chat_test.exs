@@ -47,6 +47,15 @@ defmodule Harmony.ChatTest do
       assert {:ok, new_room} = Chat.update_room(room, new_attrs)
       assert new_room.name == "new-name"
     end
+
+    test "create_room/1 creates a room" do
+      user = user_fixture()
+      attrs = params_for(:room)
+
+      {:ok, room} = Chat.create_room(user, attrs)
+      assert room.name == attrs.name
+      assert room.topic == attrs.topic
+    end
   end
 
   describe "messages" do

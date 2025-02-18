@@ -93,6 +93,13 @@ defmodule HarmonyWeb.RoomComponents do
           {@subtitle}
         </span>
       </div>
+      <.link
+        class="text-[0.8125rem] leading-6 text-zinc-900 font-semibold hover:text-zinc-700"
+        phx-click={show_modal("new-room-modal")}
+      >
+        <.icon name="hero-plus" />
+        <span class="sr-only">Create a new room</span>
+      </.link>
     </div>
     """
   end
@@ -159,6 +166,23 @@ defmodule HarmonyWeb.RoomComponents do
         </.link>
       </li>
     </ul>
+    """
+  end
+
+  attr :form, Phoenix.HTML.Form
+
+  def new_room_modal(assigns) do
+    ~H"""
+    <.modal id="new-room-modal">
+      <.header>New chat room</.header>
+      <.simple_form for={@form} id="new-room-form" phx-change="validate-room" phx-submit="save-room">
+        <.input field={@form[:name]} type="text" label="Name" phx-debounce />
+        <.input field={@form[:topic]} type="text" label="Topic" phx-debounce />
+        <:actions>
+          <.button phx-disable-with="Saving.." class="w-full">Save</.button>
+        </:actions>
+      </.simple_form>
+    </.modal>
     """
   end
 end
