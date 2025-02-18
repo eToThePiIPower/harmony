@@ -31,12 +31,44 @@ defmodule HarmonyWeb.RoomComponents do
     """
   end
 
+  attr :form, Ecto.Form
+  attr :room, Room
+
+  def message_send_form(assigns) do
+    ~H"""
+    <div class="h-12 bg-white px-4 pb-4">
+      <.form
+        for={@form}
+        id="message-send-form"
+        phx-submit="send-message"
+        phx-change="validate-message"
+        class="flex items-center border-2 border-slate-300 rounded-sm p-1"
+      >
+        <label for="chat-message-textarea" class="sr-only">Message Body</label>
+        <textarea
+          class="grow text-sm px-3 border-l border-slate-300 mx-1 resize-none"
+          cols=""
+          id="chat-message-textarea"
+          name={@form[:body].name}
+          placeholder={"Message ##{@room.name}"}
+          phx-hook="CtrlEnterSubmit"
+          phx-debounce
+          rows="1"
+        >{Phoenix.HTML.Form.normalize_value("textarea", @form[:body].value)}</textarea>
+        <button class="shrink flex items-center justify-center h-6 w-6 rounded hover:bg-slate-200">
+          <.icon name="hero-paper-airplane" class="h-4 w-4" />
+        </button>
+      </.form>
+    </div>
+    """
+  end
+
   attr :title, :string, default: "Rooms"
   slot :inner_block, required: true
 
   def rooms_list(assigns) do
     ~H"""
-    <div class="mt-4 overflow-auto">
+    <div class="mt-4 overflow-auto flex-grow">
       <div class="flex items-center h-8 px-3">
         <span class="ml-2 leading-none font-medium text-sm">{@title}</span>
       </div>
@@ -91,6 +123,42 @@ defmodule HarmonyWeb.RoomComponents do
         </div>
       </div>
     </div>
+    """
+  end
+
+  attr :current_user, Harmony.Accounts.User
+  slot :inner_block, required: false
+
+  def rooms_list_actions(assigns) do
+    ~H"""
+    <ul class="relative z-10 flex items-center gap-4 px-4 sm:px-6 lg:px-8 justify-end bg-slate-300 py-2">
+      <li class="text-[0.8125rem] leading-6 text-zinc-900">
+        {@current_user.username}
+      </li>
+
+      <li>
+        <.link
+          href={~p"/users/settings"}
+          title="Settings"
+          class="text-[0.8125rem] leading-6 text-zinc-900 font-semibold hover:text-zinc-700"
+        >
+          <.icon name="hero-user-circle" />
+          <div class="sr-only">Settings</div>
+        </.link>
+      </li>
+
+      <li>
+        <.link
+          href={~p"/users/log_out"}
+          method="delete"
+          title="Log out"
+          class="text-[0.8125rem] leading-6 text-zinc-900 font-semibold hover:text-zinc-700"
+        >
+          <.icon name="hero-arrow-right-start-on-rectangle" />
+          <div class="sr-only">Log out</div>
+        </.link>
+      </li>
+    </ul>
     """
   end
 end
