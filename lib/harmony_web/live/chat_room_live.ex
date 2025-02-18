@@ -7,7 +7,7 @@ defmodule HarmonyWeb.ChatRoomLive do
   def render(assigns) do
     ~H"""
     <div class="flex flex-col shrink-0 w-64 bg-slate-100">
-      <.rooms_list_header />
+      <.rooms_list_header is_admin={@current_user.role == :admin} />
       <.rooms_list title="Rooms">
         <.rooms_list_item :for={room <- @rooms} room={room} active={room.id == @room.id} />
       </.rooms_list>
@@ -35,7 +35,9 @@ defmodule HarmonyWeb.ChatRoomLive do
       </div>
     <% end %>
 
-    <.new_room_modal form={@new_room_form} />
+    <%= if @current_user.role == :admin do %>
+      <.new_room_modal form={@new_room_form} />
+    <% end %>
     """
   end
 

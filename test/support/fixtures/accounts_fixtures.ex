@@ -25,6 +25,12 @@ defmodule Harmony.AccountsFixtures do
     user
   end
 
+  def set_role(user, role) do
+    user
+    |> Harmony.Accounts.User.user_attrs_changeset(%{role: role})
+    |> Harmony.Repo.update!()
+  end
+
   def extract_user_token(fun) do
     {:ok, captured_email} = fun.(&"[TOKEN]#{&1}[TOKEN]")
     [_, token | _] = String.split(captured_email.text_body, "[TOKEN]")

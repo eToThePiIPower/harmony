@@ -27,10 +27,13 @@ defmodule Harmony.Chat do
     Room.changeset(room, attrs)
   end
 
-  # def create_room(%User{admin? true}, attrs) do
-  def create_room(%User{}, attrs) do
+  def create_room(%User{role: :admin}, attrs) do
     Room.changeset(%Room{}, attrs)
     |> Repo.insert()
+  end
+
+  def create_room(%User{}, _attrs) do
+    {:error, :not_authorized}
   end
 
   def update_room(%Room{} = room, attrs) do

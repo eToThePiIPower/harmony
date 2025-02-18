@@ -49,12 +49,19 @@ defmodule Harmony.ChatTest do
     end
 
     test "create_room/1 creates a room" do
-      user = user_fixture()
+      user = user_fixture() |> set_role(:admin)
       attrs = params_for(:room)
 
       {:ok, room} = Chat.create_room(user, attrs)
       assert room.name == attrs.name
       assert room.topic == attrs.topic
+    end
+
+    test "create_room/1 non-admins raise an error" do
+      user = user_fixture()
+      attrs = params_for(:room)
+
+      assert {:error, :not_authorized} = Chat.create_room(user, attrs)
     end
   end
 

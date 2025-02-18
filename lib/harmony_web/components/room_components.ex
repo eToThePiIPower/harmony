@@ -81,6 +81,7 @@ defmodule HarmonyWeb.RoomComponents do
 
   attr :title, :string, default: "Harmony"
   attr :subtitle, :string, default: "Welcome to the chat!"
+  attr :is_admin, :boolean, default: false
 
   def rooms_list_header(assigns) do
     ~H"""
@@ -94,6 +95,7 @@ defmodule HarmonyWeb.RoomComponents do
         </span>
       </div>
       <.link
+        :if={@is_admin}
         class="text-[0.8125rem] leading-6 text-zinc-900 font-semibold hover:text-zinc-700"
         phx-click={show_modal("new-room-modal")}
       >

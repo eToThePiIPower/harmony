@@ -6,6 +6,7 @@ defmodule Harmony.Accounts.User do
   schema "users" do
     field :email, :string
     field :username, :string
+    field :role, Ecto.Enum, values: [:member, :admin, :moderator], default: :member
     field :password, :string, virtual: true, redact: true
     field :hashed_password, :string, redact: true
     field :current_password, :string, virtual: true, redact: true
@@ -43,6 +44,14 @@ defmodule Harmony.Accounts.User do
     |> validate_email(opts)
     |> validate_username(opts)
     |> validate_password(opts)
+  end
+
+  @doc """
+  A user changeset for non authentication data (such as roles).
+  """
+  def user_attrs_changeset(user, attrs, _opts \\ []) do
+    user
+    |> cast(attrs, [:role])
   end
 
   defp validate_email(changeset, opts) do
