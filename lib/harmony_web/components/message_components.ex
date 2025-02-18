@@ -6,17 +6,19 @@ defmodule HarmonyWeb.MessageComponents do
   use Gettext, backend: HarmonyWeb.Gettext
   use HarmonyWeb, :verified_routes
 
-  # import HarmonyWeb.CoreComponents
+  import HarmonyWeb.CoreComponents
 
   alias Harmony.Chat.Message
   # alias Phoenix.LiveView.JS
 
   attr :message, Message, required: true
+  attr :show_delete, :boolean, default: false
   attr :dom_id, :string
 
   def message_item(assigns) do
     ~H"""
-    <div id={@dom_id} class="relative flex px-4 py-3">
+    <div id={@dom_id} class="group relative flex px-4 py-3">
+      <.message_delete_button :if={@show_delete} message={@message} />
       <div class="h-10 w-10 rounded shrink-0 bg-slate-300"></div>
 
       <div class="ml-2">
@@ -36,6 +38,22 @@ defmodule HarmonyWeb.MessageComponents do
         </div>
       </div>
     </div>
+    """
+  end
+
+  attr :message, Message, required: true
+
+  defp message_delete_button(assigns) do
+    ~H"""
+    <button
+      phx-click="delete-message"
+      phx-value-id={@message.id}
+      data-confirm="Are you sure?"
+      class="absolute top-4 right-4 text-red-500 hover:text-red-800 cursor-pointer hidden group-hover:block"
+    >
+      <.icon name="hero-trash" class="h-4 w-4" />
+      <div class="sr-only">Delete</div>
+    </button>
     """
   end
 

@@ -50,4 +50,14 @@ defmodule Harmony.Chat do
     |> Message.changeset(attrs)
     |> Repo.insert()
   end
+
+  def delete_message_by_id(id, %User{id: user_id}) do
+    case Repo.get(Message, id) do
+      %Message{user_id: ^user_id} = message ->
+        Repo.delete(message)
+
+      _ ->
+        {:error, "Message does not exist or is not owned by user"}
+    end
+  end
 end

@@ -4,7 +4,6 @@ defmodule HarmonyWeb.UserEditTheirUsername do
 
   setup :register_and_log_in_user
 
-  @tag focus: true
   test "user can edit their username", %{conn: conn, user: user} do
     conn
     |> visit(~p"/users/settings")
