@@ -48,7 +48,7 @@ defmodule Harmony.ChatTest do
       assert new_room.name == "new-name"
     end
 
-    test "create_room/1 creates a room" do
+    test "create_room/2 creates a room" do
       user = user_fixture() |> set_role(:admin)
       attrs = params_for(:room)
 
@@ -57,11 +57,27 @@ defmodule Harmony.ChatTest do
       assert room.topic == attrs.topic
     end
 
-    test "create_room/1 non-admins raise an error" do
+    test "create_room/2 non-admins return an error tuple" do
       user = user_fixture()
       attrs = params_for(:room)
 
       assert {:error, :not_authorized} = Chat.create_room(user, attrs)
+    end
+
+    test "delete_room/2 creates a room" do
+      user = user_fixture() |> set_role(:admin)
+      %Chat.Room{id: id, name: name} = insert(:room)
+
+      assert {:ok, %Chat.Room{id: ^id}} = Chat.delete_room_by_id(user, id)
+      assert Chat.get_room(name) == nil
+    end
+
+    test "delete_room/2 non-admins return an error tuple" do
+      user = user_fixture()
+      room = insert(:room)
+
+      assert {:error, :not_authorized} = Chat.delete_room_by_id(user, room.id)
+      refute Chat.get_room(room.name) == nil
     end
   end
 

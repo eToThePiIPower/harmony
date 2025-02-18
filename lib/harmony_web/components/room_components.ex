@@ -107,6 +107,7 @@ defmodule HarmonyWeb.RoomComponents do
   end
 
   attr :room, Room, required: true
+  attr :is_admin, :boolean, default: false
   attr :hide_topic?, :boolean, default: false
 
   def room_header(assigns) do
@@ -125,6 +126,15 @@ defmodule HarmonyWeb.RoomComponents do
             navigate={~p"/rooms/#{@room.name}/edit"}
           >
             Edit
+          </.link>
+          <.link
+            :if={@is_admin}
+            id="room-delete-link"
+            phx-click="delete-room"
+            phx-value-room_id={@room.id}
+            class="font-normal text-xs text-blue-600 hover:text-blue-700"
+          >
+            Delete
           </.link>
         </h1>
         <div :if={!@hide_topic?} class="topic text-xs leading-none h-3.5">

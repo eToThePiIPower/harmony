@@ -7,7 +7,7 @@ defmodule HarmonyWeb.ChatRoomLive do
   def render(assigns) do
     ~H"""
     <div class="flex flex-col shrink-0 w-64 bg-slate-100">
-      <.rooms_list_header is_admin={@current_user.role == :admin} />
+      <.rooms_list_header is_admin={is_admin(@current_user)} />
       <.rooms_list title="Rooms">
         <.rooms_list_item :for={room <- @rooms} room={room} active={room.id == @room.id} />
       </.rooms_list>
@@ -17,7 +17,7 @@ defmodule HarmonyWeb.ChatRoomLive do
 
     <%= if @room do %>
       <div class="flex flex-col grow shadow-lg">
-        <.room_header room={@room} hide_topic?={@hide_topic?} />
+        <.room_header is_admin={is_admin(@current_user)} room={@room} hide_topic?={@hide_topic?} />
         <div
           id="messages-list"
           class="overflow-auto flex-grow"
@@ -152,11 +152,26 @@ defmodule HarmonyWeb.ChatRoomLive do
     end
   end
 
+  def handle_event("delete-room", %{"room_id" => id}, socket) do
+    {:ok, room} = Chat.delete_room_by_id(socket.assigns.current_user, id)
+
+    socket =
+      socket
+      |> put_flash(:info, "Deleted the room ##{room.name}")
+      |> push_navigate(to: ~p"/")
+
+    {:noreply, socket}
+  end
+
   defp assign_room_form(socket, changeset) do
     assign(socket, :new_room_form, to_form(changeset))
   end
 
   defp assign_message_form(socket, %Ecto.Changeset{} = changeset) do
     assign(socket, :send_message_form, to_form(changeset))
+  end
+
+  defp is_admin(%Harmony.Accounts.User{role: role}) do
+    role == :admin
   end
 end

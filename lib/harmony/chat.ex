@@ -36,6 +36,15 @@ defmodule Harmony.Chat do
     {:error, :not_authorized}
   end
 
+  def delete_room_by_id(%User{role: :admin}, id) do
+    Repo.get(Room, id)
+    |> Repo.delete()
+  end
+
+  def delete_room_by_id(%User{}, _attrs) do
+    {:error, :not_authorized}
+  end
+
   def update_room(%Room{} = room, attrs) do
     room
     |> Room.changeset(attrs)
