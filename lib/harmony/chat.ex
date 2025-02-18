@@ -68,6 +68,7 @@ defmodule Harmony.Chat do
   def delete_message_by_id(id, %User{id: user_id}) do
     case Repo.get(Message, id) do
       %Message{user_id: ^user_id} = message ->
+        Phoenix.PubSub.broadcast!(@pubsub, topic(message.room_id), {:delete_message, message})
         Repo.delete(message)
 
       _ ->

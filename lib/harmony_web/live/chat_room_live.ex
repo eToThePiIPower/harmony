@@ -80,6 +80,14 @@ defmodule HarmonyWeb.ChatRoomLive do
     {:noreply, socket}
   end
 
+  def handle_info({:delete_message, message}, socket) do
+    socket =
+      socket
+      |> stream_delete(:messages, message)
+
+    {:noreply, socket}
+  end
+
   def handle_event("toggle-topic", _params, socket) do
     {:noreply, update(socket, :hide_topic?, &(!&1))}
   end
@@ -101,8 +109,8 @@ defmodule HarmonyWeb.ChatRoomLive do
   end
 
   def handle_event("delete-message", %{"id" => id}, socket) do
-    {:ok, message} = Chat.delete_message_by_id(id, socket.assigns.current_user)
-    {:noreply, stream_delete(socket, :messages, message)}
+    {:ok, %Chat.Message{}} = Chat.delete_message_by_id(id, socket.assigns.current_user)
+    {:noreply, socket}
   end
 
   def handle_event("validate-message", %{"message" => message_params}, socket) do
