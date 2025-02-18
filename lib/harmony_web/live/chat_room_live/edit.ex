@@ -56,7 +56,7 @@ defmodule HarmonyWeb.ChatRoomLive.Edit do
   end
 
   def handle_event("save-room", %{"room" => room_params}, socket) do
-    case Chat.update_room(socket.assigns.room, room_params) do
+    case Chat.update_room(socket.assigns.current_user, socket.assigns.room, room_params) do
       {:ok, room} ->
         {:noreply,
          socket

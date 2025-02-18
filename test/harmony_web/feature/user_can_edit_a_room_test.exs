@@ -9,7 +9,8 @@ defmodule HarmonyWeb.UserEditARoomTest do
     %{conn: log_in_user(conn, user), user: user, password: password}
   end
 
-  test "user can edit a chat room", %{conn: conn} do
+  test "admins can edit a chat room", %{conn: conn, user: user} do
+    user |> set_role(:admin)
     room = insert(:room)
 
     conn

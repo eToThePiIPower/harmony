@@ -40,12 +40,21 @@ defmodule Harmony.ChatTest do
       assert changeset.changes.name == "new-name"
     end
 
-    test "update_room/2 with valid params updates a room" do
+    test "update_room/2 as admin with valid params updates a room" do
       room = insert(:room)
+      user = user_fixture() |> set_role(:admin)
       new_attrs = %{name: "new-name"}
 
-      assert {:ok, new_room} = Chat.update_room(room, new_attrs)
+      assert {:ok, new_room} = Chat.update_room(user, room, new_attrs)
       assert new_room.name == "new-name"
+    end
+
+    test "update_room/2 as non-admin  returns an error tuple" do
+      room = insert(:room)
+      user = user_fixture()
+      new_attrs = %{name: "new-name"}
+
+      assert {:error, :not_authorized} = Chat.update_room(user, room, new_attrs)
     end
 
     test "create_room/2 creates a room" do

@@ -45,10 +45,14 @@ defmodule Harmony.Chat do
     {:error, :not_authorized}
   end
 
-  def update_room(%Room{} = room, attrs) do
+  def update_room(%User{role: :admin}, %Room{} = room, attrs) do
     room
     |> Room.changeset(attrs)
     |> Repo.update()
+  end
+
+  def update_room(%User{}, %Room{}, _attrs) do
+    {:error, :not_authorized}
   end
 
   def subscribe_to_room(room) do

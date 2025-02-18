@@ -121,6 +121,7 @@ defmodule HarmonyWeb.RoomComponents do
         <h1 class="name text-sm font-bold leading-none">
           #{@room.name}
           <.link
+            :if={@is_admin}
             id="room-edit-link"
             class="font-normal text-xs text-blue-600 hover:text-blue-700"
             navigate={~p"/rooms/#{@room.name}/edit"}
