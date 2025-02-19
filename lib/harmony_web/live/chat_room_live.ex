@@ -47,33 +47,27 @@ defmodule HarmonyWeb.ChatRoomLive do
   def mount(_params, _session, socket) do
     rooms = Chat.list_rooms()
 
-    socket =
-      socket
-      |> assign_room_form(Chat.change_room(%Chat.Room{}, %{}))
-      |> assign(rooms: rooms, hide_topic?: false)
-
-    {:ok, socket}
+    socket
+    |> assign_room_form(Chat.change_room(%Chat.Room{}, %{}))
+    |> assign(rooms: rooms, hide_topic?: false)
+    |> ok
   end
 
   def handle_params(%{"name" => name}, _uri, socket) do
     if socket.assigns[:room], do: Chat.unsubscribe_from_room(socket.assigns.room)
-
     room = Chat.get_room(name) || Chat.default_room()
+    Chat.subscribe_to_room(room)
     messages = Chat.list_messages(room)
 
-    changeset = Chat.change_message(%Message{})
+    message_changeset = Chat.change_message(%Message{})
     edit_room_changeset = Chat.change_room(room)
 
-    socket =
-      socket
-      |> assign(room: room, page_title: "##{room.name}")
-      |> assign_edit_room_form(edit_room_changeset)
-      |> stream(:messages, messages, reset: true)
-      |> assign_message_form(changeset)
-
-    Chat.subscribe_to_room(room)
-
-    {:noreply, socket}
+    socket
+    |> assign(room: room, page_title: "##{room.name}")
+    |> stream(:messages, messages, reset: true)
+    |> assign_edit_room_form(edit_room_changeset)
+    |> assign_message_form(message_changeset)
+    |> noreply()
   end
 
   def handle_params(_params, uri, socket) do
@@ -87,19 +81,15 @@ defmodule HarmonyWeb.ChatRoomLive do
   end
 
   def handle_info({:new_message, message}, socket) do
-    socket =
-      socket
-      |> stream_insert(:messages, message)
-
-    {:noreply, socket}
+    socket
+    |> stream_insert(:messages, message)
+    |> noreply()
   end
 
   def handle_info({:delete_message, message}, socket) do
-    socket =
-      socket
-      |> stream_delete(:messages, message)
-
-    {:noreply, socket}
+    socket
+    |> stream_delete(:messages, message)
+    |> noreply
   end
 
   def handle_event("toggle-topic", _params, socket) do
@@ -109,17 +99,16 @@ defmodule HarmonyWeb.ChatRoomLive do
   def handle_event("send-message", %{"message" => message_params}, socket) do
     %{current_user: user, room: room} = socket.assigns
 
-    socket =
-      case Chat.create_message(user, room, message_params) do
-        {:ok, %Chat.Message{}} ->
-          socket
-          |> assign_message_form(Chat.change_message(%Message{}))
+    case Chat.create_message(user, room, message_params) do
+      {:ok, %Chat.Message{}} ->
+        socket
+        |> assign_message_form(Chat.change_message(%Message{}))
 
-        {:error, changeset} ->
-          assign_message_form(socket, changeset)
-      end
-
-    {:noreply, socket}
+      {:error, changeset} ->
+        socket
+        |> assign_message_form(changeset)
+    end
+    |> noreply
   end
 
   def handle_event("delete-message", %{"id" => id}, socket) do
@@ -154,12 +143,10 @@ defmodule HarmonyWeb.ChatRoomLive do
   def handle_event("save-room", %{"new-room" => room_params}, socket) do
     case Chat.create_room(socket.assigns.current_user, room_params) do
       {:ok, room} ->
-        socket =
-          socket
-          |> put_flash(:info, "Created a room")
-          |> push_navigate(to: ~p"/rooms/#{room.name}")
-
-        {:noreply, socket}
+        socket
+        |> put_flash(:info, "Created a room")
+        |> push_navigate(to: ~p"/rooms/#{room.name}")
+        |> noreply
 
       {:error, %Ecto.Changeset{} = changeset} ->
         {:noreply, assign_room_form(socket, changeset)}
@@ -182,12 +169,10 @@ defmodule HarmonyWeb.ChatRoomLive do
   def handle_event("delete-room", %{"room_id" => id}, socket) do
     {:ok, room} = Chat.delete_room_by_id(socket.assigns.current_user, id)
 
-    socket =
-      socket
-      |> put_flash(:info, "Deleted the room ##{room.name}")
-      |> push_navigate(to: ~p"/")
-
-    {:noreply, socket}
+    socket
+    |> put_flash(:info, "Deleted the room ##{room.name}")
+    |> push_navigate(to: ~p"/")
+    |> noreply
   end
 
   defp assign_room_form(socket, changeset) do

@@ -55,6 +55,8 @@ defmodule HarmonyWeb do
       use Phoenix.LiveView,
         layout: {HarmonyWeb.Layouts, :app}
 
+      import HarmonyWeb.SocketHelpers
+
       unquote(html_helpers())
     end
   end
