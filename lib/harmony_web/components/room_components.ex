@@ -124,7 +124,7 @@ defmodule HarmonyWeb.RoomComponents do
             :if={@is_admin}
             id="room-edit-link"
             class="font-normal text-xs text-blue-600 hover:text-blue-700"
-            navigate={~p"/rooms/#{@room.name}/edit"}
+            phx-click={show_modal("edit-room-modal")}
           >
             Edit
           </.link>
@@ -133,6 +133,7 @@ defmodule HarmonyWeb.RoomComponents do
             id="room-delete-link"
             phx-click="delete-room"
             phx-value-room_id={@room.id}
+            data-confirm="Are you sure?"
             class="font-normal text-xs text-blue-600 hover:text-blue-700"
           >
             Delete
@@ -187,15 +188,35 @@ defmodule HarmonyWeb.RoomComponents do
   def new_room_modal(assigns) do
     ~H"""
     <.modal id="new-room-modal">
-      <.header>New chat room</.header>
-      <.simple_form for={@form} id="new-room-form" phx-change="validate-room" phx-submit="save-room">
-        <.input field={@form[:name]} type="text" label="Name" phx-debounce />
-        <.input field={@form[:topic]} type="text" label="Topic" phx-debounce />
-        <:actions>
-          <.button phx-disable-with="Saving.." class="w-full">Save</.button>
-        </:actions>
-      </.simple_form>
+      <.room_form id="new-room-form" for={@form} title="New chat room" />
     </.modal>
+    """
+  end
+
+  attr :form, Phoenix.HTML.Form
+
+  def edit_room_modal(assigns) do
+    ~H"""
+    <.modal id="edit-room-modal">
+      <.room_form id="edit-room-form" for={@form} title="Edit chat room" />
+    </.modal>
+    """
+  end
+
+  attr :id, :string, default: "new-room-form"
+  attr :title, :string, default: "New chat room"
+  attr :for, Phoenix.HTML.Form, required: true
+
+  def room_form(assigns) do
+    ~H"""
+    <.header>{@title}</.header>
+    <.simple_form for={@for} id={@id} phx-change="validate-room" phx-submit="save-room">
+      <.input field={@for[:name]} type="text" label="Name" phx-debounce />
+      <.input field={@for[:topic]} type="text" label="Topic" phx-debounce />
+      <:actions>
+        <.button phx-disable-with="Saving.." class="w-full">Save</.button>
+      </:actions>
+    </.simple_form>
     """
   end
 end
