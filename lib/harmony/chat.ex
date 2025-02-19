@@ -27,10 +27,32 @@ defmodule Harmony.Chat do
     Room.changeset(room, attrs)
   end
 
-  def update_room(%Room{} = room, attrs) do
+  def create_room(%User{role: :admin}, attrs) do
+    Room.changeset(%Room{}, attrs)
+    |> Repo.insert()
+  end
+
+  def create_room(%User{}, _attrs) do
+    {:error, :not_authorized}
+  end
+
+  def delete_room_by_id(%User{role: :admin}, id) do
+    Repo.get(Room, id)
+    |> Repo.delete()
+  end
+
+  def delete_room_by_id(%User{}, _attrs) do
+    {:error, :not_authorized}
+  end
+
+  def update_room(%User{role: :admin}, %Room{} = room, attrs) do
     room
     |> Room.changeset(attrs)
     |> Repo.update()
+  end
+
+  def update_room(%User{}, %Room{}, _attrs) do
+    {:error, :not_authorized}
   end
 
   def subscribe_to_room(room) do

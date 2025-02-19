@@ -9,20 +9,22 @@ defmodule HarmonyWeb.UserEditARoomTest do
     %{conn: log_in_user(conn, user), user: user, password: password}
   end
 
-  test "user can edit a chat room", %{conn: conn} do
+  test "admins can edit a chat room", %{conn: conn, user: user} do
+    user |> set_role(:admin)
     room = insert(:room)
 
     conn
     |> visit(~p"/rooms/#{room.name}")
-    |> click_link("#room-header #room-edit-link", "Edit")
-    |> assert_has("header", text: "Edit chat room")
-    |> fill_in("Name", with: "new room name")
-    |> assert_has("#room-edit-form",
-      text: "must contain only lowercase letters, numbers, or dashes"
-    )
-    |> fill_in("Name", with: "new-room-name")
-    |> fill_in("Topic", with: "New topic text")
-    |> click_button("Save")
+    |> within("#edit-room-form", fn conn ->
+      conn
+      |> fill_in("Name", with: "new room name")
+      |> assert_has("#edit-room-form",
+        text: "must contain only lowercase letters, numbers, or dashes"
+      )
+      |> fill_in("Name", with: "new-room-name")
+      |> fill_in("Topic", with: "New topic text")
+      |> click_button("Save")
+    end)
     |> click_link("#rooms-list .rooms-list-item", "new-room-name")
     |> assert_has("#room-header .name", text: "new-room-name")
     |> assert_has("#room-header .topic", text: "New topic text")

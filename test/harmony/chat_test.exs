@@ -40,12 +40,53 @@ defmodule Harmony.ChatTest do
       assert changeset.changes.name == "new-name"
     end
 
-    test "update_room/2 with valid params updates a room" do
+    test "update_room/2 as admin with valid params updates a room" do
       room = insert(:room)
+      user = user_fixture() |> set_role(:admin)
       new_attrs = %{name: "new-name"}
 
-      assert {:ok, new_room} = Chat.update_room(room, new_attrs)
+      assert {:ok, new_room} = Chat.update_room(user, room, new_attrs)
       assert new_room.name == "new-name"
+    end
+
+    test "update_room/2 as non-admin  returns an error tuple" do
+      room = insert(:room)
+      user = user_fixture()
+      new_attrs = %{name: "new-name"}
+
+      assert {:error, :not_authorized} = Chat.update_room(user, room, new_attrs)
+    end
+
+    test "create_room/2 creates a room" do
+      user = user_fixture() |> set_role(:admin)
+      attrs = params_for(:room)
+
+      {:ok, room} = Chat.create_room(user, attrs)
+      assert room.name == attrs.name
+      assert room.topic == attrs.topic
+    end
+
+    test "create_room/2 non-admins return an error tuple" do
+      user = user_fixture()
+      attrs = params_for(:room)
+
+      assert {:error, :not_authorized} = Chat.create_room(user, attrs)
+    end
+
+    test "delete_room/2 creates a room" do
+      user = user_fixture() |> set_role(:admin)
+      %Chat.Room{id: id, name: name} = insert(:room)
+
+      assert {:ok, %Chat.Room{id: ^id}} = Chat.delete_room_by_id(user, id)
+      assert Chat.get_room(name) == nil
+    end
+
+    test "delete_room/2 non-admins return an error tuple" do
+      user = user_fixture()
+      room = insert(:room)
+
+      assert {:error, :not_authorized} = Chat.delete_room_by_id(user, room.id)
+      refute Chat.get_room(room.name) == nil
     end
   end
 

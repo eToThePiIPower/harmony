@@ -81,6 +81,7 @@ defmodule HarmonyWeb.RoomComponents do
 
   attr :title, :string, default: "Harmony"
   attr :subtitle, :string, default: "Welcome to the chat!"
+  attr :is_admin, :boolean, default: false
 
   def rooms_list_header(assigns) do
     ~H"""
@@ -93,11 +94,20 @@ defmodule HarmonyWeb.RoomComponents do
           {@subtitle}
         </span>
       </div>
+      <.link
+        :if={@is_admin}
+        class="text-[0.8125rem] leading-6 text-zinc-900 font-semibold hover:text-zinc-700"
+        phx-click={show_modal("new-room-modal")}
+      >
+        <.icon name="hero-plus" />
+        <span class="sr-only">Create a new room</span>
+      </.link>
     </div>
     """
   end
 
   attr :room, Room, required: true
+  attr :is_admin, :boolean, default: false
   attr :hide_topic?, :boolean, default: false
 
   def room_header(assigns) do
@@ -111,11 +121,22 @@ defmodule HarmonyWeb.RoomComponents do
         <h1 class="name text-sm font-bold leading-none">
           #{@room.name}
           <.link
+            :if={@is_admin}
             id="room-edit-link"
             class="font-normal text-xs text-blue-600 hover:text-blue-700"
-            navigate={~p"/rooms/#{@room.name}/edit"}
+            phx-click={show_modal("edit-room-modal")}
           >
             Edit
+          </.link>
+          <.link
+            :if={@is_admin}
+            id="room-delete-link"
+            phx-click="delete-room"
+            phx-value-room_id={@room.id}
+            data-confirm="Are you sure?"
+            class="font-normal text-xs text-blue-600 hover:text-blue-700"
+          >
+            Delete
           </.link>
         </h1>
         <div :if={!@hide_topic?} class="topic text-xs leading-none h-3.5">
@@ -159,6 +180,30 @@ defmodule HarmonyWeb.RoomComponents do
         </.link>
       </li>
     </ul>
+    """
+  end
+
+  attr :id, :string, default: "new-room-form"
+  attr :title, :string, default: "New chat room"
+  attr :for, Phoenix.HTML.Form, required: true
+  attr :target, Phoenix.LiveComponent.CID, default: nil
+
+  def room_form(assigns) do
+    ~H"""
+    <.header>{@title}</.header>
+    <.simple_form
+      for={@for}
+      id={@id}
+      phx-change="validate-room"
+      phx-submit="save-room"
+      phx-target={@target}
+    >
+      <.input field={@for[:name]} type="text" label="Name" phx-debounce />
+      <.input field={@for[:topic]} type="text" label="Topic" phx-debounce />
+      <:actions>
+        <.button phx-disable-with="Saving.." class="w-full">Save</.button>
+      </:actions>
+    </.simple_form>
     """
   end
 end
