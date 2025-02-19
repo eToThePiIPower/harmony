@@ -65,6 +65,8 @@ defmodule HarmonyWeb do
     quote do
       use Phoenix.LiveComponent
 
+      import HarmonyWeb.SocketHelpers
+
       unquote(html_helpers())
     end
   end

@@ -3,6 +3,8 @@ defmodule HarmonyWeb.ChatRoomLive do
 
   alias Harmony.Chat
   alias Harmony.Chat.Message
+  alias HarmonyWeb.Components.RoomEditComponent
+  alias HarmonyWeb.Components.RoomNewComponent
 
   def render(assigns) do
     ~H"""
@@ -36,9 +38,14 @@ defmodule HarmonyWeb.ChatRoomLive do
     <% end %>
 
     <%= if @current_user.role == :admin do %>
-      <.new_room_modal form={@new_room_form} />
+      <.live_component module={RoomNewComponent} id="new-room-component" current_user={@current_user} />
       <%= if @room do %>
-        <.edit_room_modal form={@edit_room_form} />
+        <.live_component
+          module={RoomEditComponent}
+          id="edit-room-component"
+          room={@room}
+          current_user={@current_user}
+        />
       <% end %>
     <% end %>
     """
@@ -48,7 +55,6 @@ defmodule HarmonyWeb.ChatRoomLive do
     rooms = Chat.list_rooms()
 
     socket
-    |> assign_room_form(Chat.change_room(%Chat.Room{}, %{}))
     |> assign(rooms: rooms, hide_topic?: false)
     |> ok
   end
@@ -60,12 +66,10 @@ defmodule HarmonyWeb.ChatRoomLive do
     messages = Chat.list_messages(room)
 
     message_changeset = Chat.change_message(%Message{})
-    edit_room_changeset = Chat.change_room(room)
 
     socket
     |> assign(room: room, page_title: "##{room.name}")
     |> stream(:messages, messages, reset: true)
-    |> assign_edit_room_form(edit_room_changeset)
     |> assign_message_form(message_changeset)
     |> noreply()
   end
@@ -122,50 +126,6 @@ defmodule HarmonyWeb.ChatRoomLive do
     {:noreply, assign_message_form(socket, changeset)}
   end
 
-  def handle_event("validate-room", %{"new-room" => room_params}, socket) do
-    changeset =
-      %Chat.Room{}
-      |> Chat.change_room(room_params)
-      |> Map.put(:action, :validate)
-
-    {:noreply, assign_room_form(socket, changeset)}
-  end
-
-  def handle_event("validate-room", %{"edit-room" => room_params}, socket) do
-    changeset =
-      socket.assigns.room
-      |> Chat.change_room(room_params)
-      |> Map.put(:action, :validate)
-
-    {:noreply, assign_edit_room_form(socket, changeset)}
-  end
-
-  def handle_event("save-room", %{"new-room" => room_params}, socket) do
-    case Chat.create_room(socket.assigns.current_user, room_params) do
-      {:ok, room} ->
-        socket
-        |> put_flash(:info, "Created a room")
-        |> push_navigate(to: ~p"/rooms/#{room.name}")
-        |> noreply
-
-      {:error, %Ecto.Changeset{} = changeset} ->
-        {:noreply, assign_room_form(socket, changeset)}
-    end
-  end
-
-  def handle_event("save-room", %{"edit-room" => room_params}, socket) do
-    case Chat.update_room(socket.assigns.current_user, socket.assigns.room, room_params) do
-      {:ok, room} ->
-        {:noreply,
-         socket
-         |> put_flash(:info, "##{room.name} has been updated")
-         |> push_navigate(to: ~p"/rooms/#{room.name}")}
-
-      {:error, changeset} ->
-        {:noreply, assign_edit_room_form(socket, changeset)}
-    end
-  end
-
   def handle_event("delete-room", %{"room_id" => id}, socket) do
     {:ok, room} = Chat.delete_room_by_id(socket.assigns.current_user, id)
 
@@ -173,14 +133,6 @@ defmodule HarmonyWeb.ChatRoomLive do
     |> put_flash(:info, "Deleted the room ##{room.name}")
     |> push_navigate(to: ~p"/")
     |> noreply
-  end
-
-  defp assign_room_form(socket, changeset) do
-    assign(socket, :new_room_form, to_form(changeset, as: "new-room"))
-  end
-
-  defp assign_edit_room_form(socket, changeset) do
-    assign(socket, :edit_room_form, to_form(changeset, as: "edit-room"))
   end
 
   defp assign_message_form(socket, %Ecto.Changeset{} = changeset) do

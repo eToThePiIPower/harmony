@@ -183,34 +183,21 @@ defmodule HarmonyWeb.RoomComponents do
     """
   end
 
-  attr :form, Phoenix.HTML.Form
-
-  def new_room_modal(assigns) do
-    ~H"""
-    <.modal id="new-room-modal">
-      <.room_form id="new-room-form" for={@form} title="New chat room" />
-    </.modal>
-    """
-  end
-
-  attr :form, Phoenix.HTML.Form
-
-  def edit_room_modal(assigns) do
-    ~H"""
-    <.modal id="edit-room-modal">
-      <.room_form id="edit-room-form" for={@form} title="Edit chat room" />
-    </.modal>
-    """
-  end
-
   attr :id, :string, default: "new-room-form"
   attr :title, :string, default: "New chat room"
   attr :for, Phoenix.HTML.Form, required: true
+  attr :target, Phoenix.LiveComponent.CID, default: nil
 
   def room_form(assigns) do
     ~H"""
     <.header>{@title}</.header>
-    <.simple_form for={@for} id={@id} phx-change="validate-room" phx-submit="save-room">
+    <.simple_form
+      for={@for}
+      id={@id}
+      phx-change="validate-room"
+      phx-submit="save-room"
+      phx-target={@target}
+    >
       <.input field={@for[:name]} type="text" label="Name" phx-debounce />
       <.input field={@for[:topic]} type="text" label="Topic" phx-debounce />
       <:actions>
