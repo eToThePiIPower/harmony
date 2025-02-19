@@ -530,4 +530,14 @@ defmodule Harmony.AccountsTest do
       refute inspect(%User{password: "123456"}) =~ "password: \"123456\""
     end
   end
+
+  describe "list_users/0" do
+    test "lists all of the users" do
+      u1 = user_fixture()
+      u2 = user_fixture()
+
+      assert u1 in Accounts.list_users()
+      assert u2 in Accounts.list_users()
+    end
+  end
 end
