@@ -96,6 +96,7 @@ defmodule HarmonyWeb do
       # Chat.Room Components
       import HarmonyWeb.RoomComponents
       import HarmonyWeb.MessageComponents
+      import HarmonyWeb.UserComponents
 
       # Shortcut for generating JS commands
       alias Phoenix.LiveView.JS

@@ -401,4 +401,15 @@ defmodule Harmony.Accounts do
       {:error, :user, changeset, _} -> {:error, changeset}
     end
   end
+
+  @doc """
+  Returns a list of all users
+
+  ## Examples
+      iex> list_users()
+      [%User{}, %User{}]
+  """
+  def list_users() do
+    Repo.all(from u in User, order_by: [asc: u.username])
+  end
 end

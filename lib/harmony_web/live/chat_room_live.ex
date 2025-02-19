@@ -1,6 +1,7 @@
 defmodule HarmonyWeb.ChatRoomLive do
   use HarmonyWeb, :live_view
 
+  alias Harmony.Accounts
   alias Harmony.Chat
   alias Harmony.Chat.Message
   alias HarmonyWeb.Components.RoomEditComponent
@@ -13,12 +14,10 @@ defmodule HarmonyWeb.ChatRoomLive do
       <.rooms_list title="Rooms">
         <.rooms_list_item :for={room <- @rooms} room={room} active={room.id == @room.id} />
       </.rooms_list>
-
-      <.rooms_list_actions current_user={@current_user} />
     </div>
 
-    <%= if @room do %>
-      <div class="flex flex-col grow shadow-lg">
+    <div class="flex flex-col grow shadow-lg">
+      <%= if @room do %>
         <.room_header is_admin={is_admin(@current_user)} room={@room} hide_topic?={@hide_topic?} />
         <div
           id="messages-list"
@@ -34,10 +33,17 @@ defmodule HarmonyWeb.ChatRoomLive do
           />
         </div>
         <.message_send_form form={@send_message_form} room={@room} />
-      </div>
-    <% end %>
+      <% end %>
+    </div>
+
+    <div class="flex flex-col shrink-0 w-64 bg-slate-100 push-right">
+      <.users_list users={@users} />
+
+      <.rooms_list_actions current_user={@current_user} />
+    </div>
 
     <%= if @current_user.role == :admin do %>
+      <!-- Room modals -->
       <.live_component module={RoomNewComponent} id="new-room-component" current_user={@current_user} />
       <%= if @room do %>
         <.live_component
@@ -53,9 +59,11 @@ defmodule HarmonyWeb.ChatRoomLive do
 
   def mount(_params, _session, socket) do
     rooms = Chat.list_rooms()
+    users = Accounts.list_users()
 
     socket
     |> assign(rooms: rooms, hide_topic?: false)
+    |> assign(users: users)
     |> ok
   end
 
