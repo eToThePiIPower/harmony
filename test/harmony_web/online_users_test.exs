@@ -1,5 +1,5 @@
 defmodule HarmonyWeb.OnlineUsersTest do
-  use Harmony.DataCase, async: true
+  use Harmony.DataCase
 
   alias HarmonyWeb.OnlineUsers
 
