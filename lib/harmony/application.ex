@@ -16,6 +16,7 @@ defmodule Harmony.Application do
       {Finch, name: Harmony.Finch},
       # Start a worker by calling: Harmony.Worker.start_link(arg)
       # {Harmony.Worker, arg},
+      HarmonyWeb.Presence,
       # Start to serve requests, typically the last entry
       HarmonyWeb.Endpoint
     ]

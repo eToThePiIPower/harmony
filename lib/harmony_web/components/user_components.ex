@@ -4,6 +4,7 @@ defmodule HarmonyWeb.UserComponents do
   use HarmonyWeb, :verified_routes
 
   alias Harmony.Accounts.User
+  alias HarmonyWeb.OnlineUsers
 
   attr :user, User, required: true
   attr :online, :boolean, default: false
@@ -11,12 +12,16 @@ defmodule HarmonyWeb.UserComponents do
   def user(assigns) do
     ~H"""
     <div>
-      <.link class="flex items-center h-8 hover:bg-gray-300 text-sm pl-8 pr-3" href="#">
+      <.link
+        class="flex items-center h-8 hover:bg-gray-300 text-sm pl-8 pr-3"
+        href="#"
+        data-userstatus-for={@user.id}
+      >
         <div class="flex justify-center w-4">
           <%= if @online do %>
-            <span class="w-2 h-2 rounded-full bg-blue-500"></span>
+            <span class="w-2 h-2 rounded-full bg-blue-500" data-online="online"></span>
           <% else %>
-            <span class="w-2 h-2 rounded-full border-2 border-gray-500"></span>
+            <span class="w-2 h-2 rounded-full border-2 border-gray-500" data-online="offline"></span>
           <% end %>
         </div>
 
@@ -27,6 +32,7 @@ defmodule HarmonyWeb.UserComponents do
   end
 
   attr :users, :any, default: []
+  attr :online_users, :map, default: %{}
 
   def users_list(assigns) do
     ~H"""
@@ -38,7 +44,7 @@ defmodule HarmonyWeb.UserComponents do
       </div>
 
       <div id="users-list">
-        <.user :for={user <- @users} user={user} />
+        <.user :for={user <- @users} user={user} online={OnlineUsers.online?(@online_users, user.id)} />
       </div>
     </div>
     """

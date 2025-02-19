@@ -6,6 +6,7 @@ defmodule HarmonyWeb.ChatRoomLive do
   alias Harmony.Chat.Message
   alias HarmonyWeb.Components.RoomEditComponent
   alias HarmonyWeb.Components.RoomNewComponent
+  alias HarmonyWeb.OnlineUsers
 
   def render(assigns) do
     ~H"""
@@ -37,7 +38,7 @@ defmodule HarmonyWeb.ChatRoomLive do
     </div>
 
     <div class="flex flex-col shrink-0 w-64 bg-slate-100 push-right">
-      <.users_list users={@users} />
+      <.users_list users={@users} online_users={@online_users} />
 
       <.rooms_list_actions current_user={@current_user} />
     </div>
@@ -61,7 +62,14 @@ defmodule HarmonyWeb.ChatRoomLive do
     rooms = Chat.list_rooms()
     users = Accounts.list_users()
 
+    if connected?(socket) do
+      OnlineUsers.track(self(), socket.assigns.current_user)
+    end
+
+    OnlineUsers.subscribe()
+
     socket
+    |> assign(online_users: OnlineUsers.list())
     |> assign(rooms: rooms, hide_topic?: false)
     |> assign(users: users)
     |> ok
@@ -101,6 +109,14 @@ defmodule HarmonyWeb.ChatRoomLive do
   def handle_info({:delete_message, message}, socket) do
     socket
     |> stream_delete(:messages, message)
+    |> noreply
+  end
+
+  def handle_info(%{event: "presence_diff", payload: _diff}, socket) do
+    online_users = OnlineUsers.list()
+
+    socket
+    |> assign(online_users: online_users)
     |> noreply
   end
 
