@@ -59,7 +59,8 @@ defmodule HarmonyWeb.ChatRoomLive do
   end
 
   def mount(_params, _session, socket) do
-    rooms = Chat.list_rooms()
+    # rooms = Chat.list_rooms()
+    rooms = Chat.list_joined_rooms(socket.assigns.current_user)
     users = Accounts.list_users()
 
     if connected?(socket) do

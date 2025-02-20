@@ -3,13 +3,17 @@ defmodule HarmonyWeb.UserCanSeeAListOfChatRoomsTest do
   import Harmony.Factory
   import Harmony.AccountsFixtures
 
+  alias Harmony.Chat
+
   setup %{conn: conn} do
     user = user_fixture()
     %{conn: log_in_user(conn, user), user: user}
   end
 
-  test "user can see a list of chat rooms", %{conn: conn} do
+  test "user can see a list of chat rooms", %{conn: conn, user: user} do
     [room1, room2] = insert_pair(:room)
+    Chat.join_room!(room1, user)
+    Chat.join_room!(room2, user)
 
     conn
     |> visit("/")
@@ -17,8 +21,9 @@ defmodule HarmonyWeb.UserCanSeeAListOfChatRoomsTest do
     |> assert_has("#rooms-list .name", text: room2.name)
   end
 
-  test "user can toggle the room topic visibility", %{conn: conn} do
+  test "user can toggle the room topic visibility", %{conn: conn, user: user} do
     room = insert(:room)
+    Chat.join_room!(room, user)
 
     conn
     |> visit("/")
@@ -30,8 +35,10 @@ defmodule HarmonyWeb.UserCanSeeAListOfChatRoomsTest do
     |> assert_has("#room-header .topic", text: room.topic)
   end
 
-  test "user can switch between rooms", %{conn: conn} do
+  test "user can switch between rooms", %{conn: conn, user: user} do
     [room1, room2] = insert_pair(:room)
+    Chat.join_room!(room1, user)
+    Chat.join_room!(room2, user)
 
     conn
     |> visit("/")

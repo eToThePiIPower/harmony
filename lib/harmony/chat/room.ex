@@ -3,7 +3,7 @@ defmodule Harmony.Chat.Room do
   import Ecto.Changeset
 
   alias Harmony.Accounts.User
-  alias Harmony.Chat.{Message, RoomMemberships}
+  alias Harmony.Chat.{Message, RoomMembership}
 
   @primary_key {:id, :binary_id, autogenerate: true}
   @foreign_key_type :binary_id
@@ -12,7 +12,7 @@ defmodule Harmony.Chat.Room do
     field :topic, :string
 
     has_many :messages, Message
-    many_to_many :members, User, join_through: RoomMemberships
+    many_to_many :members, User, join_through: RoomMembership
 
     timestamps(type: :utc_datetime)
   end

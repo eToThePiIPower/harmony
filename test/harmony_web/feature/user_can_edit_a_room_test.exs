@@ -3,6 +3,8 @@ defmodule HarmonyWeb.UserEditARoomTest do
   import Harmony.Factory
   import Harmony.AccountsFixtures
 
+  alias Harmony.Chat
+
   setup %{conn: conn} do
     password = valid_user_password()
     user = user_fixture(%{password: password})
@@ -12,6 +14,7 @@ defmodule HarmonyWeb.UserEditARoomTest do
   test "admins can edit a chat room", %{conn: conn, user: user} do
     user |> set_role(:admin)
     room = insert(:room)
+    Chat.join_room!(room, user)
 
     conn
     |> visit(~p"/rooms/#{room.name}")

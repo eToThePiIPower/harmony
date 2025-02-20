@@ -3,9 +3,12 @@ defmodule HarmonyWeb.UsersCanSeeMessages do
   import Harmony.Factory
   import Harmony.AccountsFixtures
 
+  alias Harmony.Chat
+
   setup %{conn: conn} do
     user = user_fixture()
     room = insert(:room)
+    Chat.join_room!(room, user)
     %{conn: log_in_user(conn, user), user: user, room: room}
   end
 
@@ -19,9 +22,10 @@ defmodule HarmonyWeb.UsersCanSeeMessages do
     |> assert_has("#messages-list .message-user", text: m1.user.username)
   end
 
-  test "each room has it's own messages", %{conn: conn, room: room} do
+  test "each room has it's own messages", %{conn: conn, room: room, user: user} do
     [m1, m2] = insert_pair(:message, room: room, body: "Show these messages")
     other_room = insert(:room)
+    Chat.join_room!(other_room, user)
     [om1, om2] = insert_pair(:message, room: other_room, body: "Not these messages")
 
     conn

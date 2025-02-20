@@ -70,6 +70,13 @@ defmodule Harmony.Chat do
     |> Repo.insert!()
   end
 
+  def list_joined_rooms(%User{} = user) do
+    user
+    |> Repo.preload(:rooms)
+    |> Map.fetch!(:rooms)
+    |> Enum.sort_by(& &1.name)
+  end
+
   # Chat.Message
 
   def list_messages(%Room{id: room_id}) do

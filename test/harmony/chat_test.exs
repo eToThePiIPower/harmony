@@ -98,6 +98,35 @@ defmodule Harmony.ChatTest do
 
       assert lr == nil
     end
+
+    test "list_joined_rooms/1 lists the rooms a user has joined" do
+      [room1, room2] = insert_pair(:room)
+      [other_room1, other_room2] = insert_pair(:room)
+      user = user_fixture()
+
+      Chat.join_room!(room1, user)
+      Chat.join_room!(room2, user)
+      joined_rooms = Chat.list_joined_rooms(user)
+
+      assert room1 in joined_rooms
+      assert room2 in joined_rooms
+      refute other_room1 in joined_rooms
+      refute other_room2 in joined_rooms
+    end
+
+    test "list_joined_rooms/1 sorts by room name" do
+      [room1, room2] = insert_pair(:room)
+      aard = insert(:room, name: "aardvark")
+      user = user_fixture()
+
+      Chat.join_room!(room1, user)
+      Chat.join_room!(room2, user)
+      Chat.join_room!(aard, user)
+      [first | _rest] = joined_rooms = Chat.list_joined_rooms(user)
+
+      assert aard in joined_rooms
+      assert first == aard
+    end
   end
 
   describe "messages" do
