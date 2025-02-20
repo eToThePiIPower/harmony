@@ -44,7 +44,7 @@ defmodule HarmonyWeb.ChatRoomLive do
     <div class="flex flex-col shrink-0 w-64 bg-slate-100 push-right">
       <.users_list users={@users} online_users={@online_users} />
 
-      <.rooms_list_actions current_user={@current_user} />
+      <.users_list_actions current_user={@current_user} />
     </div>
 
     <%= if @current_user.role == :admin do %>

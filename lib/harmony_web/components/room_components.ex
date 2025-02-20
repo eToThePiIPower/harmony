@@ -147,42 +147,6 @@ defmodule HarmonyWeb.RoomComponents do
     """
   end
 
-  attr :current_user, Harmony.Accounts.User
-  slot :inner_block, required: false
-
-  def rooms_list_actions(assigns) do
-    ~H"""
-    <ul class="relative z-10 flex items-center gap-4 px-4 sm:px-6 lg:px-8 justify-end bg-slate-300 py-2">
-      <li class="text-[0.8125rem] leading-6 text-zinc-900">
-        {@current_user.username}
-      </li>
-
-      <li>
-        <.link
-          href={~p"/users/settings"}
-          title="Settings"
-          class="text-[0.8125rem] leading-6 text-zinc-900 font-semibold hover:text-zinc-700"
-        >
-          <.icon name="hero-user-circle" />
-          <div class="sr-only">Settings</div>
-        </.link>
-      </li>
-
-      <li>
-        <.link
-          href={~p"/users/log_out"}
-          method="delete"
-          title="Log out"
-          class="text-[0.8125rem] leading-6 text-zinc-900 font-semibold hover:text-zinc-700"
-        >
-          <.icon name="hero-arrow-right-start-on-rectangle" />
-          <div class="sr-only">Log out</div>
-        </.link>
-      </li>
-    </ul>
-    """
-  end
-
   attr :id, :string, default: "new-room-form"
   attr :title, :string, default: "New chat room"
   attr :for, Phoenix.HTML.Form, required: true
