@@ -36,13 +36,13 @@ defmodule HarmonyWeb.UsersCanSeeMessages do
     |> refute_has("#messages-#{om1.id}")
     |> refute_has("#messages-#{om2.id}")
     # The other room has only *it's* own messages
-    |> click_link(other_room.name)
+    |> click_link(".rooms-list-item", other_room.name)
     |> assert_has("#messages-#{om1.id}")
     |> assert_has("#messages-#{om2.id}")
     |> refute_has("#messages-#{m1.id}")
     |> refute_has("#messages-#{m2.id}")
     # Now back to the first
-    |> click_link(room.name)
+    |> click_link(".rooms-list-item", room.name)
     |> assert_has("#messages-#{m1.id}")
     |> assert_has("#messages-#{m2.id}")
     |> refute_has("#messages-#{om1.id}")

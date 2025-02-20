@@ -31,6 +31,24 @@ defmodule HarmonyWeb.RoomComponents do
     """
   end
 
+  attr :icon, :string, required: true
+  attr :title, :string, required: true
+  attr :on_click, :any
+
+  def rooms_list_xitem(assigns) do
+    ~H"""
+    <.link
+      phx-click={@on_click}
+      class="rooms-list-item flex items-center h-8 text-sm pl-8 pr-3 hover:bg-slate-300"
+    >
+      <.icon name={"hero-" <> @icon} class="h-4 w-4" />
+      <span class="ml-2 leading-none name">
+        {@title}
+      </span>
+    </.link>
+    """
+  end
+
   attr :form, Ecto.Form
   attr :room, Room
 

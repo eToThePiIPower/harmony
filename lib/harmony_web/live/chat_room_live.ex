@@ -4,8 +4,7 @@ defmodule HarmonyWeb.ChatRoomLive do
   alias Harmony.Accounts
   alias Harmony.Chat
   alias Harmony.Chat.Message
-  alias HarmonyWeb.Components.RoomEditComponent
-  alias HarmonyWeb.Components.RoomNewComponent
+  alias HarmonyWeb.Components.{RoomEditComponent, RoomIndexComponent, RoomNewComponent}
   alias HarmonyWeb.OnlineUsers
 
   def render(assigns) do
@@ -14,6 +13,7 @@ defmodule HarmonyWeb.ChatRoomLive do
       <.rooms_list_header is_admin={is_admin(@current_user)} />
       <.rooms_list title="Rooms">
         <.rooms_list_item :for={room <- @rooms} room={room} active={room.id == @room.id} />
+        <.rooms_list_xitem on_click={show_modal("index-room-modal")} icon="plus" title="Add a room" />
       </.rooms_list>
     </div>
 
@@ -59,6 +59,11 @@ defmodule HarmonyWeb.ChatRoomLive do
         />
       <% end %>
     <% end %>
+    <.live_component
+      module={RoomIndexComponent}
+      id="room-index-component"
+      current_user={@current_user}
+    />
     """
   end
 
@@ -122,6 +127,12 @@ defmodule HarmonyWeb.ChatRoomLive do
 
     socket
     |> assign(online_users: online_users)
+    |> noreply
+  end
+
+  def handle_info({:joined_room, %Chat.Room{}}, socket) do
+    socket
+    |> assign(:rooms, Chat.list_joined_rooms(socket.assigns.current_user))
     |> noreply
   end
 
