@@ -3,6 +3,7 @@ defmodule Harmony.Chat do
   alias Harmony.Accounts.User
   alias Harmony.Chat.{Message, Room, RoomMembership}
 
+  import Ecto.Changeset
   import Ecto.Query
 
   @pubsub Harmony.PubSub
@@ -65,8 +66,37 @@ defmodule Harmony.Chat do
     Phoenix.PubSub.unsubscribe(@pubsub, topic(room.id))
   end
 
+  def get_last_read_id(%Room{} = room, %User{} = user) do
+    case Repo.get_by(RoomMembership, room_id: room.id, user_id: user.id) do
+      %RoomMembership{last_read_id: last_read_id} ->
+        last_read_id
+
+      nil ->
+        nil
+    end
+  end
+
+  def update_last_read_id(%Room{} = room, %User{} = user) do
+    case Repo.get_by(RoomMembership, room_id: room.id, user_id: user.id) do
+      %RoomMembership{} = membership ->
+        id =
+          from(m in Message,
+            where: m.room_id == ^room.id,
+            select: max(type(m.id, :string))
+          )
+          |> Repo.one()
+
+        membership
+        |> change(%{last_read_id: id})
+        |> Repo.update()
+
+      nil ->
+        nil
+    end
+  end
+
   # Chat.RoomMembership
-  #
+
   def join_room!(%Room{} = room, %User{} = user) do
     %RoomMembership{room: room, user: user}
     |> Repo.insert!()

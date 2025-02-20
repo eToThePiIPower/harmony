@@ -88,6 +88,17 @@ defmodule Harmony.ChatTest do
       assert {:error, :not_authorized} = Chat.delete_room_by_id(user, room.id)
       refute Chat.get_room(room.name) == nil
     end
+
+    test "update_last_read_id/2 updates the last read message id for a user in a room" do
+      user = user_fixture()
+      room = insert(:room)
+      message = insert(:message, room: room)
+      Chat.join_room!(room, user)
+
+      id = message.id
+      assert Chat.get_last_read_id(room, user) == nil
+      assert {:ok, %Chat.RoomMembership{last_read_id: ^id}} = Chat.update_last_read_id(room, user)
+    end
   end
 
   describe "room_memberships" do

@@ -30,7 +30,7 @@ defmodule HarmonyWeb.ChatRoomLive do
             :for={{dom_id, message} <- @streams.messages}
             dom_id={dom_id}
             message={message}
-            show_delete={@current_user == message.user}
+            show_delete={is_struct(message) && @current_user == message.user}
           />
         </div>
         <.message_send_form
@@ -82,6 +82,12 @@ defmodule HarmonyWeb.ChatRoomLive do
     |> assign(online_users: OnlineUsers.list())
     |> assign(rooms: rooms, hide_topic?: false)
     |> assign(users: users)
+    |> stream_configure(:messages,
+      dom_id: fn
+        %Chat.Message{id: id} -> "messages-#{id}"
+        :unread_marker -> "messages-unread-marker"
+      end
+    )
     |> ok
   end
 
@@ -89,7 +95,15 @@ defmodule HarmonyWeb.ChatRoomLive do
     if socket.assigns[:room], do: Chat.unsubscribe_from_room(socket.assigns.room)
     room = Chat.get_room(name) || Chat.default_room()
     Chat.subscribe_to_room(room)
-    messages = Chat.list_messages(room)
+
+    last_read_id = Chat.get_last_read_id(room, socket.assigns.current_user)
+
+    messages =
+      room
+      |> Chat.list_messages()
+      |> maybe_insert_unread_marker(last_read_id)
+
+    Chat.update_last_read_id(room, socket.assigns.current_user)
 
     message_changeset = Chat.change_message(%Message{})
 
@@ -111,6 +125,8 @@ defmodule HarmonyWeb.ChatRoomLive do
   end
 
   def handle_info({:new_message, message}, socket) do
+    Chat.update_last_read_id(socket.assigns.room, socket.assigns.current_user)
+
     socket
     |> stream_insert(:messages, message)
     |> noreply()
@@ -185,5 +201,15 @@ defmodule HarmonyWeb.ChatRoomLive do
 
   defp is_admin(%Harmony.Accounts.User{role: role}) do
     role == :admin
+  end
+
+  defp maybe_insert_unread_marker(messages, nil), do: messages
+
+  defp maybe_insert_unread_marker(messages, id) do
+    case Enum.split_while(messages, &(&1.id <= id)) do
+      {read, []} -> read
+      # {read, unread} -> read ++ [:unread_marker | unread]
+      {read, unread} -> read ++ [:unread_marker | unread]
+    end
   end
 end

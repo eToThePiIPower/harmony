@@ -11,9 +11,19 @@ defmodule HarmonyWeb.MessageComponents do
   alias Harmony.Chat.Message
   # alias Phoenix.LiveView.JS
 
-  attr :message, Message, required: true
+  # attr :message, Message OR :unread_marker
+  attr :message, :any, required: true
   attr :show_delete, :boolean, default: false
   attr :dom_id, :string
+
+  def message_item(%{message: :unread_marker} = assigns) do
+    ~H"""
+    <div id={@dom_id} class="w-full flex text-red-500 items-center gap-3 pr-5">
+      <div class="w-full h-px grow bg-red-500"></div>
+      <div class="text-sm">New</div>
+    </div>
+    """
+  end
 
   def message_item(assigns) do
     ~H"""
