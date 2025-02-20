@@ -88,6 +88,16 @@ defmodule Harmony.ChatTest do
       assert {:error, :not_authorized} = Chat.delete_room_by_id(user, room.id)
       refute Chat.get_room(room.name) == nil
     end
+
+    test "join_room!/2 adds a room membership for a user" do
+      room = insert(:room)
+      user = user_fixture()
+
+      assert %Harmony.Chat.RoomMembership{room: ^room, user: ^user, last_read_id: lr} =
+               Chat.join_room!(room, user)
+
+      assert lr == nil
+    end
   end
 
   describe "messages" do

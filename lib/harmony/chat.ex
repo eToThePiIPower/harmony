@@ -1,6 +1,8 @@
 defmodule Harmony.Chat do
-  alias Harmony.{Chat.Room, Chat.Message, Repo}
+  alias Harmony.Repo
   alias Harmony.Accounts.User
+  alias Harmony.Chat.{Message, Room, RoomMembership}
+
   import Ecto.Query
 
   @pubsub Harmony.PubSub
@@ -61,6 +63,11 @@ defmodule Harmony.Chat do
 
   def unsubscribe_from_room(room) do
     Phoenix.PubSub.unsubscribe(@pubsub, topic(room.id))
+  end
+
+  def join_room!(%Room{} = room, %User{} = user) do
+    %RoomMembership{room: room, user: user}
+    |> Repo.insert!()
   end
 
   # Chat.Message
