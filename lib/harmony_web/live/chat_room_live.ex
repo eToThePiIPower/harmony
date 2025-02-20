@@ -4,8 +4,7 @@ defmodule HarmonyWeb.ChatRoomLive do
   alias Harmony.Accounts
   alias Harmony.Chat
   alias Harmony.Chat.Message
-  alias HarmonyWeb.Components.RoomEditComponent
-  alias HarmonyWeb.Components.RoomNewComponent
+  alias HarmonyWeb.Components.{RoomEditComponent, RoomIndexComponent, RoomNewComponent}
   alias HarmonyWeb.OnlineUsers
 
   def render(assigns) do
@@ -14,6 +13,7 @@ defmodule HarmonyWeb.ChatRoomLive do
       <.rooms_list_header is_admin={is_admin(@current_user)} />
       <.rooms_list title="Rooms">
         <.rooms_list_item :for={room <- @rooms} room={room} active={room.id == @room.id} />
+        <.rooms_list_xitem on_click={show_modal("index-room-modal")} icon="plus" title="Add a room" />
       </.rooms_list>
     </div>
 
@@ -33,14 +33,18 @@ defmodule HarmonyWeb.ChatRoomLive do
             show_delete={@current_user == message.user}
           />
         </div>
-        <.message_send_form form={@send_message_form} room={@room} />
+        <.message_send_form
+          :if={Chat.joined?(@room, @current_user)}
+          form={@send_message_form}
+          room={@room}
+        />
       <% end %>
     </div>
 
     <div class="flex flex-col shrink-0 w-64 bg-slate-100 push-right">
       <.users_list users={@users} online_users={@online_users} />
 
-      <.rooms_list_actions current_user={@current_user} />
+      <.users_list_actions current_user={@current_user} />
     </div>
 
     <%= if @current_user.role == :admin do %>
@@ -55,11 +59,17 @@ defmodule HarmonyWeb.ChatRoomLive do
         />
       <% end %>
     <% end %>
+    <.live_component
+      module={RoomIndexComponent}
+      id="room-index-component"
+      current_user={@current_user}
+    />
     """
   end
 
   def mount(_params, _session, socket) do
-    rooms = Chat.list_rooms()
+    # rooms = Chat.list_rooms()
+    rooms = Chat.list_joined_rooms(socket.assigns.current_user)
     users = Accounts.list_users()
 
     if connected?(socket) do
@@ -120,6 +130,12 @@ defmodule HarmonyWeb.ChatRoomLive do
     |> noreply
   end
 
+  def handle_info({:joined_room, %Chat.Room{}}, socket) do
+    socket
+    |> assign(:rooms, Chat.list_joined_rooms(socket.assigns.current_user))
+    |> noreply
+  end
+
   def handle_event("toggle-topic", _params, socket) do
     {:noreply, update(socket, :hide_topic?, &(!&1))}
   end
@@ -131,6 +147,10 @@ defmodule HarmonyWeb.ChatRoomLive do
       {:ok, %Chat.Message{}} ->
         socket
         |> assign_message_form(Chat.change_message(%Message{}))
+
+      {:error, :unauthorized} ->
+        socket
+        |> put_flash(:error, "You are not authorized to send messages here")
 
       {:error, changeset} ->
         socket

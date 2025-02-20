@@ -1,6 +1,9 @@
 defmodule Harmony.Accounts.User do
   use Ecto.Schema
   import Ecto.Changeset
+
+  alias Harmony.Chat.{Room, RoomMembership}
+
   @primary_key {:id, :binary_id, autogenerate: true}
   @foreign_key_type :binary_id
   schema "users" do
@@ -11,6 +14,8 @@ defmodule Harmony.Accounts.User do
     field :hashed_password, :string, redact: true
     field :current_password, :string, virtual: true, redact: true
     field :confirmed_at, :utc_datetime
+
+    many_to_many :rooms, Room, join_through: RoomMembership
 
     timestamps(type: :utc_datetime)
   end

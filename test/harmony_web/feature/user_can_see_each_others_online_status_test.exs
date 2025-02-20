@@ -8,7 +8,6 @@ defmodule HarmonyWeb.UsersCanSeeEachOthersOnlineStatusTest do
     %{conn: conn, room: room}
   end
 
-  @tag focus: true
   test "users can see each other's online status", %{conn: conn, room: room} do
     user1 = user_fixture()
     user2 = user_fixture()

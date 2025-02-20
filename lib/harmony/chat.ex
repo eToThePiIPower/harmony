@@ -1,6 +1,8 @@
 defmodule Harmony.Chat do
-  alias Harmony.{Chat.Room, Chat.Message, Repo}
+  alias Harmony.Repo
   alias Harmony.Accounts.User
+  alias Harmony.Chat.{Message, Room, RoomMembership}
+
   import Ecto.Query
 
   @pubsub Harmony.PubSub
@@ -63,6 +65,49 @@ defmodule Harmony.Chat do
     Phoenix.PubSub.unsubscribe(@pubsub, topic(room.id))
   end
 
+  # Chat.RoomMembership
+  #
+  def join_room!(%Room{} = room, %User{} = user) do
+    %RoomMembership{room: room, user: user}
+    |> Repo.insert!()
+  end
+
+  def list_joined_rooms(%User{} = user) do
+    user
+    |> Repo.preload(:rooms)
+    |> Map.fetch!(:rooms)
+    |> Enum.sort_by(& &1.name)
+  end
+
+  def joined?(%Room{} = room, %User{} = user) do
+    Repo.exists?(
+      from r_m in RoomMembership, where: r_m.room_id == ^room.id and r_m.user_id == ^user.id
+    )
+  end
+
+  def list_rooms_with_joined(%User{} = user) do
+    query =
+      from room in Room,
+        left_join: membership in RoomMembership,
+        on: room.id == membership.room_id and ^user.id == membership.user_id,
+        select: {room, not is_nil(membership.id)},
+        order_by: [asc: room.name]
+
+    Repo.all(query)
+  end
+
+  def toggle_room_membership(%Room{} = room, %User{} = user) do
+    case Repo.get_by(RoomMembership, room_id: room.id, user_id: user.id) do
+      %RoomMembership{} = membership ->
+        Repo.delete(membership)
+        {room, false}
+
+      nil ->
+        join_room!(room, user)
+        {room, true}
+    end
+  end
+
   # Chat.Message
 
   def list_messages(%Room{id: room_id}) do
@@ -78,12 +123,15 @@ defmodule Harmony.Chat do
   end
 
   def create_message(%User{} = user, %Room{} = room, attrs) do
-    with {:ok, message} <-
+    with true <- joined?(room, user),
+         {:ok, message} <-
            %Message{user: user, room: room}
            |> Message.changeset(attrs)
            |> Repo.insert() do
       Phoenix.PubSub.broadcast!(@pubsub, topic(room.id), {:new_message, message})
       {:ok, message}
+    else
+      false -> {:error, :unauthorized}
     end
   end
 
