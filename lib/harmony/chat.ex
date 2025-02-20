@@ -85,6 +85,17 @@ defmodule Harmony.Chat do
     )
   end
 
+  def list_rooms_with_joined(%User{} = user) do
+    query =
+      from room in Room,
+        left_join: membership in RoomMembership,
+        on: room.id == membership.room_id and ^user.id == membership.user_id,
+        select: {room, not is_nil(membership.id)},
+        order_by: [asc: room.name]
+
+    Repo.all(query)
+  end
+
   def toggle_room_membership(%Room{} = room, %User{} = user) do
     case Repo.get_by(RoomMembership, room_id: room.id, user_id: user.id) do
       %RoomMembership{} = membership ->

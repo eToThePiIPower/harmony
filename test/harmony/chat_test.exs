@@ -101,17 +101,6 @@ defmodule Harmony.ChatTest do
       assert lr == nil
     end
 
-    test "toggle_room_membership/2 toggles a room membership for a user" do
-      room = insert(:room)
-      user = user_fixture()
-
-      refute Chat.joined?(room, user)
-      assert Chat.toggle_room_membership(room, user) == {room, true}
-      assert Chat.joined?(room, user)
-      assert Chat.toggle_room_membership(room, user) == {room, false}
-      refute Chat.joined?(room, user)
-    end
-
     test "list_joined_rooms/1 lists the rooms a user has joined" do
       [room1, room2] = insert_pair(:room)
       [other_room1, other_room2] = insert_pair(:room)
@@ -149,6 +138,35 @@ defmodule Harmony.ChatTest do
 
       assert Chat.joined?(room, user)
       refute Chat.joined?(other_room, user)
+    end
+
+    test "list_rooms_with_joins/1 lists all of the servers rooms, along with the given users join status" do
+      user = user_fixture()
+      [room1, room2] = insert_pair(:room)
+      other_room = insert(:room)
+      aard = insert(:room, name: "aaardvark")
+      Chat.join_room!(room1, user)
+      Chat.join_room!(room2, user)
+
+      rooms_with_joined = Chat.list_rooms_with_joined(user)
+
+      assert {room1, true} in rooms_with_joined
+      assert {room2, true} in rooms_with_joined
+      assert {other_room, false} in rooms_with_joined
+
+      # It alphabetized the list
+      assert rooms_with_joined |> List.first() == {aard, false}
+    end
+
+    test "toggle_room_membership/2 toggles a room membership for a user" do
+      room = insert(:room)
+      user = user_fixture()
+
+      refute Chat.joined?(room, user)
+      assert Chat.toggle_room_membership(room, user) == {room, true}
+      assert Chat.joined?(room, user)
+      assert Chat.toggle_room_membership(room, user) == {room, false}
+      refute Chat.joined?(room, user)
     end
   end
 
