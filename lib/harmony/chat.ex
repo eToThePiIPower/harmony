@@ -85,6 +85,18 @@ defmodule Harmony.Chat do
     )
   end
 
+  def toggle_room_membership(%Room{} = room, %User{} = user) do
+    case Repo.get_by(RoomMembership, room_id: room.id, user_id: user.id) do
+      %RoomMembership{} = membership ->
+        Repo.delete(membership)
+        {room, false}
+
+      nil ->
+        join_room!(room, user)
+        {room, true}
+    end
+  end
+
   # Chat.Message
 
   def list_messages(%Room{id: room_id}) do

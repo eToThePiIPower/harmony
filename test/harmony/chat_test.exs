@@ -101,6 +101,17 @@ defmodule Harmony.ChatTest do
       assert lr == nil
     end
 
+    test "toggle_room_membership/2 toggles a room membership for a user" do
+      room = insert(:room)
+      user = user_fixture()
+
+      refute Chat.joined?(room, user)
+      assert Chat.toggle_room_membership(room, user) == {room, true}
+      assert Chat.joined?(room, user)
+      assert Chat.toggle_room_membership(room, user) == {room, false}
+      refute Chat.joined?(room, user)
+    end
+
     test "list_joined_rooms/1 lists the rooms a user has joined" do
       [room1, room2] = insert_pair(:room)
       [other_room1, other_room2] = insert_pair(:room)

@@ -11,7 +11,7 @@ defmodule HarmonyWeb.Components.RoomIndexComponent do
         <div>
           <.link
             :for={room <- @rooms}
-            phx-click="join-room"
+            phx-click="toggle-room"
             phx-target={@myself}
             phx-value-room={room.name}
             class="flex items-center h-8 text-sm pl-8 pr-3 hover:bg-slate-300"
@@ -35,9 +35,9 @@ defmodule HarmonyWeb.Components.RoomIndexComponent do
     |> ok
   end
 
-  def handle_event("join-room", %{"room" => room_name}, socket) do
+  def handle_event("toggle-room", %{"room" => room_name}, socket) do
     room = Chat.get_room(room_name)
-    Chat.join_room!(room, socket.assigns.current_user)
+    Chat.toggle_room_membership(room, socket.assigns.current_user)
     send(self(), {:joined_room, room})
 
     socket
