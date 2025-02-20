@@ -33,7 +33,11 @@ defmodule HarmonyWeb.ChatRoomLive do
             show_delete={@current_user == message.user}
           />
         </div>
-        <.message_send_form form={@send_message_form} room={@room} />
+        <.message_send_form
+          :if={Chat.joined?(@room, @current_user)}
+          form={@send_message_form}
+          room={@room}
+        />
       <% end %>
     </div>
 
@@ -132,6 +136,10 @@ defmodule HarmonyWeb.ChatRoomLive do
       {:ok, %Chat.Message{}} ->
         socket
         |> assign_message_form(Chat.change_message(%Message{}))
+
+      {:error, :unauthorized} ->
+        socket
+        |> put_flash(:error, "You are not authorized to send messages here")
 
       {:error, changeset} ->
         socket

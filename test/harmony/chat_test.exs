@@ -88,7 +88,9 @@ defmodule Harmony.ChatTest do
       assert {:error, :not_authorized} = Chat.delete_room_by_id(user, room.id)
       refute Chat.get_room(room.name) == nil
     end
+  end
 
+  describe "room_memberships" do
     test "join_room!/2 adds a room membership for a user" do
       room = insert(:room)
       user = user_fixture()
@@ -127,6 +129,16 @@ defmodule Harmony.ChatTest do
       assert aard in joined_rooms
       assert first == aard
     end
+
+    test "joined?/2 returns if a user is a member of a room" do
+      user = user_fixture()
+      room = insert(:room)
+      other_room = insert(:room)
+      Chat.join_room!(room, user)
+
+      assert Chat.joined?(room, user)
+      refute Chat.joined?(other_room, user)
+    end
   end
 
   describe "messages" do
@@ -144,12 +156,23 @@ defmodule Harmony.ChatTest do
     test "create_message/3 create a message" do
       user = user_fixture()
       room = insert(:room)
+      Chat.join_room!(room, user)
       params = params_for(:message, body: "Test message body")
       Chat.subscribe_to_room(room)
 
       {:ok, message} = Chat.create_message(user, room, params)
       assert_receive({:new_message, ^message})
       assert message.body == "Test message body"
+    end
+
+    test "create_message/3 user must be joined" do
+      user = user_fixture()
+      room = insert(:room)
+      params = params_for(:message, body: "Test message body")
+      Chat.subscribe_to_room(room)
+
+      {:error, :unauthorized} = Chat.create_message(user, room, params)
+      refute_receive({:new_message, _})
     end
 
     test "change_message/2 returns a valid changeset" do

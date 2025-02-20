@@ -65,6 +65,8 @@ defmodule Harmony.Chat do
     Phoenix.PubSub.unsubscribe(@pubsub, topic(room.id))
   end
 
+  # Chat.RoomMembership
+  #
   def join_room!(%Room{} = room, %User{} = user) do
     %RoomMembership{room: room, user: user}
     |> Repo.insert!()
@@ -75,6 +77,12 @@ defmodule Harmony.Chat do
     |> Repo.preload(:rooms)
     |> Map.fetch!(:rooms)
     |> Enum.sort_by(& &1.name)
+  end
+
+  def joined?(%Room{} = room, %User{} = user) do
+    Repo.exists?(
+      from r_m in RoomMembership, where: r_m.room_id == ^room.id and r_m.user_id == ^user.id
+    )
   end
 
   # Chat.Message
@@ -92,12 +100,15 @@ defmodule Harmony.Chat do
   end
 
   def create_message(%User{} = user, %Room{} = room, attrs) do
-    with {:ok, message} <-
+    with true <- joined?(room, user),
+         {:ok, message} <-
            %Message{user: user, room: room}
            |> Message.changeset(attrs)
            |> Repo.insert() do
       Phoenix.PubSub.broadcast!(@pubsub, topic(room.id), {:new_message, message})
       {:ok, message}
+    else
+      false -> {:error, :unauthorized}
     end
   end
 
