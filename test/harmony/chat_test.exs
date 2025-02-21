@@ -88,6 +88,17 @@ defmodule Harmony.ChatTest do
       assert {:error, :not_authorized} = Chat.delete_room_by_id(user, room.id)
       refute Chat.get_room(room.name) == nil
     end
+
+    test "update_last_read_id/2 updates the last read message id for a user in a room" do
+      user = user_fixture()
+      room = insert(:room)
+      message = insert(:message, room: room)
+      Chat.join_room!(room, user)
+
+      id = message.id
+      assert Chat.get_last_read_id(room, user) == nil
+      assert {:ok, %Chat.RoomMembership{last_read_id: ^id}} = Chat.update_last_read_id(room, user)
+    end
   end
 
   describe "room_memberships" do
@@ -128,6 +139,31 @@ defmodule Harmony.ChatTest do
 
       assert aard in joined_rooms
       assert first == aard
+    end
+
+    test "list_joined_rooms_with_unread/1" do
+      user = user_fixture()
+
+      room1 =
+        insert(:room)
+        |> with_messages(count: 2)
+        |> read_messages(user)
+
+      [room2, room3] =
+        insert_pair(:room)
+        |> with_messages(count: 2)
+        |> read_messages(user)
+        |> with_messages(count: 2)
+
+      room4 = insert(:room) |> with_messages(count: 3)
+      Chat.join_room!(room4, user)
+
+      list = Chat.list_joined_rooms_with_unread_counts(user)
+
+      assert {room1, 0, false} in list
+      assert {room2, 2, false} in list
+      assert {room3, 2, false} in list
+      assert {room4, 0, true} in list
     end
 
     test "joined?/2 returns if a user is a member of a room" do

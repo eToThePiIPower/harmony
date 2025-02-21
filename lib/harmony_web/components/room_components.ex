@@ -13,6 +13,7 @@ defmodule HarmonyWeb.RoomComponents do
 
   attr :active, :boolean, required: true
   attr :room, Room, required: true
+  attr :unread, :integer, default: 0
 
   def rooms_list_item(assigns) do
     ~H"""
@@ -24,8 +25,14 @@ defmodule HarmonyWeb.RoomComponents do
       patch={~p"/rooms/#{@room.name}"}
     >
       <.icon name="hero-hashtag" class="h-4 w-4" />
-      <span class={["ml-2 leading-none name", @active && "font-bold"]}>
+      <span class={["ml-2 leading-none name grow", @active && "font-bold"]}>
         {@room.name}
+      </span>
+      <span
+        :if={@unread > 0}
+        class="unread-count flex justify-center items-center rounded-full bg-sky-500 text-white h-5 w-5 text-xs font-bold"
+      >
+        {@unread}
       </span>
     </.link>
     """

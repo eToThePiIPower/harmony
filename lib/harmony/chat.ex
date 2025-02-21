@@ -3,6 +3,7 @@ defmodule Harmony.Chat do
   alias Harmony.Accounts.User
   alias Harmony.Chat.{Message, Room, RoomMembership}
 
+  import Ecto.Changeset
   import Ecto.Query
 
   @pubsub Harmony.PubSub
@@ -65,8 +66,37 @@ defmodule Harmony.Chat do
     Phoenix.PubSub.unsubscribe(@pubsub, topic(room.id))
   end
 
+  def get_last_read_id(%Room{} = room, %User{} = user) do
+    case Repo.get_by(RoomMembership, room_id: room.id, user_id: user.id) do
+      %RoomMembership{last_read_id: last_read_id} ->
+        last_read_id
+
+      nil ->
+        nil
+    end
+  end
+
+  def update_last_read_id(%Room{} = room, %User{} = user) do
+    case Repo.get_by(RoomMembership, room_id: room.id, user_id: user.id) do
+      %RoomMembership{} = membership ->
+        id =
+          from(m in Message,
+            where: m.room_id == ^room.id,
+            select: max(type(m.id, :string))
+          )
+          |> Repo.one()
+
+        membership
+        |> change(%{last_read_id: id})
+        |> Repo.update()
+
+      nil ->
+        nil
+    end
+  end
+
   # Chat.RoomMembership
-  #
+
   def join_room!(%Room{} = room, %User{} = user) do
     %RoomMembership{room: room, user: user}
     |> Repo.insert!()
@@ -77,6 +107,19 @@ defmodule Harmony.Chat do
     |> Repo.preload(:rooms)
     |> Map.fetch!(:rooms)
     |> Enum.sort_by(& &1.name)
+  end
+
+  def list_joined_rooms_with_unread_counts(%User{} = user) do
+    from(room in Room,
+      join: membership in assoc(room, :memberships),
+      where: membership.user_id == ^user.id,
+      left_join: message in assoc(room, :messages),
+      on: message.id > membership.last_read_id,
+      group_by: [room.id, membership.id],
+      select: {room, count(message.id), is_nil(membership.last_read_id)},
+      order_by: [asc: room.name]
+    )
+    |> Repo.all()
   end
 
   def joined?(%Room{} = room, %User{} = user) do
@@ -132,6 +175,7 @@ defmodule Harmony.Chat do
       {:ok, message}
     else
       false -> {:error, :unauthorized}
+      {:error, changset} -> {:error, changset}
     end
   end
 
