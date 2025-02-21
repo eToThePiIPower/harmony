@@ -12,7 +12,12 @@ defmodule HarmonyWeb.ChatRoomLive do
     <div class="flex flex-col shrink-0 w-64 bg-slate-100">
       <.rooms_list_header is_admin={is_admin(@current_user)} />
       <.rooms_list title="Rooms">
-        <.rooms_list_item :for={room <- @rooms} room={room} active={room.id == @room.id} />
+        <.rooms_list_item
+          :for={{room, unread} <- @rooms}
+          room={room}
+          unread={unread}
+          active={room.id == @room.id}
+        />
         <.rooms_list_xitem on_click={show_modal("index-room-modal")} icon="plus" title="Add a room" />
       </.rooms_list>
     </div>
@@ -69,7 +74,7 @@ defmodule HarmonyWeb.ChatRoomLive do
 
   def mount(_params, _session, socket) do
     # rooms = Chat.list_rooms()
-    rooms = Chat.list_joined_rooms(socket.assigns.current_user)
+    rooms = Chat.list_joined_rooms_with_unread_counts(socket.assigns.current_user)
     users = Accounts.list_users()
 
     if connected?(socket) do
@@ -77,6 +82,7 @@ defmodule HarmonyWeb.ChatRoomLive do
     end
 
     OnlineUsers.subscribe()
+    Enum.each(rooms, fn {room, _} -> Chat.subscribe_to_room(room) end)
 
     socket
     |> assign(online_users: OnlineUsers.list())
@@ -92,9 +98,7 @@ defmodule HarmonyWeb.ChatRoomLive do
   end
 
   def handle_params(%{"name" => name}, _uri, socket) do
-    if socket.assigns[:room], do: Chat.unsubscribe_from_room(socket.assigns.room)
     room = Chat.get_room(name) || Chat.default_room()
-    Chat.subscribe_to_room(room)
 
     last_read_id = Chat.get_last_read_id(room, socket.assigns.current_user)
 
@@ -109,6 +113,7 @@ defmodule HarmonyWeb.ChatRoomLive do
 
     socket
     |> assign(room: room, page_title: "##{room.name}")
+    |> update(:rooms, reset_current_rooms_unread(room))
     |> stream(:messages, messages, reset: true)
     |> assign_message_form(message_changeset)
     |> noreply()
@@ -125,11 +130,21 @@ defmodule HarmonyWeb.ChatRoomLive do
   end
 
   def handle_info({:new_message, message}, socket) do
-    Chat.update_last_read_id(socket.assigns.room, socket.assigns.current_user)
+    cond do
+      message.room_id == socket.assigns.room.id ->
+        Chat.update_last_read_id(socket.assigns.room, socket.assigns.current_user)
 
-    socket
-    |> stream_insert(:messages, message)
-    |> noreply()
+        socket
+        |> stream_insert(:messages, message)
+
+      message.user_id != socket.assigns.current_user.id ->
+        socket
+        |> update(:rooms, inc_current_rooms_unread(message.room))
+
+      true ->
+        socket
+    end
+    |> noreply
   end
 
   def handle_info({:delete_message, message}, socket) do
@@ -148,7 +163,7 @@ defmodule HarmonyWeb.ChatRoomLive do
 
   def handle_info({:joined_room, %Chat.Room{}}, socket) do
     socket
-    |> assign(:rooms, Chat.list_joined_rooms(socket.assigns.current_user))
+    |> assign(:rooms, Chat.list_joined_rooms_with_unread_counts(socket.assigns.current_user))
     |> noreply
   end
 
@@ -193,6 +208,28 @@ defmodule HarmonyWeb.ChatRoomLive do
     |> put_flash(:info, "Deleted the room ##{room.name}")
     |> push_navigate(to: ~p"/")
     |> noreply
+  end
+
+  defp inc_current_rooms_unread(room) do
+    id = room.id
+
+    fn rooms ->
+      Enum.map(rooms, fn
+        {%Chat.Room{id: ^id} = room, count} -> {room, count + 1}
+        other -> other
+      end)
+    end
+  end
+
+  defp reset_current_rooms_unread(room) do
+    id = room.id
+
+    fn rooms ->
+      Enum.map(rooms, fn
+        {%Chat.Room{id: ^id} = room, _} -> {room, 0}
+        other -> other
+      end)
+    end
   end
 
   defp assign_message_form(socket, %Ecto.Changeset{} = changeset) do

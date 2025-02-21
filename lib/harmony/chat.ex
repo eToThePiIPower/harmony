@@ -175,6 +175,7 @@ defmodule Harmony.Chat do
       {:ok, message}
     else
       false -> {:error, :unauthorized}
+      {:error, changset} -> {:error, changset}
     end
   end
 
