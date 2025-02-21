@@ -37,4 +37,48 @@ defmodule HarmonyWeb.UsersCanJoinRoomsAsMembersTest do
     |> click_button("#room-index #room-index-item-#{room1.id} button", "Leave")
     |> refute_has("#room-index #room-index-item-#{room1.id}", text: "Joined")
   end
+
+  test "joining a room subscribes to its messages", %{conn: conn} do
+    [room1, room2] = insert_pair(:room)
+
+    conn
+    |> visit("/rooms/#{room1.name}")
+    |> click_button("#room-index #room-index-item-#{room2.id} button", "Join")
+    |> click_link("#rooms-list .rooms-list-item", room2.name)
+    # Fake another user sending a message here
+    |> send_message(room2, body: "Hello World 1")
+    |> assert_has("#messages-list .message-body", text: "Hello World 1")
+  end
+
+  test "multiple joins/rejoins only subscribes once", %{conn: conn, user: user} do
+    [room1, room2] = insert_pair(:room)
+    Harmony.Chat.join_room!(room1, user)
+
+    conn
+    |> visit("/rooms/#{room1.name}")
+    # Join/unjoin multiple times
+    |> click_button("#room-index #room-index-item-#{room2.id} button", "Join")
+    |> click_button("#room-index #room-index-item-#{room2.id} button", "Leave")
+    |> click_button("#room-index #room-index-item-#{room2.id} button", "Join")
+    |> click_button("#room-index #room-index-item-#{room2.id} button", "Leave")
+    |> click_button("#room-index #room-index-item-#{room2.id} button", "Join")
+    # Never been in the room, so the unread count doesn't show yet
+    |> send_message(room2, body: "Hello World 1")
+    |> refute_has("#rooms-list .rooms-list-item .unread-count", count: 1)
+    # Go into the room, then back to the first
+    |> click_link("#rooms-list .rooms-list-item", room2.name)
+    |> click_link("#rooms-list .rooms-list-item", room1.name)
+    # Fake another user sending a message here
+    |> send_message(room2, body: "Hello World 1")
+    |> assert_has("#rooms-list .rooms-list-item .unread-count", text: "1", count: 1)
+  end
+
+  defp send_message(conn, room, attrs) do
+    attrs = Keyword.merge(attrs, room: room)
+    msg = insert(:message, attrs)
+    Phoenix.PubSub.broadcast(Harmony.PubSub, topic(room.id), {:new_message, msg})
+    conn
+  end
+
+  defp topic(room_id), do: "chat_room:#{room_id}"
 end

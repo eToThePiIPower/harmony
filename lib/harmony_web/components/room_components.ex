@@ -30,7 +30,7 @@ defmodule HarmonyWeb.RoomComponents do
       </span>
       <span
         :if={@unread > 0}
-        class="flex justify-center items-center rounded-full bg-sky-500 text-white h-5 w-5 text-xs font-bold"
+        class="unread-count flex justify-center items-center rounded-full bg-sky-500 text-white h-5 w-5 text-xs font-bold"
       >
         {@unread}
       </span>

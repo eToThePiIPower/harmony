@@ -160,10 +160,10 @@ defmodule Harmony.ChatTest do
 
       list = Chat.list_joined_rooms_with_unread_counts(user)
 
-      assert {room1, 0} in list
-      assert {room2, 2} in list
-      assert {room3, 2} in list
-      assert {room4, 0} in list
+      assert {room1, 0, false} in list
+      assert {room2, 2, false} in list
+      assert {room3, 2, false} in list
+      assert {room4, 0, true} in list
     end
 
     test "joined?/2 returns if a user is a member of a room" do

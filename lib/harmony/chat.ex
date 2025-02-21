@@ -115,8 +115,8 @@ defmodule Harmony.Chat do
       where: membership.user_id == ^user.id,
       left_join: message in assoc(room, :messages),
       on: message.id > membership.last_read_id,
-      group_by: room.id,
-      select: {room, count(message.id)},
+      group_by: [room.id, membership.id],
+      select: {room, count(message.id), is_nil(membership.last_read_id)},
       order_by: [asc: room.name]
     )
     |> Repo.all()

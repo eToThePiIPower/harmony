@@ -11,7 +11,6 @@ defmodule HarmonyWeb.UsersCanDeleteMessages do
 
   test "users can delete their own messages", %{conn: conn, room: room, user: user} do
     [m1, m2] = insert_pair(:message, room: room, user: user)
-    Harmony.Chat.join_room!(room, user)
 
     conn
     |> visit("/rooms/#{room.name}")

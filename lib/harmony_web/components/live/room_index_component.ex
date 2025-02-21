@@ -63,7 +63,7 @@ defmodule HarmonyWeb.Components.RoomIndexComponent do
   def handle_event("toggle-room", %{"room" => room_name}, socket) do
     room = Chat.get_room(room_name)
     {room, joined?} = Chat.toggle_room_membership(room, socket.assigns.current_user)
-    send(self(), {:joined_room, room})
+    send(self(), {:toggled_room, room})
 
     socket
     |> stream_insert(:rooms, {room, joined?})

@@ -13,7 +13,7 @@ defmodule HarmonyWeb.ChatRoomLive do
       <.rooms_list_header is_admin={is_admin(@current_user)} />
       <.rooms_list title="Rooms">
         <.rooms_list_item
-          :for={{room, unread} <- @rooms}
+          :for={{room, unread, _all_new?} <- @rooms}
           room={room}
           unread={unread}
           active={room.id == @room.id}
@@ -82,7 +82,7 @@ defmodule HarmonyWeb.ChatRoomLive do
     end
 
     OnlineUsers.subscribe()
-    Enum.each(rooms, fn {room, _} -> Chat.subscribe_to_room(room) end)
+    Enum.each(rooms, fn {room, _, _} -> Chat.subscribe_to_room(room) end)
 
     socket
     |> assign(online_users: OnlineUsers.list())
@@ -99,6 +99,9 @@ defmodule HarmonyWeb.ChatRoomLive do
 
   def handle_params(%{"name" => name}, _uri, socket) do
     room = Chat.get_room(name) || Chat.default_room()
+
+    # socket.assigns[:room] is still the old room (or nil)
+    maybe_update_visitor_subscriptions(socket.assigns[:room], room, socket.assigns.current_user)
 
     last_read_id = Chat.get_last_read_id(room, socket.assigns.current_user)
 
@@ -139,7 +142,7 @@ defmodule HarmonyWeb.ChatRoomLive do
 
       message.user_id != socket.assigns.current_user.id ->
         socket
-        |> update(:rooms, inc_current_rooms_unread(message.room))
+        |> update(:rooms, inc_other_rooms_unread(message.room))
 
       true ->
         socket
@@ -161,7 +164,13 @@ defmodule HarmonyWeb.ChatRoomLive do
     |> noreply
   end
 
-  def handle_info({:joined_room, %Chat.Room{}}, socket) do
+  def handle_info({:toggled_room, %Chat.Room{} = room}, socket) do
+    if Chat.joined?(room, socket.assigns.current_user) do
+      Chat.subscribe_to_room(room)
+    else
+      Chat.unsubscribe_from_room(room)
+    end
+
     socket
     |> assign(:rooms, Chat.list_joined_rooms_with_unread_counts(socket.assigns.current_user))
     |> noreply
@@ -210,12 +219,12 @@ defmodule HarmonyWeb.ChatRoomLive do
     |> noreply
   end
 
-  defp inc_current_rooms_unread(room) do
+  defp inc_other_rooms_unread(room) do
     id = room.id
 
     fn rooms ->
       Enum.map(rooms, fn
-        {%Chat.Room{id: ^id} = room, count} -> {room, count + 1}
+        {%Chat.Room{id: ^id} = room, count, false} -> {room, count + 1, false}
         other -> other
       end)
     end
@@ -226,7 +235,7 @@ defmodule HarmonyWeb.ChatRoomLive do
 
     fn rooms ->
       Enum.map(rooms, fn
-        {%Chat.Room{id: ^id} = room, _} -> {room, 0}
+        {%Chat.Room{id: ^id} = room, _, _} -> {room, 0, false}
         other -> other
       end)
     end
@@ -247,6 +256,16 @@ defmodule HarmonyWeb.ChatRoomLive do
       {read, []} -> read
       # {read, unread} -> read ++ [:unread_marker | unread]
       {read, unread} -> read ++ [:unread_marker | unread]
+    end
+  end
+
+  defp maybe_update_visitor_subscriptions(old_room, new_room, user) do
+    if old_room && !Chat.joined?(old_room, user) do
+      Chat.unsubscribe_from_room(old_room)
+    end
+
+    if new_room && !Chat.joined?(new_room, user) do
+      Chat.subscribe_to_room(new_room)
     end
   end
 end
