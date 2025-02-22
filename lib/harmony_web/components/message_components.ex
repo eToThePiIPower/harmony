@@ -26,6 +26,12 @@ defmodule HarmonyWeb.MessageComponents do
   end
 
   def message_item(assigns) do
+    profile =
+      assigns.message.user
+      |> Harmony.Accounts.get_user_profile()
+
+    assigns = assign(assigns, :profile, profile)
+
     ~H"""
     <div id={@dom_id} class="group relative flex px-4 py-3 hover:bg-slate-100">
       <.message_delete_button :if={@show_delete} message={@message} />
@@ -34,7 +40,7 @@ defmodule HarmonyWeb.MessageComponents do
       <div class="ml-2">
         <div class="-mt-1">
           <.link class="text-sm font-semibold hover:underline">
-            <span class="message-user">{@message.user.username}</span>
+            <span class="message-user">{@profile.display_name}</span>
           </.link>
           <span
             id={@dom_id <> "timestamp"}
