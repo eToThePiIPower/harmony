@@ -4,7 +4,7 @@ defmodule Harmony.AccountsTest do
   alias Harmony.Accounts
 
   import Harmony.AccountsFixtures
-  alias Harmony.Accounts.{User, UserToken}
+  alias Harmony.Accounts.{Profile, User, UserToken}
 
   describe "get_user_by_email/1" do
     test "does not return the user if the email does not exist" do
@@ -112,6 +112,13 @@ defmodule Harmony.AccountsTest do
       assert is_binary(user.hashed_password)
       assert is_nil(user.confirmed_at)
       assert is_nil(user.password)
+    end
+
+    test "creates the users profile with display_name set to username" do
+      email = unique_user_email()
+      {:ok, user} = Accounts.register_user(valid_user_attributes(email: email))
+      assert %Profile{} = profile = Accounts.get_user_profile(user)
+      assert profile.display_name == user.username
     end
   end
 
@@ -538,6 +545,15 @@ defmodule Harmony.AccountsTest do
 
       assert u1 in Accounts.list_users()
       assert u2 in Accounts.list_users()
+    end
+  end
+
+  describe "get_user_profile/1" do
+    test "gets the user profile" do
+      u1 = user_fixture()
+      id = u1.id
+
+      assert %Profile{user_id: ^id} = Accounts.get_user_profile(u1)
     end
   end
 end

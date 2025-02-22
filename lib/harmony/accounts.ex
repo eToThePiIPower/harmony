@@ -6,7 +6,7 @@ defmodule Harmony.Accounts do
   import Ecto.Query, warn: false
   alias Harmony.Repo
 
-  alias Harmony.Accounts.{User, UserToken, UserNotifier}
+  alias Harmony.Accounts.{Profile, User, UserToken, UserNotifier}
 
   ## Database getters
 
@@ -67,6 +67,23 @@ defmodule Harmony.Accounts do
   """
   def get_user!(id), do: Repo.get!(User, id)
 
+  @doc """
+  Returns the profile for a user
+
+  We'll use this so we don't have to keep preloading the profile on users; when
+  we need profile information, we'll explicitly ask for the profile.
+
+  ## Examples
+
+      iex> get_user_profile!(user)
+      %Profile{}
+  """
+  def get_user_profile(%User{id: id}) do
+    Profile
+    |> where([p], p.user_id == ^id)
+    |> Repo.one()
+  end
+
   ## User registration
 
   @doc """
@@ -85,6 +102,16 @@ defmodule Harmony.Accounts do
     %User{}
     |> User.registration_changeset(attrs)
     |> Repo.insert()
+    |> maybe_create_profile
+  end
+
+  defp maybe_create_profile({:error, changeset}), do: {:error, changeset}
+
+  defp maybe_create_profile({:ok, user}) do
+    %Profile{user: user, display_name: user.username}
+    |> Repo.insert()
+
+    {:ok, user}
   end
 
   @doc """
