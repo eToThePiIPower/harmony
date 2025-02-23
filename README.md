@@ -36,6 +36,7 @@ Harmony is in an early stage right now. Planned features include:
 
     * [x]    Rooms
     * [x]    Messages
+    * [x]    New message markers/badges
     * [ ]    Room groups and ordering
     * [ ]    User profiles
     * [ ]    User roles (admin, moderator, user)
