@@ -13,6 +13,7 @@ defmodule HarmonyWeb.RoomComponents do
 
   attr :active, :boolean, required: true
   attr :room, Room, required: true
+  attr :unread, :integer, default: 0
 
   def rooms_list_item(assigns) do
     ~H"""
@@ -24,8 +25,32 @@ defmodule HarmonyWeb.RoomComponents do
       patch={~p"/rooms/#{@room.name}"}
     >
       <.icon name="hero-hashtag" class="h-4 w-4" />
-      <span class={["ml-2 leading-none name", @active && "font-bold"]}>
+      <span class={["ml-2 leading-none name grow", @active && "font-bold"]}>
         {@room.name}
+      </span>
+      <span
+        :if={@unread > 0}
+        class="unread-count flex justify-center items-center rounded-full bg-sky-500 text-white h-5 w-5 text-xs font-bold"
+      >
+        {@unread}
+      </span>
+    </.link>
+    """
+  end
+
+  attr :icon, :string, required: true
+  attr :title, :string, required: true
+  attr :on_click, :any
+
+  def rooms_list_xitem(assigns) do
+    ~H"""
+    <.link
+      phx-click={@on_click}
+      class="rooms-list-item flex items-center h-8 text-sm pl-8 pr-3 hover:bg-slate-300"
+    >
+      <.icon name={"hero-" <> @icon} class="h-4 w-4" />
+      <span class="ml-2 leading-none name">
+        {@title}
       </span>
     </.link>
     """
@@ -81,6 +106,7 @@ defmodule HarmonyWeb.RoomComponents do
 
   attr :title, :string, default: "Harmony"
   attr :subtitle, :string, default: "Welcome to the chat!"
+  attr :is_admin, :boolean, default: false
 
   def rooms_list_header(assigns) do
     ~H"""
@@ -93,11 +119,20 @@ defmodule HarmonyWeb.RoomComponents do
           {@subtitle}
         </span>
       </div>
+      <.link
+        :if={@is_admin}
+        class="text-[0.8125rem] leading-6 text-zinc-900 font-semibold hover:text-zinc-700"
+        phx-click={show_modal("new-room-modal")}
+      >
+        <.icon name="hero-plus" />
+        <span class="sr-only">Create a new room</span>
+      </.link>
     </div>
     """
   end
 
   attr :room, Room, required: true
+  attr :is_admin, :boolean, default: false
   attr :hide_topic?, :boolean, default: false
 
   def room_header(assigns) do
@@ -111,11 +146,22 @@ defmodule HarmonyWeb.RoomComponents do
         <h1 class="name text-sm font-bold leading-none">
           #{@room.name}
           <.link
+            :if={@is_admin}
             id="room-edit-link"
             class="font-normal text-xs text-blue-600 hover:text-blue-700"
-            navigate={~p"/rooms/#{@room.name}/edit"}
+            phx-click={show_modal("edit-room-modal")}
           >
             Edit
+          </.link>
+          <.link
+            :if={@is_admin}
+            id="room-delete-link"
+            phx-click="delete-room"
+            phx-value-room_id={@room.id}
+            data-confirm="Are you sure?"
+            class="font-normal text-xs text-blue-600 hover:text-blue-700"
+          >
+            Delete
           </.link>
         </h1>
         <div :if={!@hide_topic?} class="topic text-xs leading-none h-3.5">
@@ -126,39 +172,27 @@ defmodule HarmonyWeb.RoomComponents do
     """
   end
 
-  attr :current_user, Harmony.Accounts.User
-  slot :inner_block, required: false
+  attr :id, :string, default: "new-room-form"
+  attr :title, :string, default: "New chat room"
+  attr :for, Phoenix.HTML.Form, required: true
+  attr :target, Phoenix.LiveComponent.CID, default: nil
 
-  def rooms_list_actions(assigns) do
+  def room_form(assigns) do
     ~H"""
-    <ul class="relative z-10 flex items-center gap-4 px-4 sm:px-6 lg:px-8 justify-end bg-slate-300 py-2">
-      <li class="text-[0.8125rem] leading-6 text-zinc-900">
-        {@current_user.username}
-      </li>
-
-      <li>
-        <.link
-          href={~p"/users/settings"}
-          title="Settings"
-          class="text-[0.8125rem] leading-6 text-zinc-900 font-semibold hover:text-zinc-700"
-        >
-          <.icon name="hero-user-circle" />
-          <div class="sr-only">Settings</div>
-        </.link>
-      </li>
-
-      <li>
-        <.link
-          href={~p"/users/log_out"}
-          method="delete"
-          title="Log out"
-          class="text-[0.8125rem] leading-6 text-zinc-900 font-semibold hover:text-zinc-700"
-        >
-          <.icon name="hero-arrow-right-start-on-rectangle" />
-          <div class="sr-only">Log out</div>
-        </.link>
-      </li>
-    </ul>
+    <.header>{@title}</.header>
+    <.simple_form
+      for={@for}
+      id={@id}
+      phx-change="validate-room"
+      phx-submit="save-room"
+      phx-target={@target}
+    >
+      <.input field={@for[:name]} type="text" label="Name" phx-debounce />
+      <.input field={@for[:topic]} type="text" label="Topic" phx-debounce />
+      <:actions>
+        <.button phx-disable-with="Saving.." class="w-full">Save</.button>
+      </:actions>
+    </.simple_form>
     """
   end
 end

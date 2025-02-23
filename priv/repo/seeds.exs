@@ -29,6 +29,8 @@ han = Accounts.get_user_by_email("han@falcon.ship")
 leia = Accounts.get_user_by_email("leia@alderan.planet")
 chewie = Accounts.get_user_by_email("chewie@falcon.ship")
 
+Accounts.User.user_attrs_changeset(ben, %{role: :admin}) |> Harmony.Repo.update()
+
 room = Repo.insert!(%Room{name: "death-star", topic: "Making the Galaxy Great Again"})
 
 for {user, message} <- [

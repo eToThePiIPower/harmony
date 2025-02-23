@@ -55,6 +55,8 @@ defmodule HarmonyWeb do
       use Phoenix.LiveView,
         layout: {HarmonyWeb.Layouts, :app}
 
+      import HarmonyWeb.SocketHelpers
+
       unquote(html_helpers())
     end
   end
@@ -62,6 +64,8 @@ defmodule HarmonyWeb do
   def live_component do
     quote do
       use Phoenix.LiveComponent
+
+      import HarmonyWeb.SocketHelpers
 
       unquote(html_helpers())
     end
@@ -92,6 +96,7 @@ defmodule HarmonyWeb do
       # Chat.Room Components
       import HarmonyWeb.RoomComponents
       import HarmonyWeb.MessageComponents
+      import HarmonyWeb.UserComponents
 
       # Shortcut for generating JS commands
       alias Phoenix.LiveView.JS

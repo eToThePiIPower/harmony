@@ -1,15 +1,21 @@
 defmodule Harmony.Accounts.User do
   use Ecto.Schema
   import Ecto.Changeset
+
+  alias Harmony.Chat.{Room, RoomMembership}
+
   @primary_key {:id, :binary_id, autogenerate: true}
   @foreign_key_type :binary_id
   schema "users" do
     field :email, :string
     field :username, :string
+    field :role, Ecto.Enum, values: [:member, :admin, :moderator], default: :member
     field :password, :string, virtual: true, redact: true
     field :hashed_password, :string, redact: true
     field :current_password, :string, virtual: true, redact: true
     field :confirmed_at, :utc_datetime
+
+    many_to_many :rooms, Room, join_through: RoomMembership
 
     timestamps(type: :utc_datetime)
   end
@@ -43,6 +49,14 @@ defmodule Harmony.Accounts.User do
     |> validate_email(opts)
     |> validate_username(opts)
     |> validate_password(opts)
+  end
+
+  @doc """
+  A user changeset for non authentication data (such as roles).
+  """
+  def user_attrs_changeset(user, attrs, _opts \\ []) do
+    user
+    |> cast(attrs, [:role])
   end
 
   defp validate_email(changeset, opts) do
