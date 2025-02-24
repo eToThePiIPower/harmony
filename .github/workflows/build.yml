@@ -43,5 +43,7 @@ jobs:
         restore-keys: ${{ runner.os }}-mix-
     - name: Install dependencies
       run: mix deps.get
+    - name: Make upload directory
+      run: mkdir -p priv/static/uploads
     - name: Run tests
       run: mix test
