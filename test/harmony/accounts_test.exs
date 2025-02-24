@@ -557,6 +557,43 @@ defmodule Harmony.AccountsTest do
     end
   end
 
+  describe "change_user_profile/2" do
+    test "retrieves the user's profile and returns a changeset" do
+      user = user_fixture()
+      assert %Ecto.Changeset{} = Accounts.change_user_profile(user)
+    end
+
+    test "allows fields to be set" do
+      user = user_fixture()
+
+      changeset =
+        Accounts.change_user_profile(
+          user,
+          %{about_me: "My bio", display_name: "My name here"}
+        )
+
+      assert changeset.valid?
+      assert get_change(changeset, :about_me) == "My bio"
+      assert get_change(changeset, :display_name) == "My name here"
+      assert is_nil(get_change(changeset, :avatar_path))
+    end
+  end
+
+  describe "update_user_profile/2" do
+    test "updates a profile by taking the user" do
+      user = user_fixture()
+
+      attrs = %{
+        avatar_path: "/new/avatar/path.png",
+        display_name: "My New Name",
+        about_me: "All about me"
+      }
+
+      assert {:ok, new_profile} = Accounts.update_user_profile(user, attrs)
+      assert new_profile.avatar_path == "/new/avatar/path.png"
+    end
+  end
+
   describe "update_profile/2" do
     test "updates the profile" do
       user = user_fixture()
