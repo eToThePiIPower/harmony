@@ -2,12 +2,15 @@ defmodule HarmonyWeb.Components.RoomIndexComponent do
   use HarmonyWeb, :live_component
 
   alias Harmony.Chat
+  alias HarmonyWeb.Components.RoomNewComponent
 
   def render(assigns) do
     ~H"""
     <div>
       <.modal id="index-room-modal">
-        <.header>Browsing rooms</.header>
+        <.header>
+          <span>Browsing rooms</span>
+        </.header>
         <div id="room-index" phx-update="stream">
           <div
             :for={{id, {room, joined?}} <- @streams.rooms}
@@ -40,7 +43,17 @@ defmodule HarmonyWeb.Components.RoomIndexComponent do
             </button>
           </div>
         </div>
+        <.link
+          :if={@is_admin}
+          class="flex items-center block h-10 w-1/2 mx-auto justify-center text-xs text-zinc-900 font-light hover:text-zinc-700 hover:bg-slate-300"
+          phx-click={show_modal("new-room-modal")}
+        >
+          <.icon name="hero-plus" />
+          <span class="">Create a new room</span>
+        </.link>
       </.modal>
+
+      <.live_component module={RoomNewComponent} id="new-room-component" current_user={@current_user} />
     </div>
     """
   end
@@ -52,9 +65,11 @@ defmodule HarmonyWeb.Components.RoomIndexComponent do
 
   def update(assigns, socket) do
     rooms = Chat.list_rooms_with_joined(assigns.current_user)
+    is_admin = assigns.current_user.role == :admin
 
     socket
     |> assign(assigns)
+    |> assign(is_admin: is_admin)
     |> stream_configure(:rooms, dom_id: fn {r, _} -> "room-index-item-#{r.id}" end)
     |> stream(:rooms, rooms)
     |> ok

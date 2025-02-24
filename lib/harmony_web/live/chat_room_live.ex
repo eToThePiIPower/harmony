@@ -4,13 +4,13 @@ defmodule HarmonyWeb.ChatRoomLive do
   alias Harmony.Accounts
   alias Harmony.Chat
   alias Harmony.Chat.Message
-  alias HarmonyWeb.Components.{RoomEditComponent, RoomIndexComponent, RoomNewComponent}
+  alias HarmonyWeb.Components.{RoomEditComponent, RoomIndexComponent}
   alias HarmonyWeb.OnlineUsers
 
   def render(assigns) do
     ~H"""
     <div class="flex flex-col shrink-0 w-64 bg-slate-100">
-      <.rooms_list_header is_admin={is_admin(@current_user)} />
+      <.rooms_list_header />
       <.rooms_list title="Rooms">
         <.rooms_list_item
           :for={{room, unread, _all_new?} <- @rooms}
@@ -54,7 +54,6 @@ defmodule HarmonyWeb.ChatRoomLive do
 
     <%= if @current_user.role == :admin do %>
       <!-- Room modals -->
-      <.live_component module={RoomNewComponent} id="new-room-component" current_user={@current_user} />
       <%= if @room do %>
         <.live_component
           module={RoomEditComponent}
