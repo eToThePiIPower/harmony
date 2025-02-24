@@ -3,3 +3,9 @@
 @import "tailwindcss/utilities";
 
 /* This file is for your main application CSS */
+.text-2xs {
+    font-size: .625rem; line-height: 0.75rem;
+ }
+.text-3xs {
+    font-size: .5rem; line-height: 0.5rem;
+}

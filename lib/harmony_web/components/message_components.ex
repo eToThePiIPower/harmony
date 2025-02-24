@@ -26,20 +26,33 @@ defmodule HarmonyWeb.MessageComponents do
   end
 
   def message_item(assigns) do
-    profile =
-      assigns.message.user
-      |> Harmony.Accounts.get_user_profile()
+    user = assigns.message.user
+    profile = Harmony.Accounts.get_user_profile(user)
 
-    assigns = assign(assigns, :profile, profile)
+    assigns = assign(assigns, profile: profile, user: user)
 
     ~H"""
     <div id={@dom_id} class="group relative flex px-4 py-3 hover:bg-slate-100">
       <.message_delete_button :if={@show_delete} message={@message} />
-      <div class="h-10 w-10 rounded shrink-0 bg-slate-300"></div>
+      <img
+        class="h-10 w-10 rounded shrink-0 bg-slate-300"
+        style={"background-color: #{avatar_bgcolor(@user.username)};"}
+        src={avatar_path(@profile)}
+        phx-click={show("#msg-#{@message.id}-profile")}
+      />
+      <.live_component
+        module={HarmonyWeb.Components.ProfileComponent}
+        id={"msg-#{@message.id}-profile"}
+        profile={@profile}
+        user={@user}
+      />
 
       <div class="ml-2">
         <div class="-mt-1">
-          <.link class="text-sm font-semibold hover:underline">
+          <.link
+            class="text-sm font-semibold hover:underline"
+            phx-click={show("#msg-#{@message.id}-profile")}
+          >
             <span class="message-user">{@profile.display_name}</span>
           </.link>
           <span
@@ -73,7 +86,19 @@ defmodule HarmonyWeb.MessageComponents do
     """
   end
 
+  defp avatar_path(profile) do
+    if profile.avatar_path do
+      profile.avatar_path
+    else
+      ~p"/images/user_profile.svg"
+    end
+  end
+
   defp message_timestamp(message) do
     message.inserted_at |> Calendar.strftime("%I:%M %p on %Y/%m/%d")
+  end
+
+  defp avatar_bgcolor(username) do
+    ColorHash.hash(username) |> ColorHash.hsl_to_css()
   end
 end

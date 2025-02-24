@@ -677,4 +677,22 @@ defmodule HarmonyWeb.CoreComponents do
   def translate_errors(errors, field) when is_list(errors) do
     for {^field, {msg, opts}} <- errors, do: translate_error({msg, opts})
   end
+
+  @doc """
+  A basic tag or "pill" component. If you want to change the color, pass in a
+  class attribute.
+  """
+  attr :class, :string, default: "bg-zinc-900"
+  slot :inner_block, required: true
+
+  def tag(assigns) do
+    ~H"""
+    <span class={[
+      "text-2xs px-2 py-1 rounded-lg text-white",
+      @class
+    ]}>
+      {render_slot(@inner_block)}
+    </span>
+    """
+  end
 end

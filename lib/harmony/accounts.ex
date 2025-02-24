@@ -84,6 +84,12 @@ defmodule Harmony.Accounts do
     |> Repo.one()
   end
 
+  def update_profile(%Profile{} = profile, attrs \\ %{}) do
+    profile
+    |> Profile.changeset(attrs)
+    |> Repo.update()
+  end
+
   ## User registration
 
   @doc """
