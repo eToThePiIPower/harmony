@@ -4,7 +4,7 @@ defmodule Harmony.AccountsTest do
   alias Harmony.Accounts
 
   import Harmony.AccountsFixtures
-  alias Harmony.Accounts.{User, UserToken}
+  alias Harmony.Accounts.{Profile, User, UserToken}
 
   describe "get_user_by_email/1" do
     test "does not return the user if the email does not exist" do
@@ -112,6 +112,13 @@ defmodule Harmony.AccountsTest do
       assert is_binary(user.hashed_password)
       assert is_nil(user.confirmed_at)
       assert is_nil(user.password)
+    end
+
+    test "creates the users profile with display_name set to username" do
+      email = unique_user_email()
+      {:ok, user} = Accounts.register_user(valid_user_attributes(email: email))
+      assert %Profile{} = profile = Accounts.get_user_profile(user)
+      assert profile.display_name == user.username
     end
   end
 
@@ -538,6 +545,68 @@ defmodule Harmony.AccountsTest do
 
       assert u1 in Accounts.list_users()
       assert u2 in Accounts.list_users()
+    end
+  end
+
+  describe "get_user_profile/1" do
+    test "gets the user profile" do
+      u1 = user_fixture()
+      id = u1.id
+
+      assert %Profile{user_id: ^id} = Accounts.get_user_profile(u1)
+    end
+  end
+
+  describe "change_user_profile/2" do
+    test "retrieves the user's profile and returns a changeset" do
+      user = user_fixture()
+      assert %Ecto.Changeset{} = Accounts.change_user_profile(user)
+    end
+
+    test "allows fields to be set" do
+      user = user_fixture()
+
+      changeset =
+        Accounts.change_user_profile(
+          user,
+          %{about_me: "My bio", display_name: "My name here"}
+        )
+
+      assert changeset.valid?
+      assert get_change(changeset, :about_me) == "My bio"
+      assert get_change(changeset, :display_name) == "My name here"
+      assert is_nil(get_change(changeset, :avatar_path))
+    end
+  end
+
+  describe "update_user_profile/2" do
+    test "updates a profile by taking the user" do
+      user = user_fixture()
+
+      attrs = %{
+        avatar_path: "/new/avatar/path.png",
+        display_name: "My New Name",
+        about_me: "All about me"
+      }
+
+      assert {:ok, new_profile} = Accounts.update_user_profile(user, attrs)
+      assert new_profile.avatar_path == "/new/avatar/path.png"
+    end
+  end
+
+  describe "update_profile/2" do
+    test "updates the profile" do
+      user = user_fixture()
+      profile = Accounts.get_user_profile(user)
+
+      attrs = %{
+        avatar_path: "/new/avatar/path.png",
+        display_name: "My New Name",
+        about_me: "All about me"
+      }
+
+      assert {:ok, new_profile} = Accounts.update_profile(profile, attrs)
+      assert new_profile.avatar_path == "/new/avatar/path.png"
     end
   end
 end
