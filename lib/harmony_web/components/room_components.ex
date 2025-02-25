@@ -119,14 +119,6 @@ defmodule HarmonyWeb.RoomComponents do
           {@subtitle}
         </span>
       </div>
-      <.link
-        :if={@is_admin}
-        class="text-[0.8125rem] leading-6 text-zinc-900 font-semibold hover:text-zinc-700"
-        phx-click={show_modal("new-room-modal")}
-      >
-        <.icon name="hero-plus" />
-        <span class="sr-only">Create a new room</span>
-      </.link>
     </div>
     """
   end

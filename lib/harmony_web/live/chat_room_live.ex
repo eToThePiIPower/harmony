@@ -9,17 +9,25 @@ defmodule HarmonyWeb.ChatRoomLive do
 
   def render(assigns) do
     ~H"""
-    <div class="flex flex-col shrink-0 w-64 bg-slate-100">
-      <.rooms_list_header />
-      <.rooms_list title="Rooms">
-        <.rooms_list_item
-          :for={{room, unread, _all_new?} <- @rooms}
-          room={room}
-          unread={unread}
-          active={room.id == @room.id}
-        />
-        <.rooms_list_xitem on_click={show_modal("index-room-modal")} icon="plus" title="Add a room" />
-      </.rooms_list>
+    <div class={[
+      "z-15 relative flex flex-col shrink-0 w-64 bg-slate-100 transition-transform h-screen",
+      (@sidebar_left && "") || "max-w-12"
+    ]}>
+      <button class="absolute top-2 right-2" phx-click="toggle-sidebar-left">
+        <.icon name="hero-bars-3" />
+      </button>
+      <div :if={@sidebar_left}>
+        <.rooms_list_header />
+        <.rooms_list title="Rooms">
+          <.rooms_list_item
+            :for={{room, unread, _all_new?} <- @rooms}
+            room={room}
+            unread={unread}
+            active={room.id == @room.id}
+          />
+          <.rooms_list_xitem on_click={show_modal("index-room-modal")} icon="plus" title="Add a room" />
+        </.rooms_list>
+      </div>
     </div>
 
     <div class="flex flex-col grow shadow-lg">
@@ -87,6 +95,8 @@ defmodule HarmonyWeb.ChatRoomLive do
     |> assign(online_users: OnlineUsers.list())
     |> assign(rooms: rooms, hide_topic?: false)
     |> assign(users: users)
+    |> assign(:sidebar_left, true)
+    |> assign(:sidebar_right, true)
     |> stream_configure(:messages,
       dom_id: fn
         %Chat.Message{id: id} -> "messages-#{id}"
@@ -174,6 +184,18 @@ defmodule HarmonyWeb.ChatRoomLive do
 
     socket
     |> assign(:rooms, Chat.list_joined_rooms_with_unread_counts(socket.assigns.current_user))
+    |> noreply
+  end
+
+  def handle_event("toggle-sidebar-left", _params, socket) do
+    socket
+    |> update(:sidebar_left, &(!&1))
+    |> noreply
+  end
+
+  def handle_event("taggle-sidebar-right", _params, socket) do
+    socket
+    |> update(:sidebar_right, &(!&1))
     |> noreply
   end
 
