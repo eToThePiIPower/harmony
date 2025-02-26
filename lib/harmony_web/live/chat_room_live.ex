@@ -54,10 +54,16 @@ defmodule HarmonyWeb.ChatRoomLive do
       <% end %>
     </div>
 
-    <div class="flex flex-col shrink-0 w-64 bg-slate-100 push-right">
-      <.users_list users={@users} online_users={@online_users} />
+    <div class={[
+      "z-15 relative flex flex-col shrink-0 w-64 bg-slate-100 push-right",
+      (@sidebar_right && "") || "max-w-12"
+    ]}>
+      <button class="absolute top-2 left-2" phx-click="toggle-sidebar-right">
+        <.icon name="hero-bars-3" />
+      </button>
+      <.users_list :if={@sidebar_right} users={@users} online_users={@online_users} />
 
-      <.users_list_actions current_user={@current_user} />
+      <.users_list_actions :if={@sidebar_right} current_user={@current_user} />
     </div>
 
     <%= if @current_user.role == :admin do %>
@@ -193,7 +199,7 @@ defmodule HarmonyWeb.ChatRoomLive do
     |> noreply
   end
 
-  def handle_event("taggle-sidebar-right", _params, socket) do
+  def handle_event("toggle-sidebar-right", _params, socket) do
     socket
     |> update(:sidebar_right, &(!&1))
     |> noreply

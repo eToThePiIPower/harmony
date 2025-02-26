@@ -40,9 +40,7 @@ defmodule HarmonyWeb.UserComponents do
     ~H"""
     <div class="mt-4 grow">
       <div class="flex items-center h-8 px-3">
-        <div class="flex items-center grow">
-          <span class="ml-2 leading-none font-medium text-sm">Users</span>
-        </div>
+        <span class="mt-8 push-right leading-none font-medium text-sm">Users</span>
       </div>
 
       <div id="users-list">
