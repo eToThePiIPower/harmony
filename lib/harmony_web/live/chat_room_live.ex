@@ -91,6 +91,7 @@ defmodule HarmonyWeb.ChatRoomLive do
     |> stream_configure(:messages,
       dom_id: fn
         %Chat.Message{id: id} -> "messages-#{id}"
+        {:date_divider, date} -> "messages-date-divier-#{date}"
         :unread_marker -> "messages-unread-marker"
       end
     )
@@ -108,6 +109,7 @@ defmodule HarmonyWeb.ChatRoomLive do
     messages =
       room
       |> Chat.list_messages()
+      |> insert_date_dividers()
       |> maybe_insert_unread_marker(last_read_id)
 
     Chat.update_last_read_id(room, socket.assigns.current_user)
@@ -249,10 +251,23 @@ defmodule HarmonyWeb.ChatRoomLive do
     role == :admin
   end
 
+  defp insert_date_dividers(messages) do
+    messages
+    |> Enum.group_by(fn message ->
+      message.inserted_at
+      |> DateTime.to_date()
+    end)
+    |> Enum.sort_by(fn {date, _msg} -> date end, &(Date.compare(&1, &2) != :gt))
+    |> Enum.flat_map(fn {date, messages} -> messages ++ [{:date_divider, date}] end)
+  end
+
   defp maybe_insert_unread_marker(messages, nil), do: messages
 
   defp maybe_insert_unread_marker(messages, id) do
-    case Enum.split_while(messages, &(&1.id <= id)) do
+    case Enum.split_while(messages, fn
+           %Message{} = message -> message.id <= id
+           _ -> true
+         end) do
       {read, []} -> read
       # {read, unread} -> read ++ [:unread_marker | unread]
       {read, unread} -> read ++ [:unread_marker | unread]
