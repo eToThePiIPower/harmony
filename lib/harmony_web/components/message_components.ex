@@ -16,6 +16,19 @@ defmodule HarmonyWeb.MessageComponents do
   attr :show_delete, :boolean, default: false
   attr :dom_id, :string
 
+  def message_item(%{message: {:date_divider, date}} = assigns) do
+    assigns = assign(assigns, :date, date)
+
+    ~H"""
+    <div :if={@date != Date.utc_today()} id={@dom_id} class="flex flex-col items-center mt-2">
+      <hr class="w-full" />
+      <span class="flex items-center justify-center -mt-3 bg-white h-6 px-3 rounded-full border text-xs font-semibold mx-auto">
+        {format_date(@date)}
+      </span>
+    </div>
+    """
+  end
+
   def message_item(%{message: :unread_marker} = assigns) do
     ~H"""
     <div id={@dom_id} class="w-full flex text-red-500 items-center gap-3 pr-5">
@@ -68,6 +81,16 @@ defmodule HarmonyWeb.MessageComponents do
       </div>
     </div>
     """
+  end
+
+  defp format_date(%Date{} = date) do
+    today = Date.utc_today()
+
+    case Date.diff(today, date) do
+      0 -> "Today"
+      1 -> "Yesterday"
+      _ -> date |> Calendar.strftime("%A, %d %B %Y")
+    end
   end
 
   attr :message, Message, required: true
