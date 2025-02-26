@@ -12,7 +12,6 @@ defmodule HarmonyWeb.ChatRoomsHaveDateDividersTest do
 
     conn
     |> visit("/rooms/#{room.name}")
-    |> open_browser
     |> assert_has("#messages-date-divier-#{DateTime.to_date(yesterday)}", text: "Yesterday")
   end
 
