@@ -1,7 +1,7 @@
 defmodule Harmony.Chat.Message do
   use Ecto.Schema
   import Ecto.Changeset
-  alias Harmony.Chat.Room
+  alias Harmony.Chat.{Reply, Room}
   alias Harmony.Accounts.User
 
   @type t() :: %__MODULE__{
@@ -21,6 +21,8 @@ defmodule Harmony.Chat.Message do
     field :body, :string
     belongs_to :user, User
     belongs_to :room, Room
+
+    has_many :replies, Reply
 
     timestamps(type: :utc_datetime)
   end
