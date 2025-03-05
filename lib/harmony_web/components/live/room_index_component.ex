@@ -16,7 +16,7 @@ defmodule HarmonyWeb.Components.RoomIndexComponent do
             :for={{id, {room, joined?}} <- @streams.rooms}
             id={id}
             phx-click={JS.patch("/rooms/#{room.name}")}
-            class="room-index-item list-row p-2 group"
+            class="room-index-item list-row p-2 group hover:bg-base-300 hover:shadow-md"
           >
             <.icon name="hero-hashtag" />
             <div class="list-col-grow">
