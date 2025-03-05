@@ -1,5 +1,8 @@
 {
   "dependencies": {
     "javascript-time-ago": "^2.5.11"
+  },
+  "devDependencies": {
+    "daisyui": "^5.0.0"
   }
 }

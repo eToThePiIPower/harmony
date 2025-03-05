@@ -235,8 +235,7 @@ defmodule HarmonyWeb.CoreComponents do
     <button
       type={@type}
       class={[
-        "phx-submit-loading:opacity-75 rounded-lg bg-zinc-900 hover:bg-zinc-700 py-2 px-3",
-        "text-sm font-semibold leading-6 text-white active:text-white/80",
+        "btn phx-submit-loading:opacity-75",
         @class
       ]}
       {@rest}
@@ -290,6 +289,8 @@ defmodule HarmonyWeb.CoreComponents do
   attr :prompt, :string, default: nil, doc: "the prompt for select inputs"
   attr :options, :list, doc: "the options to pass to Phoenix.HTML.Form.options_for_select/2"
   attr :multiple, :boolean, default: false, doc: "the multiple flag for select inputs"
+
+  attr :class, :string, default: nil
 
   attr :rest, :global,
     include: ~w(accept autocomplete capture cols disabled form list max maxlength min minlength
@@ -374,19 +375,26 @@ defmodule HarmonyWeb.CoreComponents do
   def input(assigns) do
     ~H"""
     <div>
-      <.label for={@id}>{@label}</.label>
-      <input
-        type={@type}
-        name={@name}
-        id={@id}
-        value={Phoenix.HTML.Form.normalize_value(@type, @value)}
+      <label
         class={[
-          "mt-2 block w-full rounded-lg text-zinc-900 focus:ring-0 sm:text-sm sm:leading-6",
-          @errors == [] && "border-zinc-300 focus:border-zinc-400",
-          @errors != [] && "border-rose-400 focus:border-rose-400"
+          "input w-full",
+          @errors == [] && @class != nil && @class,
+          @errors != [] && "input-error"
         ]}
-        {@rest}
-      />
+        for={@id}
+      >
+        <span class="sr-only">{@label}</span>
+        <input
+          type={@type}
+          name={@name}
+          placeholder={@label}
+          id={@id}
+          value={Phoenix.HTML.Form.normalize_value(@type, @value)}
+          class="grow"
+          {@rest}
+        />
+        <.icon :if={@rest[:required]} name="hero-exclamation-circle-mini" />
+      </label>
       <.error :for={msg <- @errors}>{msg}</.error>
     </div>
     """
@@ -413,7 +421,7 @@ defmodule HarmonyWeb.CoreComponents do
 
   def error(assigns) do
     ~H"""
-    <p class="mt-3 flex gap-3 text-sm leading-6 text-rose-600">
+    <p class="validator-hint text-error">
       <.icon name="hero-exclamation-circle-mini" class="mt-0.5 h-5 w-5 flex-none" />
       {render_slot(@inner_block)}
     </p>
