@@ -25,7 +25,7 @@ defmodule HarmonyWeb.ChatRoomLive do
             unread={unread}
             active={room.id == @room.id}
           />
-          <.rooms_list_xitem on_click={show_modal("index-room-modal")} icon="plus" title="Add a room" />
+          <.rooms_list_xitem on_click={show_modal("room-index-modal")} icon="plus" title="Add a room" />
         </.rooms_list>
       </div>
     </div>

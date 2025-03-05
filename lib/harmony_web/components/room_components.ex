@@ -17,24 +17,23 @@ defmodule HarmonyWeb.RoomComponents do
 
   def rooms_list_item(assigns) do
     ~H"""
-    <.link
-      class={[
-        "rooms-list-item flex items-center h-8 text-sm pl-8 pr-3",
-        (@active && "bg-slate-300") || "hover:bg-slate-300"
-      ]}
-      patch={~p"/rooms/#{@room.name}"}
-    >
-      <.icon name="hero-hashtag" class="h-4 w-4" />
-      <span class={["ml-2 leading-none name grow", @active && "font-bold"]}>
-        {@room.name}
-      </span>
-      <span
-        :if={@unread > 0}
-        class="unread-count flex justify-center items-center rounded-full bg-sky-500 text-white h-5 w-5 text-xs font-bold"
+    <li>
+      <.link
+        class={[
+          "rooms-list-item",
+          (@active && "menu-active") || ""
+        ]}
+        patch={~p"/rooms/#{@room.name}"}
       >
-        {@unread}
-      </span>
-    </.link>
+        <.icon name="hero-hashtag" class="h-4 w-4" />
+        <span class="name grow">
+          {@room.name}
+        </span>
+        <span :if={@unread > 0} class="unread-count badge badge-xs badge-info">
+          {@unread}
+        </span>
+      </.link>
+    </li>
     """
   end
 
@@ -44,15 +43,14 @@ defmodule HarmonyWeb.RoomComponents do
 
   def rooms_list_xitem(assigns) do
     ~H"""
-    <.link
-      phx-click={@on_click}
-      class="rooms-list-item flex items-center h-8 text-sm pl-8 pr-3 hover:bg-slate-300"
-    >
-      <.icon name={"hero-" <> @icon} class="h-4 w-4" />
-      <span class="ml-2 leading-none name">
-        {@title}
-      </span>
-    </.link>
+    <li>
+      <.link phx-click={@on_click} class="rooms-list-item">
+        <.icon name={"hero-" <> @icon} class="h-4 w-4" />
+        <span class="ml-2 leading-none name">
+          {@title}
+        </span>
+      </.link>
+    </li>
     """
   end
 
@@ -61,30 +59,27 @@ defmodule HarmonyWeb.RoomComponents do
 
   def message_send_form(assigns) do
     ~H"""
-    <div class="h-12 bg-white px-4 pb-4">
-      <.form
-        for={@form}
-        id="message-send-form"
-        phx-submit="send-message"
-        phx-change="validate-message"
-        class="flex items-center border-2 border-slate-300 rounded-sm p-1"
-      >
-        <label for="chat-message-textarea" class="sr-only">Message Body</label>
-        <textarea
-          class="grow text-sm px-3 border-l border-slate-300 mx-1 resize-none"
-          cols=""
-          id="chat-message-textarea"
-          name={@form[:body].name}
-          placeholder={"Message ##{@room.name}"}
-          phx-hook="CtrlEnterSubmit"
-          phx-debounce
-          rows="1"
-        >{Phoenix.HTML.Form.normalize_value("textarea", @form[:body].value)}</textarea>
-        <button class="shrink flex items-center justify-center h-6 w-6 rounded hover:bg-slate-200">
-          <.icon name="hero-paper-airplane" class="h-4 w-4" />
-        </button>
-      </.form>
-    </div>
+    <.form
+      for={@form}
+      id="message-send-form"
+      phx-submit="send-message"
+      phx-change="validate-message"
+      class="p-2 join"
+    >
+      <label for="chat-message-textarea" class="sr-only">Message Body</label>
+      <textarea
+        class="textarea textarea-primary textarea-md join-item grow"
+        id="chat-message-textarea"
+        name={@form[:body].name}
+        placeholder={"Message ##{@room.name}"}
+        phx-hook="CtrlEnterSubmit"
+        phx-debounce
+        rows="1"
+      >{Phoenix.HTML.Form.normalize_value("textarea", @form[:body].value)}</textarea>
+      <button class="btn btn-primary join-item h-full">
+        <.icon name="hero-paper-airplane" class="h-4 w-4" />
+      </button>
+    </.form>
     """
   end
 
@@ -97,9 +92,9 @@ defmodule HarmonyWeb.RoomComponents do
       <div class="flex items-center h-8 px-3">
         <span class="ml-2 leading-none font-medium text-sm">{@title}</span>
       </div>
-      <div id="rooms-list">
+      <ul id="rooms-list" class="menu">
         {render_slot(@inner_block)}
-      </div>
+      </ul>
     </div>
     """
   end
