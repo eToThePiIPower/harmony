@@ -4,6 +4,17 @@ defmodule Harmony.Accounts.Profile do
 
   alias Harmony.Accounts.User
 
+  @type t() :: %__MODULE__{
+          id: Ecto.UUID.t(),
+          user: User.t(),
+          user_id: Ecto.UUID.t(),
+          avatar_path: Path.t(),
+          display_name: String.t(),
+          about_me: String.t(),
+          inserted_at: DateTime.t(),
+          updated_at: DateTime.t()
+        }
+
   @primary_key {:id, :binary_id, autogenerate: true}
   @foreign_key_type :binary_id
   schema "user_profiles" do

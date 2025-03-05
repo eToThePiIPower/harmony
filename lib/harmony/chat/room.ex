@@ -5,6 +5,17 @@ defmodule Harmony.Chat.Room do
   alias Harmony.Accounts.User
   alias Harmony.Chat.{Message, RoomMembership}
 
+  @type t() :: %__MODULE__{
+          id: Ecto.UUID.t(),
+          name: String.t(),
+          topic: String.t(),
+          members: list(User.t()),
+          memberships: list(RoomMembership.t()),
+          messages: list(Message.t()),
+          inserted_at: DateTime.t(),
+          updated_at: DateTime.t()
+        }
+
   @primary_key {:id, :binary_id, autogenerate: true}
   @foreign_key_type :binary_id
   schema "rooms" do
