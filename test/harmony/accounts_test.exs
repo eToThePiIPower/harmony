@@ -593,20 +593,4 @@ defmodule Harmony.AccountsTest do
       assert new_profile.avatar_path == "/new/avatar/path.png"
     end
   end
-
-  describe "update_profile/2" do
-    test "updates the profile" do
-      user = user_fixture()
-      profile = Accounts.get_user_profile(user)
-
-      attrs = %{
-        avatar_path: "/new/avatar/path.png",
-        display_name: "My New Name",
-        about_me: "All about me"
-      }
-
-      assert {:ok, new_profile} = Accounts.update_profile(profile, attrs)
-      assert new_profile.avatar_path == "/new/avatar/path.png"
-    end
-  end
 end

@@ -67,43 +67,10 @@ defmodule Harmony.Accounts do
   """
   def get_user!(id), do: Repo.get!(User, id)
 
-  @doc """
-  Returns the profile for a user
-
-  We'll use this so we don't have to keep preloading the profile on users; when
-  we need profile information, we'll explicitly ask for the profile.
-
-  ## Examples
-
-      iex> get_user_profile!(user)
-      %Profile{}
-  """
-  def get_user_profile(%User{id: id}) do
-    Profile
-    |> where([p], p.user_id == ^id)
-    |> Repo.one()
-  end
-
-  def update_profile(%Profile{} = profile, attrs \\ %{}) do
-    profile
-    |> Profile.changeset(attrs)
-    |> Repo.update()
-  end
-
-  def change_user_profile(%User{} = user, attrs \\ %{}) do
-    get_user_profile(user)
-    |> Profile.changeset(attrs)
-  end
-
-  def update_user_profile(%User{} = user, attrs \\ %{}) do
-    get_user_profile(user)
-    |> update_profile(attrs)
-  end
-
   ## User registration
 
   @doc """
-  Registers a user.
+  Registers a user, and creates their profile.
 
   ## Examples
 
@@ -452,7 +419,63 @@ defmodule Harmony.Accounts do
       iex> list_users()
       [%User{}, %User{}]
   """
+  @spec list_users() :: list(User.t())
   def list_users() do
     Repo.all(from u in User, order_by: [asc: u.username])
+  end
+
+  # Accounts.Profile
+
+  @doc """
+  Returns the profile for a user
+
+  We'll use this so we don't have to keep preloading the profile on users; when
+  we need profile information, we'll explicitly ask for the profile.
+
+  ## Examples
+
+      iex> get_user_profile!(user)
+      %Profile{}
+  """
+  @spec get_user_profile(User.t()) :: Profile.t()
+  def get_user_profile(%User{id: id}) do
+    Profile
+    |> where([p], p.user_id == ^id)
+    |> Repo.one()
+  end
+
+  @doc """
+  Returns an `%Ecto.Changeset{}` for changing the profile for the given user.
+
+  ## Examples
+
+      iex> change_user_profile(user)
+      %Ecto.Changeset{data: %Profile{}}
+
+  """
+  @spec change_user_profile(User.t(), map()) :: Ecto.Changeset.t(Profile.t())
+  def change_user_profile(%User{} = user, attrs \\ %{}) do
+    get_user_profile(user)
+    |> Profile.changeset(attrs)
+  end
+
+  @doc """
+  Updates the user's profile.
+
+  ## Examples
+
+      iex> update_user_profile(user, %{display_name: ...})
+      {:ok, %Profile{}}
+
+      iex> update_user_profile(user, %{display_name: nil})
+      {:error, %Ecto.Changeset{}}
+
+  """
+  @spec update_user_profile(User.t(), map()) ::
+          {:ok, Profile.t()} | {:error, Ecto.Changeset.t(Profile.t())}
+  def update_user_profile(%User{} = user, attrs \\ %{}) do
+    get_user_profile(user)
+    |> Profile.changeset(attrs)
+    |> Repo.update()
   end
 end
