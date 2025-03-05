@@ -7,45 +7,47 @@ defmodule HarmonyWeb.Components.RoomIndexComponent do
   def render(assigns) do
     ~H"""
     <div>
-      <.modal id="index-room-modal">
+      <.modal id="room-index-modal">
         <.header>
           <span>Browsing rooms</span>
         </.header>
-        <div id="room-index" phx-update="stream">
-          <div
+        <ul id="room-index" phx-update="stream" class="list">
+          <li
             :for={{id, {room, joined?}} <- @streams.rooms}
             id={id}
             phx-click={JS.patch("/rooms/#{room.name}")}
-            class="room-index-item flex items-center h-10 text-sm pl-8 pr-3 hover:bg-slate-300 group"
+            class="room-index-item list-row p-2 group"
           >
             <.icon name="hero-hashtag" />
-            <div class="grow">
-              <div class="ml-2 leading-none block text-lg">
+            <div class="list-col-grow">
+              <div class="block text-lg">
                 {room.name}
               </div>
-              <div class="ml-2 leading-none block">
-                <span :if={joined?} class="text-green-600 font-bold">Joined</span>
+              <div class="block">
+                <span :if={joined?} class="text-success font-bold">Joined</span>
                 <span :if={joined?} class="mx-1">·</span>
                 <span class="text-gray-600 font-light">{room.topic}</span>
               </div>
             </div>
-            <button
-              class="hidden group-hover:block rounded-sm hover:bg-zinc-100 py-1 px-2 text-sm font-semibold border border-zinc-400"
-              phx-click="toggle-room"
-              phx-target={@myself}
-              phx-value-room={room.name}
-            >
-              <%= if joined? do %>
-                Leave
-              <% else %>
-                Join
-              <% end %>
-            </button>
-          </div>
-        </div>
+            <div class="list-col w-24 h-8">
+              <button
+                class="btn btn-ghost hidden group-hover:block"
+                phx-click="toggle-room"
+                phx-target={@myself}
+                phx-value-room={room.name}
+              >
+                <%= if joined? do %>
+                  Leave
+                <% else %>
+                  Join
+                <% end %>
+              </button>
+            </div>
+          </li>
+        </ul>
         <.link
           :if={@is_admin}
-          class="flex items-center block h-10 w-1/2 mx-auto justify-center text-xs text-zinc-900 font-light hover:text-zinc-700 hover:bg-slate-300"
+          class="btn btn-block btn-ghost my-2"
           phx-click={show_modal("new-room-modal")}
         >
           <.icon name="hero-plus" />

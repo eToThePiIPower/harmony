@@ -11,6 +11,13 @@ module.exports = {
     "../lib/harmony_web.ex",
     "../lib/harmony_web/**/*.*ex"
   ],
+  daisyui: {
+    themes: [
+      "light",
+      "dark",
+      "synthwave",
+    ]
+  },
   theme: {
     extend: {
       colors: {
