@@ -4,7 +4,7 @@ defmodule HarmonyWeb.ChatRoomLive do
   alias Harmony.Accounts
   alias Harmony.Chat
   alias Harmony.Chat.Message
-  alias HarmonyWeb.Components.{RoomEditComponent, RoomIndexComponent}
+  alias HarmonyWeb.Components.{RepliesComponent, RoomEditComponent, RoomIndexComponent}
   alias HarmonyWeb.OnlineUsers
 
   def render(assigns) do
@@ -66,6 +66,12 @@ defmodule HarmonyWeb.ChatRoomLive do
       <.users_list_actions :if={@sidebar_right} current_user={@current_user} />
     </div>
 
+    <.live_component
+      id="replies-component"
+      module={RepliesComponent}
+      message={@replies_parent}
+      room={@room}
+    />"
     <%= if @current_user.role == :admin do %>
       <!-- Room modals -->
       <%= if @room do %>
@@ -103,6 +109,7 @@ defmodule HarmonyWeb.ChatRoomLive do
     |> assign(users: users)
     |> assign(:sidebar_left, true)
     |> assign(:sidebar_right, true)
+    |> assign(:replies_parent, nil)
     |> stream_configure(:messages,
       dom_id: fn
         %Chat.Message{id: id} -> "messages-#{id}"
@@ -190,6 +197,20 @@ defmodule HarmonyWeb.ChatRoomLive do
 
     socket
     |> assign(:rooms, Chat.list_joined_rooms_with_unread_counts(socket.assigns.current_user))
+    |> noreply
+  end
+
+  def handle_event("show-replies", %{"message_id" => message_id}, socket) do
+    message = Chat.get_message(message_id)
+
+    socket
+    |> assign(replies_parent: message)
+    |> noreply
+  end
+
+  def handle_event("hide-replies", _params, socket) do
+    socket
+    |> assign(replies_parent: nil)
     |> noreply
   end
 

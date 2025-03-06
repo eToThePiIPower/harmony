@@ -207,6 +207,28 @@ defmodule Harmony.ChatTest do
   end
 
   describe "messages" do
+    test "get_message/1 gets a message by id" do
+      msg = insert(:message)
+      id = msg.id
+
+      assert %Chat.Message{id: ^id} = message = Chat.get_message(msg.id)
+      # Assert the user is preloaded
+      assert %Harmony.Accounts.User{} = message.user
+    end
+
+    test "get_message_with_replies/1 gets a message by id" do
+      msg =
+        insert(:message)
+        |> with_replies(count: 2)
+
+      id = msg.id
+
+      assert %Chat.Message{id: ^id} = message = Chat.get_message_with_replies(msg.id)
+      # Assert the user and replies are is preloaded
+      assert %Harmony.Accounts.User{} = message.user
+      assert length(message.replies) == 2
+    end
+
     test "list_messages/1 returns all messages for a room" do
       room = insert(:room)
       insert_list(3, :message, room: room)

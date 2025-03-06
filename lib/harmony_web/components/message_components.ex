@@ -9,12 +9,12 @@ defmodule HarmonyWeb.MessageComponents do
   import HarmonyWeb.CoreComponents
 
   alias Harmony.Chat.Message
-  # alias Phoenix.LiveView.JS
 
   # attr :message, Message OR :unread_marker
   attr :message, :any, required: true
   attr :show_delete, :boolean, default: false
   attr :dom_id, :string
+  attr :threaded, :boolean, default: false
 
   def message_item(%{message: {:date_divider, date}} = assigns) do
     assigns = assign(assigns, :date, date)
@@ -54,6 +54,7 @@ defmodule HarmonyWeb.MessageComponents do
         phx-click={show("#msg-#{@message.id}-profile")}
       />
       <.live_component
+        :if={!@threaded}
         module={HarmonyWeb.Components.ProfileComponent}
         id={"msg-#{@message.id}-profile"}
         profile={@profile}
@@ -77,6 +78,14 @@ defmodule HarmonyWeb.MessageComponents do
             {message_timestamp(@message)}
           </span>
           <p class="text-sm message-body">{@message.body}</p>
+        </div>
+        <div
+          :if={!@threaded}
+          id={@dom_id <> "-replies-btn"}
+          phx-click="show-replies"
+          phx-value-message_id={@message.id}
+        >
+          Replies
         </div>
       </div>
     </div>

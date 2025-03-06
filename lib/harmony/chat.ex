@@ -246,6 +246,19 @@ defmodule Harmony.Chat do
 
   # Chat.Message
 
+  def get_message(id) do
+    Message
+    |> preload(:user)
+    |> Repo.get(id)
+  end
+
+  def get_message_with_replies(id) do
+    Message
+    |> preload(:user)
+    |> preload(:replies)
+    |> Repo.get(id)
+  end
+
   @spec list_messages(Room.t()) :: list(Message.t())
   def list_messages(%Room{id: room_id}) do
     Message
