@@ -75,7 +75,7 @@ defmodule HarmonyWeb.UsersCanJoinRoomsAsMembersTest do
 
   defp send_message(conn, room, attrs) do
     attrs = Keyword.merge(attrs, room: room)
-    msg = insert(:message, attrs)
+    msg = insert(:message, attrs) |> Harmony.Repo.preload(user: :profile)
     Phoenix.PubSub.broadcast(Harmony.PubSub, topic(room.id), {:new_message, msg})
     conn
   end

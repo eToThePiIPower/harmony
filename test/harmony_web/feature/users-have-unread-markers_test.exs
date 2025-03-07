@@ -65,7 +65,7 @@ defmodule HarmonyWeb.UsersHaveUnreadMarkersTest do
 
     conn = visit(conn, "/rooms/#{room.name}")
     # The actual exercise - sending a new message
-    m4 = insert(:message, room: room)
+    m4 = insert(:message, room: room) |> Harmony.Repo.preload(user: :profile)
     send(conn.view.pid, {:new_message, m4})
     # Need to use the conn again to get it to process the message
     assert_has(conn, ".message-body", text: m4.body)

@@ -248,14 +248,18 @@ defmodule Harmony.Chat do
 
   def get_message(id) do
     Message
-    |> preload(:user)
+    # Preload the profiles because otherwise we get an n+1 problem loading all
+    # the display names and avatars
+    |> preload(user: :profile)
     |> Repo.get(id)
   end
 
   def get_message_with_replies(id) do
     Message
-    |> preload(:user)
-    |> preload(:replies)
+    # Preload the profiles because otherwise we get an n+1 problem loading all
+    # the display names and avatars
+    |> preload(user: :profile)
+    |> preload(replies: [user: :profile])
     |> Repo.get(id)
   end
 
@@ -264,7 +268,9 @@ defmodule Harmony.Chat do
     Message
     |> where([m], m.room_id == ^room_id)
     |> order_by([m], asc: :inserted_at, asc: :id)
-    |> preload(:user)
+    # Preload the profiles because otherwise we get an n+1 problem loading all
+    # the display names and avatars
+    |> preload(user: :profile)
     |> Repo.all()
   end
 
@@ -281,6 +287,8 @@ defmodule Harmony.Chat do
            %Message{user: user, room: room}
            |> Message.changeset(attrs)
            |> Repo.insert() do
+      # the event handlers expect the profile preloaded
+      message = Repo.preload(message, user: :profile)
       Phoenix.PubSub.broadcast!(@pubsub, topic(room.id), {:new_message, message})
       {:ok, message}
     else

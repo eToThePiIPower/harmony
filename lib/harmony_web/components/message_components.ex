@@ -40,13 +40,16 @@ defmodule HarmonyWeb.MessageComponents do
 
   def message_item(assigns) do
     user = assigns.message.user
-    profile = Harmony.Accounts.get_user_profile(user)
+    profile = user.profile
 
     assigns = assign(assigns, profile: profile, user: user)
 
     ~H"""
     <div id={@dom_id} class="group relative flex px-4 py-3 hover:bg-slate-100">
-      <.message_delete_button :if={@show_delete} message={@message} />
+      <div class="join absolute top-4 right-4 hidden group-hover:inline-flex">
+        <.message_delete_button :if={@show_delete} message={@message} />
+        <.message_reply_button message={@message} />
+      </div>
       <img
         class="h-10 w-10 rounded shrink-0 bg-slate-300"
         style={"background-color: #{avatar_bgcolor(@user.username)};"}
@@ -79,14 +82,6 @@ defmodule HarmonyWeb.MessageComponents do
           </span>
           <p class="text-sm message-body">{@message.body}</p>
         </div>
-        <div
-          :if={!@threaded}
-          id={@dom_id <> "-replies-btn"}
-          phx-click="show-replies"
-          phx-value-message_id={@message.id}
-        >
-          Replies
-        </div>
       </div>
     </div>
     """
@@ -110,10 +105,23 @@ defmodule HarmonyWeb.MessageComponents do
       phx-click="delete-message"
       phx-value-id={@message.id}
       data-confirm="Are you sure?"
-      class="absolute top-4 right-4 text-red-500 hover:text-red-800 cursor-pointer hidden group-hover:block"
+      class="btn btn-error btn-sm join-item cursor-pointer"
     >
       <.icon name="hero-trash" class="h-4 w-4" />
       <div class="sr-only">Delete</div>
+    </button>
+    """
+  end
+
+  defp message_reply_button(assigns) do
+    ~H"""
+    <button
+      class="btn btn-sm btn-info btn-soft join-item cursor-pointer"
+      phx-click="show-replies"
+      phx-value-message_id={@message.id}
+    >
+      <.icon name="hero-arrow-uturn-left" class="h-4 w-4" />
+      <div class="sr-only">Show replies</div>
     </button>
     """
   end

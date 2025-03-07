@@ -43,7 +43,7 @@ defmodule HarmonyWeb.ChatRoomLive do
             :for={{dom_id, message} <- @streams.messages}
             dom_id={dom_id}
             message={message}
-            show_delete={is_struct(message) && @current_user == message.user}
+            show_delete={is_struct(message) && @current_user.id == message.user.id}
           />
         </div>
         <.message_send_form
@@ -201,7 +201,7 @@ defmodule HarmonyWeb.ChatRoomLive do
   end
 
   def handle_event("show-replies", %{"message_id" => message_id}, socket) do
-    message = Chat.get_message(message_id)
+    message = Chat.get_message_with_replies(message_id)
 
     socket
     |> assign(replies_parent: message)

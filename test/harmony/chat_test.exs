@@ -212,8 +212,9 @@ defmodule Harmony.ChatTest do
       id = msg.id
 
       assert %Chat.Message{id: ^id} = message = Chat.get_message(msg.id)
-      # Assert the user is preloaded
+      # Assert the user and their is preloaded
       assert %Harmony.Accounts.User{} = message.user
+      assert %Harmony.Accounts.Profile{} = message.user.profile
     end
 
     test "get_message_with_replies/1 gets a message by id" do
@@ -226,6 +227,7 @@ defmodule Harmony.ChatTest do
       assert %Chat.Message{id: ^id} = message = Chat.get_message_with_replies(msg.id)
       # Assert the user and replies are is preloaded
       assert %Harmony.Accounts.User{} = message.user
+      assert %Harmony.Accounts.Profile{} = message.user.profile
       assert length(message.replies) == 2
     end
 
