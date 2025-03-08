@@ -70,6 +70,7 @@ defmodule HarmonyWeb.ChatRoomLive do
       id="replies-component"
       module={RepliesComponent}
       message={@replies_parent}
+      user={@current_user}
       room={@room}
     />"
     <%= if @current_user.role == :admin do %>
@@ -198,6 +199,26 @@ defmodule HarmonyWeb.ChatRoomLive do
     socket
     |> assign(:rooms, Chat.list_joined_rooms_with_unread_counts(socket.assigns.current_user))
     |> noreply
+  end
+
+  def handle_info({:new_reply, message_id, %Chat.Reply{} = reply}, socket) do
+    send_update(RepliesComponent,
+      id: "replies-component",
+      new_reply: reply,
+      message_id: message_id
+    )
+
+    {:noreply, socket}
+  end
+
+  def handle_info({:delete_reply, message_id, %Chat.Reply{} = reply}, socket) do
+    send_update(RepliesComponent,
+      id: "replies-component",
+      deleted_reply: reply,
+      message_id: message_id
+    )
+
+    {:noreply, socket}
   end
 
   def handle_event("show-replies", %{"message_id" => message_id}, socket) do

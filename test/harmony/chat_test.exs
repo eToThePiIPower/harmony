@@ -301,4 +301,67 @@ defmodule Harmony.ChatTest do
       assert [%Chat.Message{id: ^id}] = Chat.list_messages(room)
     end
   end
+
+  describe "replies" do
+    test "list_replies" do
+      message = insert(:message)
+      [r1, r2] = insert_pair(:reply, message: message)
+      insert_pair(:reply)
+      [id1, id2] = [r1.id, r2.id]
+
+      assert [%Chat.Reply{id: ^id1}, %Chat.Reply{id: ^id2}] =
+               Chat.list_replies(message.id)
+    end
+
+    test "change_reply/2 returns a valid changeset" do
+      user = user_fixture()
+      message = insert(:message)
+      reply = %Chat.Reply{message: message, user: user}
+      new_attrs = %{body: "reply body"}
+
+      assert changeset = %Ecto.Changeset{} = Chat.change_reply(reply, new_attrs)
+      assert changeset.changes.body == "reply body"
+      assert changeset.valid?
+    end
+
+    test "create_reply/3 creates a reply" do
+      user = user_fixture()
+      message = insert(:message)
+      params = %{body: "First reply!"}
+      Chat.subscribe_to_room(message.room)
+      message_id = message.id
+
+      assert {:ok, reply} = Chat.create_reply(user, message, params)
+      assert_receive({:new_reply, ^message_id, ^reply})
+      assert reply.body == "First reply!"
+    end
+  end
+
+  test "delete_reply_by_id/2 delete a message with id && user" do
+    user = user_fixture()
+    message = insert(:message)
+    reply = insert(:reply, user: user, message: message)
+    id = reply.id
+    mid = message.id
+    Chat.subscribe_to_room(message.room)
+
+    assert [%Chat.Reply{id: ^id}] = Chat.list_replies(message.id)
+    assert {:ok, %Chat.Reply{}} = Chat.delete_reply_by_id(id, user)
+    assert_receive({:delete_reply, ^mid, %Chat.Reply{id: ^id}})
+    assert [] == Chat.list_replies(message.id)
+  end
+
+  test "delete_reply_by_id/2 does not delete a message with wrong user" do
+    user = user_fixture()
+    message = insert(:message)
+    reply = insert(:reply, message: message)
+    id = reply.id
+    mid = message.id
+    Chat.subscribe_to_room(message.room)
+
+    assert [%Chat.Reply{id: ^id}] = Chat.list_replies(message.id)
+    assert {:error, _} = Chat.delete_reply_by_id(id, user)
+    refute_receive({:delete_reply, ^mid, %Chat.Reply{id: ^id}})
+    assert [%Chat.Reply{id: ^id}] = Chat.list_replies(message.id)
+  end
 end

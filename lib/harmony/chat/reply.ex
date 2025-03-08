@@ -5,6 +5,17 @@ defmodule Harmony.Chat.Reply do
   alias Harmony.Accounts.User
   alias Harmony.Chat.Message
 
+  @type t() :: %__MODULE__{
+          id: UUIDv7.t(),
+          body: String.t(),
+          user: User.t(),
+          user_id: Ecto.UUID.t(),
+          message: Message.t(),
+          message: UUIDv7.t(),
+          inserted_at: DateTime.t(),
+          updated_at: DateTime.t()
+        }
+
   @primary_key {:id, UUIDv7, autogenerate: true}
   @foreign_key_type :binary_id
   schema "replies" do
