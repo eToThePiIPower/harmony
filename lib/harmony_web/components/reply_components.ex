@@ -50,6 +50,7 @@ defmodule HarmonyWeb.ReplyComponents do
   attr :form, Phoenix.HTML.Form, required: true
   attr :target, Phoenix.LiveComponent.CID, default: nil
   attr :room, Harmony.Chat.Room, required: true
+  attr :class, :string, default: ""
 
   def send_reply_form(assigns) do
     ~H"""
@@ -59,7 +60,7 @@ defmodule HarmonyWeb.ReplyComponents do
       phx-submit="send-reply"
       phx-change="validate-reply"
       phx-target={@target}
-      class="p-2 join"
+      class={["p-2 join join-horizontal", @class]}
     >
       <label for="chat-reply-textarea" class="sr-only">Reply Body</label>
       <textarea
@@ -71,7 +72,7 @@ defmodule HarmonyWeb.ReplyComponents do
         phx-debounce
         rows="3"
       >{Phoenix.HTML.Form.normalize_value("textarea", @form[:body].value)}</textarea>
-      <button class="btn btn-primary join-item h-full">
+      <button class="btn btn-primary join-item h-auto w-auto">
         <.icon name="hero-paper-airplane" class="h-4 w-4" />
       </button>
     </.form>

@@ -23,7 +23,7 @@ defmodule HarmonyWeb.Components.RepliesComponent do
             phx-click="hide-replies"
           >
           </div>
-          <div class="menu bg-white w-5/6 md:w-1/3 h-full">
+          <div class="menu bg-white w-5/6 md:w-1/3 h-full flex flex-col flex-nowrap">
             <div :if={@room} class="header border-b pb-3">
               <h2 class="font-bold">Replies</h2>
               <div>#{@room.name}</div>
@@ -31,7 +31,7 @@ defmodule HarmonyWeb.Components.RepliesComponent do
             <%= if assigns[:message] do %>
               <.message_item message={@message} dom_id="reply-base-message" threaded />
               <hr />
-              <div id="replies-list" phx-update="stream">
+              <div id="replies-list" phx-update="stream" class="overflow-y-auto">
                 <.reply_item
                   :for={{dom_id, reply} <- @streams.replies}
                   dom_id={dom_id}
@@ -40,7 +40,7 @@ defmodule HarmonyWeb.Components.RepliesComponent do
                   delete_target={@myself}
                 />
               </div>
-              <.send_reply_form form={@form} target={@myself} room={@room} />
+              <.send_reply_form form={@form} target={@myself} room={@room} class="w-full" />
             <% end %>
           </div>
         </div>
