@@ -76,7 +76,7 @@ defmodule HarmonyWeb.UsersCanSendRepliessTest do
       |> assert_has("#replies-list .reply-body", text: "Test reply body")
       |> assert_has("#replies-list .reply-user", text: user2.username)
 
-    reply = Chat.list_replies(message.id) |> List.first()
+    [reply] = Chat.get_message_with_replies(message.id).replies
 
     # user2 deletes their reply
     session2
@@ -112,7 +112,7 @@ defmodule HarmonyWeb.UsersCanSendRepliessTest do
       |> fill_in("#reply-send-form textarea", "Reply Body", with: "Test reply body again")
       |> submit()
 
-    [reply1, reply2] = Chat.list_replies(message.id)
+    [reply1, reply2] = Chat.get_message_with_replies(message.id).replies
 
     # user1 sees an avatar-group pop up under the message with a count
     session1 =

@@ -201,30 +201,20 @@ defmodule HarmonyWeb.ChatRoomLive do
     |> noreply
   end
 
-  def handle_info({:new_reply, message_id, %Chat.Reply{} = reply}, socket) do
-    send_update(RepliesComponent,
-      id: "replies-component",
-      new_reply: reply,
-      message_id: message_id
-    )
-
+  def handle_info({:new_reply, message_id, _reply}, socket) do
     message = Chat.get_message_with_replies(message_id)
 
     socket
+    |> maybe_update_replies_parent(message)
     |> stream_insert(:messages, message)
     |> noreply
   end
 
-  def handle_info({:delete_reply, message_id, %Chat.Reply{} = reply}, socket) do
-    send_update(RepliesComponent,
-      id: "replies-component",
-      deleted_reply: reply,
-      message_id: message_id
-    )
-
+  def handle_info({:delete_reply, message_id, _reply}, socket) do
     message = Chat.get_message_with_replies(message_id)
 
     socket
+    |> maybe_update_replies_parent(message)
     |> stream_insert(:messages, message)
     |> noreply
   end
@@ -358,6 +348,14 @@ defmodule HarmonyWeb.ChatRoomLive do
 
     if new_room && !Chat.joined?(new_room, user) do
       Chat.subscribe_to_room(new_room)
+    end
+  end
+
+  defp maybe_update_replies_parent(socket, message) do
+    if socket.assigns[:replies_parent] && socket.assigns.replies_parent.id == message.id do
+      assign(socket, :replies_parent, message)
+    else
+      socket
     end
   end
 end

@@ -306,16 +306,6 @@ defmodule Harmony.ChatTest do
   end
 
   describe "replies" do
-    test "list_replies" do
-      message = insert(:message)
-      [r1, r2] = insert_pair(:reply, message: message)
-      insert_pair(:reply)
-      [id1, id2] = [r1.id, r2.id]
-
-      assert [%Chat.Reply{id: ^id1}, %Chat.Reply{id: ^id2}] =
-               Chat.list_replies(message.id)
-    end
-
     test "change_reply/2 returns a valid changeset" do
       user = user_fixture()
       message = insert(:message)
@@ -348,10 +338,9 @@ defmodule Harmony.ChatTest do
     mid = message.id
     Chat.subscribe_to_room(message.room)
 
-    assert [%Chat.Reply{id: ^id}] = Chat.list_replies(message.id)
     assert {:ok, %Chat.Reply{}} = Chat.delete_reply_by_id(id, user)
     assert_receive({:delete_reply, ^mid, %Chat.Reply{id: ^id}})
-    assert [] == Chat.list_replies(message.id)
+    assert Chat.get_message_with_replies(mid).replies == []
   end
 
   test "delete_reply_by_id/2 does not delete a message with wrong user" do
@@ -362,9 +351,8 @@ defmodule Harmony.ChatTest do
     mid = message.id
     Chat.subscribe_to_room(message.room)
 
-    assert [%Chat.Reply{id: ^id}] = Chat.list_replies(message.id)
     assert {:error, _} = Chat.delete_reply_by_id(id, user)
     refute_receive({:delete_reply, ^mid, %Chat.Reply{id: ^id}})
-    assert [%Chat.Reply{id: ^id}] = Chat.list_replies(message.id)
+    assert [%Chat.Reply{id: ^id}] = Chat.get_message_with_replies(mid).replies
   end
 end

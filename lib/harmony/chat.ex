@@ -255,12 +255,13 @@ defmodule Harmony.Chat do
   end
 
   def get_message_with_replies(id) do
+    replies = from reply in Reply, order_by: [asc: :inserted_at, asc: :id]
+
     Message
-    # Preload the profiles because otherwise we get an n+1 problem loading all
-    # the display names and avatars
+    |> where([m], m.id == ^id)
     |> preload(user: :profile)
-    |> preload(replies: [user: :profile])
-    |> Repo.get(id)
+    |> preload(replies: ^{replies, [user: :profile]})
+    |> Repo.one!()
   end
 
   @spec list_messages(Room.t()) :: list(Message.t())
@@ -311,13 +312,6 @@ defmodule Harmony.Chat do
   end
 
   # Chat.Reply
-
-  @spec list_replies(UUIDv7.t()) :: list(Reply.t())
-  def list_replies(message_id) do
-    Reply
-    |> where([r], r.message_id == ^message_id)
-    |> Repo.all()
-  end
 
   @spec change_reply(Reply.t(), map()) :: Ecto.Changeset.t(Reply.t())
   def change_reply(%Reply{} = reply, attrs \\ %{}) do
