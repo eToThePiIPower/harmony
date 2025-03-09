@@ -271,6 +271,7 @@ defmodule Harmony.Chat do
     # Preload the profiles because otherwise we get an n+1 problem loading all
     # the display names and avatars
     |> preload(user: :profile)
+    |> preload(replies: [user: :profile])
     |> Repo.all()
   end
 
@@ -287,8 +288,8 @@ defmodule Harmony.Chat do
            %Message{user: user, room: room}
            |> Message.changeset(attrs)
            |> Repo.insert() do
-      # the event handlers expect the profile preloaded
-      message = Repo.preload(message, user: :profile)
+      # the event handlers expect the profile and replies preloaded
+      message = Repo.preload(message, user: :profile, replies: [user: :profile])
       Phoenix.PubSub.broadcast!(@pubsub, topic(room.id), {:new_message, message})
       {:ok, message}
     else

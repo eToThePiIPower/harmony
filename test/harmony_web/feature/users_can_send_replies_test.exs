@@ -86,4 +86,59 @@ defmodule HarmonyWeb.UsersCanSendRepliessTest do
     session1
     |> refute_has("#replies-list .reply-body", text: "Test reply body")
   end
+
+  test "replies appear as avatar groups in real time", %{
+    conn: conn,
+    room: room,
+    message: message
+  } do
+    user1 = user_fixture()
+    user2 = user_fixture()
+
+    session1 =
+      conn
+      |> log_in_user(user1)
+      |> visit("/rooms/#{room.name}")
+      |> refute_has("#messages-list #messages-#{message.id} .avatar-group")
+
+    # in a separate session, user2 also logs in and sends two replies
+    session2 =
+      conn
+      |> log_in_user(user2)
+      |> visit("/rooms/#{room.name}")
+      |> click_button("#messages-#{message.id} button", "Show replies")
+      |> fill_in("#reply-send-form textarea", "Reply Body", with: "Test reply body")
+      |> submit()
+      |> fill_in("#reply-send-form textarea", "Reply Body", with: "Test reply body again")
+      |> submit()
+
+    [reply1, reply2] = Chat.list_replies(message.id)
+
+    # user1 sees an avatar-group pop up under the message with a count
+    session1 =
+      session1
+      |> assert_has("#messages-list #messages-#{message.id} .avatar-group",
+        text: "2 replies from 1 user"
+      )
+
+    # user2 deletes a reply
+    session2 =
+      session2
+      |> click_button("#replies-#{reply1.id} button", "Delete")
+
+    # user1 sees the reply count decrement
+    session1 =
+      session1
+      |> assert_has("#messages-list #messages-#{message.id} .avatar-group",
+        text: "1 reply from 1 user"
+      )
+
+    # user2 deletes their other reply
+    session2
+    |> click_button("#replies-#{reply2.id} button", "Delete")
+
+    # user1 sees the avatar-group disappear
+    session1
+    |> refute_has("#messages-list #messages-#{message.id} .avatar-group")
+  end
 end

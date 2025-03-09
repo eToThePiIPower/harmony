@@ -82,6 +82,8 @@ defmodule HarmonyWeb.MessageComponents do
           </span>
           <p class="text-sm message-body">{@message.body}</p>
         </div>
+
+        <.reply_avatar_group :if={@message.replies} replies={@message.replies} />
       </div>
     </div>
     """
@@ -141,4 +143,41 @@ defmodule HarmonyWeb.MessageComponents do
   defp avatar_bgcolor(username) do
     ColorHash.hash(username) |> ColorHash.hsl_to_css()
   end
+
+  attr :replies, :list, default: []
+
+  def reply_avatar_group(assigns) do
+    users =
+      assigns.replies
+      |> Enum.map(& &1.user)
+      |> Enum.uniq_by(& &1.id)
+
+    assigns = assign(assigns, :users, users)
+
+    ~H"""
+    <div :if={length(@replies) > 0} class="avatar-group -space-x-4">
+      <div :for={user <- @users} class="avatar">
+        <div class="w-6">
+          <img
+            src={avatar_path(user.profile)}
+            style={"background-color: #{avatar_bgcolor(user.username)};"}
+          />
+        </div>
+      </div>
+      <div class="avatar avatar-placeholder">
+        <div class="bg-neutral text-neutral-content w-6">
+          <span>+{length(@replies)}</span>
+          <div class="span sr-only">
+            {pluralize_replies_from_users(replies: length(@replies), users: length(@users))}
+          </div>
+        </div>
+      </div>
+    </div>
+    """
+  end
+
+  defp pluralize_replies_from_users(replies: 1, users: 1), do: "1 reply from 1 user"
+  defp pluralize_replies_from_users(replies: 1, users: n), do: "1 reply from #{n} users"
+  defp pluralize_replies_from_users(replies: n, users: 1), do: "#{n} replies from 1 user"
+  defp pluralize_replies_from_users(replies: n, users: m), do: "#{n} replies from #{m} users"
 end

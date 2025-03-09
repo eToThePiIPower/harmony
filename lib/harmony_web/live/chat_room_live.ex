@@ -208,7 +208,11 @@ defmodule HarmonyWeb.ChatRoomLive do
       message_id: message_id
     )
 
-    {:noreply, socket}
+    message = Chat.get_message_with_replies(message_id)
+
+    socket
+    |> stream_insert(:messages, message)
+    |> noreply
   end
 
   def handle_info({:delete_reply, message_id, %Chat.Reply{} = reply}, socket) do
@@ -218,7 +222,11 @@ defmodule HarmonyWeb.ChatRoomLive do
       message_id: message_id
     )
 
-    {:noreply, socket}
+    message = Chat.get_message_with_replies(message_id)
+
+    socket
+    |> stream_insert(:messages, message)
+    |> noreply
   end
 
   def handle_event("show-replies", %{"message_id" => message_id}, socket) do

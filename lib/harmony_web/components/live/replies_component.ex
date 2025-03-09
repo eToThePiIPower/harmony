@@ -50,7 +50,7 @@ defmodule HarmonyWeb.Components.RepliesComponent do
   end
 
   def update(%{new_reply: new_reply, message_id: message_id}, socket) do
-    if message_id == socket.assigns.message.id do
+    if socket.assigns.message && message_id == socket.assigns.message.id do
       socket
       |> stream_insert(:replies, new_reply)
     else
@@ -60,7 +60,7 @@ defmodule HarmonyWeb.Components.RepliesComponent do
   end
 
   def update(%{deleted_reply: deleted_reply, message_id: message_id}, socket) do
-    if message_id == socket.assigns.message.id do
+    if socket.assigns.message && message_id == socket.assigns.message.id do
       socket
       |> stream_delete(:replies, deleted_reply)
     else

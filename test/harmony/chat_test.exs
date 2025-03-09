@@ -238,8 +238,11 @@ defmodule Harmony.ChatTest do
       other_room = insert(:room)
       insert_list(3, :message, room: other_room)
 
-      messages = Chat.list_messages(room)
+      [m1 | _] = messages = Chat.list_messages(room)
       assert length(messages) == 3
+
+      # We need the replies preloaded
+      assert is_list(m1.replies)
     end
 
     test "create_message/3 create a message" do
