@@ -9,12 +9,12 @@ defmodule HarmonyWeb.MessageComponents do
   import HarmonyWeb.CoreComponents
 
   alias Harmony.Chat.Message
-  # alias Phoenix.LiveView.JS
 
   # attr :message, Message OR :unread_marker
   attr :message, :any, required: true
   attr :show_delete, :boolean, default: false
   attr :dom_id, :string
+  attr :threaded, :boolean, default: false
 
   def message_item(%{message: {:date_divider, date}} = assigns) do
     assigns = assign(assigns, :date, date)
@@ -40,13 +40,16 @@ defmodule HarmonyWeb.MessageComponents do
 
   def message_item(assigns) do
     user = assigns.message.user
-    profile = Harmony.Accounts.get_user_profile(user)
+    profile = user.profile
 
     assigns = assign(assigns, profile: profile, user: user)
 
     ~H"""
     <div id={@dom_id} class="group relative flex px-4 py-3 hover:bg-slate-100">
-      <.message_delete_button :if={@show_delete} message={@message} />
+      <div class="join absolute top-4 right-4 hidden group-hover:inline-flex">
+        <.message_delete_button :if={@show_delete} message={@message} />
+        <.message_reply_button message={@message} />
+      </div>
       <img
         class="h-10 w-10 rounded shrink-0 bg-slate-300"
         style={"background-color: #{avatar_bgcolor(@user.username)};"}
@@ -54,6 +57,7 @@ defmodule HarmonyWeb.MessageComponents do
         phx-click={show("#msg-#{@message.id}-profile")}
       />
       <.live_component
+        :if={!@threaded}
         module={HarmonyWeb.Components.ProfileComponent}
         id={"msg-#{@message.id}-profile"}
         profile={@profile}
@@ -78,6 +82,8 @@ defmodule HarmonyWeb.MessageComponents do
           </span>
           <p class="text-sm message-body">{@message.body}</p>
         </div>
+
+        <.reply_avatar_group :if={@message.replies} replies={@message.replies} />
       </div>
     </div>
     """
@@ -101,10 +107,23 @@ defmodule HarmonyWeb.MessageComponents do
       phx-click="delete-message"
       phx-value-id={@message.id}
       data-confirm="Are you sure?"
-      class="absolute top-4 right-4 text-red-500 hover:text-red-800 cursor-pointer hidden group-hover:block"
+      class="btn btn-error btn-sm join-item cursor-pointer"
     >
       <.icon name="hero-trash" class="h-4 w-4" />
       <div class="sr-only">Delete</div>
+    </button>
+    """
+  end
+
+  defp message_reply_button(assigns) do
+    ~H"""
+    <button
+      class="btn btn-sm btn-info btn-soft join-item cursor-pointer"
+      phx-click="show-replies"
+      phx-value-message_id={@message.id}
+    >
+      <.icon name="hero-arrow-uturn-left" class="h-4 w-4" />
+      <div class="sr-only">Show replies</div>
     </button>
     """
   end
@@ -124,4 +143,41 @@ defmodule HarmonyWeb.MessageComponents do
   defp avatar_bgcolor(username) do
     ColorHash.hash(username) |> ColorHash.hsl_to_css()
   end
+
+  attr :replies, :list, default: []
+
+  def reply_avatar_group(assigns) do
+    users =
+      assigns.replies
+      |> Enum.map(& &1.user)
+      |> Enum.uniq_by(& &1.id)
+
+    assigns = assign(assigns, :users, users)
+
+    ~H"""
+    <div :if={length(@replies) > 0} class="avatar-group -space-x-4">
+      <div :for={user <- @users} class="avatar">
+        <div class="w-6">
+          <img
+            src={avatar_path(user.profile)}
+            style={"background-color: #{avatar_bgcolor(user.username)};"}
+          />
+        </div>
+      </div>
+      <div class="avatar avatar-placeholder">
+        <div class="bg-neutral text-neutral-content w-6">
+          <span>+{length(@replies)}</span>
+          <div class="span sr-only">
+            {pluralize_replies_from_users(replies: length(@replies), users: length(@users))}
+          </div>
+        </div>
+      </div>
+    </div>
+    """
+  end
+
+  defp pluralize_replies_from_users(replies: 1, users: 1), do: "1 reply from 1 user"
+  defp pluralize_replies_from_users(replies: 1, users: n), do: "1 reply from #{n} users"
+  defp pluralize_replies_from_users(replies: n, users: 1), do: "#{n} replies from 1 user"
+  defp pluralize_replies_from_users(replies: n, users: m), do: "#{n} replies from #{m} users"
 end

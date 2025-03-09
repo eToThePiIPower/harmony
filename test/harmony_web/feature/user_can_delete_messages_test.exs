@@ -27,6 +27,6 @@ defmodule HarmonyWeb.UsersCanDeleteMessages do
     conn
     |> visit("/rooms/#{room.name}")
     |> assert_has("#messages-#{m.id}")
-    |> refute_has("#messages-#{m.id} button")
+    |> refute_has("#messages-#{m.id} button", text: "Delete")
   end
 end

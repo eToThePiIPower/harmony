@@ -4,7 +4,7 @@ defmodule HarmonyWeb.ChatRoomLive do
   alias Harmony.Accounts
   alias Harmony.Chat
   alias Harmony.Chat.Message
-  alias HarmonyWeb.Components.{RoomEditComponent, RoomIndexComponent}
+  alias HarmonyWeb.Components.{RepliesComponent, RoomEditComponent, RoomIndexComponent}
   alias HarmonyWeb.OnlineUsers
 
   def render(assigns) do
@@ -43,7 +43,7 @@ defmodule HarmonyWeb.ChatRoomLive do
             :for={{dom_id, message} <- @streams.messages}
             dom_id={dom_id}
             message={message}
-            show_delete={is_struct(message) && @current_user == message.user}
+            show_delete={is_struct(message) && @current_user.id == message.user.id}
           />
         </div>
         <.message_send_form
@@ -66,6 +66,13 @@ defmodule HarmonyWeb.ChatRoomLive do
       <.users_list_actions :if={@sidebar_right} current_user={@current_user} />
     </div>
 
+    <.live_component
+      id="replies-component"
+      module={RepliesComponent}
+      message={@replies_parent}
+      user={@current_user}
+      room={@room}
+    />"
     <%= if @current_user.role == :admin do %>
       <!-- Room modals -->
       <%= if @room do %>
@@ -103,6 +110,7 @@ defmodule HarmonyWeb.ChatRoomLive do
     |> assign(users: users)
     |> assign(:sidebar_left, true)
     |> assign(:sidebar_right, true)
+    |> assign(:replies_parent, nil)
     |> stream_configure(:messages,
       dom_id: fn
         %Chat.Message{id: id} -> "messages-#{id}"
@@ -190,6 +198,38 @@ defmodule HarmonyWeb.ChatRoomLive do
 
     socket
     |> assign(:rooms, Chat.list_joined_rooms_with_unread_counts(socket.assigns.current_user))
+    |> noreply
+  end
+
+  def handle_info({:new_reply, message_id, _reply}, socket) do
+    message = Chat.get_message_with_replies(message_id)
+
+    socket
+    |> maybe_update_replies_parent(message)
+    |> stream_insert(:messages, message)
+    |> noreply
+  end
+
+  def handle_info({:delete_reply, message_id, _reply}, socket) do
+    message = Chat.get_message_with_replies(message_id)
+
+    socket
+    |> maybe_update_replies_parent(message)
+    |> stream_insert(:messages, message)
+    |> noreply
+  end
+
+  def handle_event("show-replies", %{"message_id" => message_id}, socket) do
+    message = Chat.get_message_with_replies(message_id)
+
+    socket
+    |> assign(replies_parent: message)
+    |> noreply
+  end
+
+  def handle_event("hide-replies", _params, socket) do
+    socket
+    |> assign(replies_parent: nil)
     |> noreply
   end
 
@@ -308,6 +348,14 @@ defmodule HarmonyWeb.ChatRoomLive do
 
     if new_room && !Chat.joined?(new_room, user) do
       Chat.subscribe_to_room(new_room)
+    end
+  end
+
+  defp maybe_update_replies_parent(socket, message) do
+    if socket.assigns[:replies_parent] && socket.assigns.replies_parent.id == message.id do
+      assign(socket, :replies_parent, message)
+    else
+      socket
     end
   end
 end

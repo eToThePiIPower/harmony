@@ -207,6 +207,30 @@ defmodule Harmony.ChatTest do
   end
 
   describe "messages" do
+    test "get_message/1 gets a message by id" do
+      msg = insert(:message)
+      id = msg.id
+
+      assert %Chat.Message{id: ^id} = message = Chat.get_message(msg.id)
+      # Assert the user and their is preloaded
+      assert %Harmony.Accounts.User{} = message.user
+      assert %Harmony.Accounts.Profile{} = message.user.profile
+    end
+
+    test "get_message_with_replies/1 gets a message by id" do
+      msg =
+        insert(:message)
+        |> with_replies(count: 2)
+
+      id = msg.id
+
+      assert %Chat.Message{id: ^id} = message = Chat.get_message_with_replies(msg.id)
+      # Assert the user and replies are is preloaded
+      assert %Harmony.Accounts.User{} = message.user
+      assert %Harmony.Accounts.Profile{} = message.user.profile
+      assert length(message.replies) == 2
+    end
+
     test "list_messages/1 returns all messages for a room" do
       room = insert(:room)
       insert_list(3, :message, room: room)
@@ -214,8 +238,11 @@ defmodule Harmony.ChatTest do
       other_room = insert(:room)
       insert_list(3, :message, room: other_room)
 
-      messages = Chat.list_messages(room)
+      [m1 | _] = messages = Chat.list_messages(room)
       assert length(messages) == 3
+
+      # We need the replies preloaded
+      assert is_list(m1.replies)
     end
 
     test "create_message/3 create a message" do
@@ -276,5 +303,56 @@ defmodule Harmony.ChatTest do
       refute_receive({:delete_message, %Chat.Message{id: ^id}})
       assert [%Chat.Message{id: ^id}] = Chat.list_messages(room)
     end
+  end
+
+  describe "replies" do
+    test "change_reply/2 returns a valid changeset" do
+      user = user_fixture()
+      message = insert(:message)
+      reply = %Chat.Reply{message: message, user: user}
+      new_attrs = %{body: "reply body"}
+
+      assert changeset = %Ecto.Changeset{} = Chat.change_reply(reply, new_attrs)
+      assert changeset.changes.body == "reply body"
+      assert changeset.valid?
+    end
+
+    test "create_reply/3 creates a reply" do
+      user = user_fixture()
+      message = insert(:message)
+      params = %{body: "First reply!"}
+      Chat.subscribe_to_room(message.room)
+      message_id = message.id
+
+      assert {:ok, reply} = Chat.create_reply(user, message, params)
+      assert_receive({:new_reply, ^message_id, ^reply})
+      assert reply.body == "First reply!"
+    end
+  end
+
+  test "delete_reply_by_id/2 delete a message with id && user" do
+    user = user_fixture()
+    message = insert(:message)
+    reply = insert(:reply, user: user, message: message)
+    id = reply.id
+    mid = message.id
+    Chat.subscribe_to_room(message.room)
+
+    assert {:ok, %Chat.Reply{}} = Chat.delete_reply_by_id(id, user)
+    assert_receive({:delete_reply, ^mid, %Chat.Reply{id: ^id}})
+    assert Chat.get_message_with_replies(mid).replies == []
+  end
+
+  test "delete_reply_by_id/2 does not delete a message with wrong user" do
+    user = user_fixture()
+    message = insert(:message)
+    reply = insert(:reply, message: message)
+    id = reply.id
+    mid = message.id
+    Chat.subscribe_to_room(message.room)
+
+    assert {:error, _} = Chat.delete_reply_by_id(id, user)
+    refute_receive({:delete_reply, ^mid, %Chat.Reply{id: ^id}})
+    assert [%Chat.Reply{id: ^id}] = Chat.get_message_with_replies(mid).replies
   end
 end

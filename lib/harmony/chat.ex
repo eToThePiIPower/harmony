@@ -1,7 +1,7 @@
 defmodule Harmony.Chat do
   alias Harmony.Repo
   alias Harmony.Accounts.User
-  alias Harmony.Chat.{Message, Room, RoomMembership}
+  alias Harmony.Chat.{Message, Reply, Room, RoomMembership}
 
   import Ecto.Changeset
   import Ecto.Query
@@ -246,12 +246,33 @@ defmodule Harmony.Chat do
 
   # Chat.Message
 
+  def get_message(id) do
+    Message
+    # Preload the profiles because otherwise we get an n+1 problem loading all
+    # the display names and avatars
+    |> preload(user: :profile)
+    |> Repo.get(id)
+  end
+
+  def get_message_with_replies(id) do
+    replies = from reply in Reply, order_by: [asc: :inserted_at, asc: :id]
+
+    Message
+    |> where([m], m.id == ^id)
+    |> preload(user: :profile)
+    |> preload(replies: ^{replies, [user: :profile]})
+    |> Repo.one!()
+  end
+
   @spec list_messages(Room.t()) :: list(Message.t())
   def list_messages(%Room{id: room_id}) do
     Message
     |> where([m], m.room_id == ^room_id)
     |> order_by([m], asc: :inserted_at, asc: :id)
-    |> preload(:user)
+    # Preload the profiles because otherwise we get an n+1 problem loading all
+    # the display names and avatars
+    |> preload(user: :profile)
+    |> preload(replies: [user: :profile])
     |> Repo.all()
   end
 
@@ -268,6 +289,8 @@ defmodule Harmony.Chat do
            %Message{user: user, room: room}
            |> Message.changeset(attrs)
            |> Repo.insert() do
+      # the event handlers expect the profile and replies preloaded
+      message = Repo.preload(message, user: :profile, replies: [user: :profile])
       Phoenix.PubSub.broadcast!(@pubsub, topic(room.id), {:new_message, message})
       {:ok, message}
     else
@@ -282,6 +305,48 @@ defmodule Harmony.Chat do
       %Message{user_id: ^user_id} = message ->
         Phoenix.PubSub.broadcast!(@pubsub, topic(message.room_id), {:delete_message, message})
         Repo.delete(message)
+
+      _ ->
+        {:error, "Message does not exist or is not owned by user"}
+    end
+  end
+
+  # Chat.Reply
+
+  @spec change_reply(Reply.t(), map()) :: Ecto.Changeset.t(Reply.t())
+  def change_reply(%Reply{} = reply, attrs \\ %{}) do
+    Reply.changeset(reply, attrs)
+  end
+
+  @spec create_reply(User.t(), Message.t(), map()) ::
+          {:ok, Reply.t()} | {:error, Ecto.Changeset.t(Reply.t())} | {:error, :unauthorized}
+  def create_reply(%User{} = user, %Message{} = message, attrs) do
+    with {:ok, reply} <-
+           %Reply{user: user, message: message}
+           |> Reply.changeset(attrs)
+           |> Repo.insert() do
+      # the event handlers expect the profile preloaded
+      reply = Repo.preload(reply, user: :profile)
+      Phoenix.PubSub.broadcast!(@pubsub, topic(message.room_id), {:new_reply, message.id, reply})
+      {:ok, reply}
+    else
+      {:error, changset} -> {:error, changset}
+    end
+  end
+
+  @spec delete_reply_by_id(UUIDv7.t(), User.t()) :: {:ok, Reply.t()} | {:error, String.t()}
+  def delete_reply_by_id(id, %User{id: user_id}) do
+    case Repo.get(Reply, id) do
+      %Reply{user_id: ^user_id} = reply ->
+        %Message{room_id: room_id} = get_message(reply.message_id)
+
+        Phoenix.PubSub.broadcast!(
+          @pubsub,
+          topic(room_id),
+          {:delete_reply, reply.message_id, reply}
+        )
+
+        Repo.delete(reply)
 
       _ ->
         {:error, "Message does not exist or is not owned by user"}

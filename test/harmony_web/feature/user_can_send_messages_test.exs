@@ -1,4 +1,4 @@
-defmodule HarmonyWeb.UsersCanSendMessages do
+defmodule HarmonyWeb.UsersCanSendMessagesTest do
   use HarmonyWeb.FeatureCase, async: true
   import Harmony.Factory
   import Harmony.AccountsFixtures

@@ -1,35 +1,35 @@
-defmodule Harmony.Chat.Message do
+defmodule Harmony.Chat.Reply do
   use Ecto.Schema
   import Ecto.Changeset
-  alias Harmony.Chat.{Reply, Room}
+
   alias Harmony.Accounts.User
+  alias Harmony.Chat.Message
 
   @type t() :: %__MODULE__{
           id: UUIDv7.t(),
           body: String.t(),
           user: User.t(),
           user_id: Ecto.UUID.t(),
-          room: Room.t(),
-          room_id: Ecto.UUID.t(),
+          message: Message.t(),
+          message: UUIDv7.t(),
           inserted_at: DateTime.t(),
           updated_at: DateTime.t()
         }
 
   @primary_key {:id, UUIDv7, autogenerate: true}
   @foreign_key_type :binary_id
-  schema "messages" do
+  schema "replies" do
     field :body, :string
-    belongs_to :user, User
-    belongs_to :room, Room
 
-    has_many :replies, Reply
+    belongs_to :message, Message
+    belongs_to :user, User
 
     timestamps(type: :utc_datetime)
   end
 
   @doc false
-  def changeset(message, attrs) do
-    message
+  def changeset(reply, attrs) do
+    reply
     |> cast(attrs, [:body])
     |> validate_required([:body])
   end

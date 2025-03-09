@@ -4,6 +4,7 @@ defmodule Harmony.Factory do
 
   alias Harmony.Accounts.User
   alias Harmony.Chat.Room
+  alias Harmony.Chat.Message
 
   def room_factory do
     %Harmony.Chat.Room{
@@ -47,6 +48,19 @@ defmodule Harmony.Factory do
       body: "Hello",
       user: Harmony.AccountsFixtures.user_fixture(),
       room: build(:room)
+    }
+  end
+
+  def with_replies(%Message{} = message, count: count) do
+    insert_list(count, :reply, message: message)
+    message
+  end
+
+  def reply_factory do
+    %Harmony.Chat.Reply{
+      body: "Hello there",
+      user: Harmony.AccountsFixtures.user_fixture(),
+      message: build(:message)
     }
   end
 end
