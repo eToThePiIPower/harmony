@@ -275,7 +275,7 @@ defmodule Harmony.Chat do
     |> preload(replies: [user: :profile])
     |> Repo.paginate(
       after: opts[:after],
-      limit: 5,
+      limit: 25,
       cursor_fields: [inserted_at: :desc, id: :desc]
     )
   end

@@ -33,13 +33,15 @@ defmodule HarmonyWeb.ChatRoomLive do
     <div class="flex flex-col grow shadow-lg">
       <%= if @room do %>
         <.room_header is_admin={is_admin(@current_user)} room={@room} hide_topic?={@hide_topic?} />
-        <div
-          :if={@messages_cursor}
-          class="btn mx-auto w-1/2 btn-neutral btn-ghost btn-xs"
-          phx-click="load-more"
-        >
-          Load More
-        </div>
+        <noscript>
+          <div
+            :if={@messages_cursor}
+            class="btn mx-auto w-1/2 btn-neutral btn-ghost btn-xs"
+            phx-click="load-more"
+          >
+            Load More
+          </div>
+        </noscript>
         <div
           id="messages-list"
           class="overflow-auto flex-grow"
@@ -146,6 +148,7 @@ defmodule HarmonyWeb.ChatRoomLive do
     |> assign(room: room, page_title: "##{room.name}", last_read_id: last_read_id)
     |> update(:rooms, reset_current_rooms_unread(room))
     |> stream(:messages, [], reset: true)
+    |> push_event("reset_autoscroll", %{has_more_pages: !is_nil(page.metadata.after)})
     |> stream_messages_page(page)
     |> assign_message_form(message_changeset)
     |> noreply()
@@ -302,7 +305,7 @@ defmodule HarmonyWeb.ChatRoomLive do
     socket
     |> stream_messages_page(page)
     |> assign(:messages_cursor, page.metadata.after)
-    |> noreply()
+    |> reply(%{has_more_pages: !is_nil(page.metadata.after)})
   end
 
   defp inc_other_rooms_unread(room) do

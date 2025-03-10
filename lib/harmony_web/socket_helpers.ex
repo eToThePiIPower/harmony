@@ -22,4 +22,15 @@ defmodule HarmonyWeb.SocketHelpers do
   """
   @spec noreply(socket()) :: {:noreply, socket()}
   def noreply(%Phoenix.LiveView.Socket{} = socket), do: {:noreply, socket}
+
+  @doc """
+  Wraps a socket into a reply tuple of the form {:reply, map, socket}
+  The reply gets passed to a JS hook
+
+  ## Examples
+      iex> socket
+      iex> |> reply(%{"hello" => "world"})
+  """
+  @spec reply(socket(), map()) :: {:reply, socket(), map()}
+  def reply(socket, map), do: {:reply, map, socket}
 end
