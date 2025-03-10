@@ -231,14 +231,15 @@ defmodule Harmony.ChatTest do
       assert length(message.replies) == 2
     end
 
-    test "list_messages/1 returns all messages for a room" do
+    test "list_messages/1 returns a paginator for messages for a room" do
       room = insert(:room)
       insert_list(3, :message, room: room)
 
       other_room = insert(:room)
       insert_list(3, :message, room: other_room)
 
-      [m1 | _] = messages = Chat.list_messages(room)
+      page = Chat.list_messages(room)
+      [m1 | _] = messages = page.entries
       assert length(messages) == 3
 
       # We need the replies preloaded
@@ -285,10 +286,10 @@ defmodule Harmony.ChatTest do
       id = message.id
       Chat.subscribe_to_room(room)
 
-      assert [%Chat.Message{id: ^id}] = Chat.list_messages(room)
+      assert [%Chat.Message{id: ^id}] = Chat.list_messages(room).entries
       assert {:ok, %Chat.Message{}} = Chat.delete_message_by_id(message.id, user)
       assert_receive({:delete_message, %Chat.Message{id: ^id}})
-      assert [] == Chat.list_messages(room)
+      assert [] == Chat.list_messages(room).entries
     end
 
     test "delete_message_by_id/2 does not delete a message with wrong user" do
@@ -298,10 +299,10 @@ defmodule Harmony.ChatTest do
       id = message.id
       Chat.subscribe_to_room(room)
 
-      assert [%Chat.Message{id: ^id}] = Chat.list_messages(room)
+      assert [%Chat.Message{id: ^id}] = Chat.list_messages(room).entries
       assert {:error, _} = Chat.delete_message_by_id(message.id, user)
       refute_receive({:delete_message, %Chat.Message{id: ^id}})
-      assert [%Chat.Message{id: ^id}] = Chat.list_messages(room)
+      assert [%Chat.Message{id: ^id}] = Chat.list_messages(room).entries
     end
   end
 

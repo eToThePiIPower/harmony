@@ -34,6 +34,13 @@ defmodule HarmonyWeb.ChatRoomLive do
       <%= if @room do %>
         <.room_header is_admin={is_admin(@current_user)} room={@room} hide_topic?={@hide_topic?} />
         <div
+          :if={@messages_cursor}
+          class="btn mx-auto w-1/2 btn-neutral btn-ghost btn-xs"
+          phx-click="load-more"
+        >
+          Load More
+        </div>
+        <div
           id="messages-list"
           class="overflow-auto flex-grow"
           phx-update="stream"
@@ -129,20 +136,17 @@ defmodule HarmonyWeb.ChatRoomLive do
 
     last_read_id = Chat.get_last_read_id(room, socket.assigns.current_user)
 
-    messages =
-      room
-      |> Chat.list_messages()
-      |> insert_date_dividers()
-      |> maybe_insert_unread_marker(last_read_id)
+    page = Chat.list_messages(room)
 
     Chat.update_last_read_id(room, socket.assigns.current_user)
 
     message_changeset = Chat.change_message(%Message{})
 
     socket
-    |> assign(room: room, page_title: "##{room.name}")
+    |> assign(room: room, page_title: "##{room.name}", last_read_id: last_read_id)
     |> update(:rooms, reset_current_rooms_unread(room))
-    |> stream(:messages, messages, reset: true)
+    |> stream(:messages, [], reset: true)
+    |> stream_messages_page(page)
     |> assign_message_form(message_changeset)
     |> noreply()
   end
@@ -288,6 +292,19 @@ defmodule HarmonyWeb.ChatRoomLive do
     |> noreply
   end
 
+  def handle_event("load-more", _params, socket) do
+    page =
+      Chat.list_messages(
+        socket.assigns.room,
+        after: socket.assigns.messages_cursor
+      )
+
+    socket
+    |> stream_messages_page(page)
+    |> assign(:messages_cursor, page.metadata.after)
+    |> noreply()
+  end
+
   defp inc_other_rooms_unread(room) do
     id = room.id
 
@@ -357,5 +374,20 @@ defmodule HarmonyWeb.ChatRoomLive do
     else
       socket
     end
+  end
+
+  defp stream_messages_page(socket, page, reset \\ false) do
+    last_read_id = socket.assigns.last_read_id
+
+    messages =
+      page.entries
+      |> Enum.reverse()
+      |> insert_date_dividers()
+      |> maybe_insert_unread_marker(last_read_id)
+      |> Enum.reverse()
+
+    socket
+    |> stream(:messages, messages, at: 0, reset: reset)
+    |> assign(:messages_cursor, page.metadata.after)
   end
 end
