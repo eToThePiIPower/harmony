@@ -264,16 +264,20 @@ defmodule Harmony.Chat do
     |> Repo.one!()
   end
 
-  @spec list_messages(Room.t()) :: list(Message.t())
-  def list_messages(%Room{id: room_id}) do
+  @spec list_messages(Room.t(), keyword()) :: list(Message.t())
+  def list_messages(%Room{id: room_id}, opts \\ []) do
     Message
     |> where([m], m.room_id == ^room_id)
-    |> order_by([m], asc: :inserted_at, asc: :id)
+    |> order_by([m], desc: :inserted_at, desc: :id)
     # Preload the profiles because otherwise we get an n+1 problem loading all
     # the display names and avatars
     |> preload(user: :profile)
     |> preload(replies: [user: :profile])
-    |> Repo.all()
+    |> Repo.paginate(
+      after: opts[:after],
+      limit: 25,
+      cursor_fields: [inserted_at: :desc, id: :desc]
+    )
   end
 
   @spec change_message(Message.t(), map()) :: Ecto.Changeset.t(Message.t())
